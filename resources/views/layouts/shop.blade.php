@@ -132,7 +132,7 @@
               <a class="nav-link" href="/categories">Categories</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/shop">Shop</a>
+              <a class="nav-link active" href="/shop">Shop</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="/contact">Contact</a>
@@ -151,7 +151,6 @@
   </header>
 
   @yield('content')
-
   <!-- Footer Section -->
   <footer class="bg-success text-white py-4">
     <div class="container">
@@ -169,11 +168,17 @@
           <h5>Shop</h5>
           <ul class="list-unstyled">
             <li><a href="#" class="text-white">All Products</a></li>
+            {{-- <li><a href="#" class="text-white">Seasonal</a></li>
+            <li><a href="#" class="text-white">Organic</a></li>
+            <li><a href="#" class="text-white">Bundles</a></li> --}}
           </ul>
         </div>
         <div class="col-md-2 mb-4 mb-md-0">
           <h5>About</h5>
           <ul class="list-unstyled">
+            {{-- <li><a href="#" class="text-white">Our Story</a></li>
+            <li><a href="#" class="text-white">Farmers</a></li>
+            <li><a href="#" class="text-white">Sustainability</a></li> --}}
             <li><a href="#" class="text-white">Blog</a></li>
           </ul>
         </div>
