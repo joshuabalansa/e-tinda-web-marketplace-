@@ -94,24 +94,34 @@
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
           <!-- Product Card 1 -->
           <div class="col">
-            <a href="{{ route('shop.index') }}" class="product-link">
+            <a href="{{ route('shop.product', ['id' => $products[0]['id']]) }}" class="product-link">
               <div class="card h-100 product-card">
                 <div class="badge bg-success position-absolute" style="top: 10px; right: 10px;">Organic</div>
-                <img src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Fresh Tomatoes">
+                <img src="{{ $products[0]['image'] }}" class="card-img-top" alt="{{ $products[0]['name'] }}">
                 <div class="card-body d-flex flex-column">
-                  <h5 class="card-title">Fresh Tomatoes</h5>
+                  <h5 class="card-title">{{ $products[0]['name'] }}</h5>
                   <div class="rating mb-2">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star-half-alt"></i>
-                    <small class="text-muted ms-1">(42)</small>
+                    @for($i = 0; $i < 5; $i++)
+                      @if($i < floor($products[0]['rating']))
+                        <i class="fas fa-star"></i>
+                      @elseif($i < ceil($products[0]['rating']) && $products[0]['rating'] - floor($products[0]['rating']) >= 0.5)
+                        <i class="fas fa-star-half-alt"></i>
+                      @else
+                        <i class="far fa-star"></i>
+                      @endif
+                    @endfor
+                    <small class="text-muted ms-1">({{ $products[0]['review_count'] }})</small>
                   </div>
-                  <p class="card-text flex-grow-1">Juicy, vine-ripened tomatoes grown locally without pesticides.</p>
+                  <p class="card-text flex-grow-1">{{ $products[0]['description'] }}</p>
                   <div class="d-flex justify-content-between align-items-center mt-auto">
-                    <h5 class="mb-0 text-success">₱3.99/lb</h5>
-                    <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
+                    <h5 class="mb-0 text-success">₱{{ number_format($products[0]['price'], 2) }}/{{ $products[0]['unit'] }}</h5>
+                    <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
+                      @csrf
+                      <input type="hidden" name="product_id" value="{{ $products[0]['id'] }}">
+                      <button type="submit" class="btn btn-sm btn-success">
+                        <i class="fas fa-cart-plus"></i> Add
+                      </button>
+                    </form>
                   </div>
                 </div>
               </div>
@@ -120,23 +130,33 @@
 
           <!-- Product Card 2 -->
           <div class="col">
-            <a href="{{ route('shop.index') }}" class="product-link">
+            <a href="{{ route('shop.product', ['id' => $products[1]['id']]) }}" class="product-link">
               <div class="card h-100 product-card">
-                <img src="https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Carrots">
+                <img src="{{ $products[1]['image'] }}" class="card-img-top" alt="{{ $products[1]['name'] }}">
                 <div class="card-body d-flex flex-column">
-                  <h5 class="card-title">Organic Carrots</h5>
+                  <h5 class="card-title">{{ $products[1]['name'] }}</h5>
                   <div class="rating mb-2">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="far fa-star"></i>
-                    <small class="text-muted ms-1">(36)</small>
+                    @for($i = 0; $i < 5; $i++)
+                      @if($i < floor($products[1]['rating']))
+                        <i class="fas fa-star"></i>
+                      @elseif($i < ceil($products[1]['rating']) && $products[1]['rating'] - floor($products[1]['rating']) >= 0.5)
+                        <i class="fas fa-star-half-alt"></i>
+                      @else
+                        <i class="far fa-star"></i>
+                      @endif
+                    @endfor
+                    <small class="text-muted ms-1">({{ $products[1]['review_count'] }})</small>
                   </div>
-                  <p class="card-text flex-grow-1">Sweet and crunchy carrots, perfect for snacking or cooking.</p>
+                  <p class="card-text flex-grow-1">{{ $products[1]['description'] }}</p>
                   <div class="d-flex justify-content-between align-items-center mt-auto">
-                    <h5 class="mb-0 text-success">$2.49/lb</h5>
-                    <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
+                    <h5 class="mb-0 text-success">₱{{ number_format($products[1]['price'], 2) }}/{{ $products[1]['unit'] }}</h5>
+                    <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
+                      @csrf
+                      <input type="hidden" name="product_id" value="{{ $products[1]['id'] }}">
+                      <button type="submit" class="btn btn-sm btn-success">
+                        <i class="fas fa-cart-plus"></i> Add
+                      </button>
+                    </form>
                   </div>
                 </div>
               </div>
