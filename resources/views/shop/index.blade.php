@@ -5,6 +5,16 @@
       height: 200px;
       object-fit: cover;
     }
+    .product-card {
+      transition: transform 0.2s;
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+    .product-link {
+      text-decoration: none;
+      color: inherit;
+    }
   </style>
 
   <header class="bg-light py-5">
@@ -84,143 +94,155 @@
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
           <!-- Product Card 1 -->
           <div class="col">
-            <div class="card h-100 product-card">
-              <div class="badge bg-success position-absolute" style="top: 10px; right: 10px;">Organic</div>
-              <img src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Fresh Tomatoes">
-              <div class="card-body d-flex flex-column">
-                <h5 class="card-title">Fresh Tomatoes</h5>
-                <div class="rating mb-2">
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star-half-alt"></i>
-                  <small class="text-muted ms-1">(42)</small>
-                </div>
-                <p class="card-text flex-grow-1">Juicy, vine-ripened tomatoes grown locally without pesticides.</p>
-                <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <h5 class="mb-0 text-success">₱3.99/lb</h5>
-                  <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
+            <a href="{{ route('shop.index') }}" class="product-link">
+              <div class="card h-100 product-card">
+                <div class="badge bg-success position-absolute" style="top: 10px; right: 10px;">Organic</div>
+                <img src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Fresh Tomatoes">
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title">Fresh Tomatoes</h5>
+                  <div class="rating mb-2">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                    <small class="text-muted ms-1">(42)</small>
+                  </div>
+                  <p class="card-text flex-grow-1">Juicy, vine-ripened tomatoes grown locally without pesticides.</p>
+                  <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <h5 class="mb-0 text-success">₱3.99/lb</h5>
+                    <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </a>
           </div>
 
           <!-- Product Card 2 -->
           <div class="col">
-            <div class="card h-100 product-card">
-              <img src="https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Carrots">
-              <div class="card-body d-flex flex-column">
-                <h5 class="card-title">Organic Carrots</h5>
-                <div class="rating mb-2">
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="far fa-star"></i>
-                  <small class="text-muted ms-1">(36)</small>
-                </div>
-                <p class="card-text flex-grow-1">Sweet and crunchy carrots, perfect for snacking or cooking.</p>
-                <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <h5 class="mb-0 text-success">$2.49/lb</h5>
-                  <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
+            <a href="{{ route('shop.index') }}" class="product-link">
+              <div class="card h-100 product-card">
+                <img src="https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Carrots">
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title">Organic Carrots</h5>
+                  <div class="rating mb-2">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="far fa-star"></i>
+                    <small class="text-muted ms-1">(36)</small>
+                  </div>
+                  <p class="card-text flex-grow-1">Sweet and crunchy carrots, perfect for snacking or cooking.</p>
+                  <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <h5 class="mb-0 text-success">$2.49/lb</h5>
+                    <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </a>
           </div>
 
           <!-- Product Card 3 -->
           <div class="col">
-            <div class="card h-100 product-card">
-              <div class="badge bg-success position-absolute" style="top: 10px; right: 10px;">Organic</div>
-              <img src="https://images.unsplash.com/photo-1603569283847-aa295f0d016a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Organic Apples">
-              <div class="card-body d-flex flex-column">
-                <h5 class="card-title">Organic Apples</h5>
-                <div class="rating mb-2">
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="far fa-star"></i>
-                  <small class="text-muted ms-1">(29)</small>
-                </div>
-                <p class="card-text flex-grow-1">Crisp and sweet, perfect for eating fresh or baking.</p>
-                <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <h5 class="mb-0 text-success">$1.99/lb</h5>
-                  <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
+            <a href="{{ route('shop.index') }}" class="product-link">
+              <div class="card h-100 product-card">
+                <div class="badge bg-success position-absolute" style="top: 10px; right: 10px;">Organic</div>
+                <img src="https://images.unsplash.com/photo-1603569283847-aa295f0d016a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Organic Apples">
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title">Organic Apples</h5>
+                  <div class="rating mb-2">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="far fa-star"></i>
+                    <small class="text-muted ms-1">(29)</small>
+                  </div>
+                  <p class="card-text flex-grow-1">Crisp and sweet, perfect for eating fresh or baking.</p>
+                  <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <h5 class="mb-0 text-success">$1.99/lb</h5>
+                    <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </a>
           </div>
 
           <!-- Product Card 4 -->
           <div class="col">
-            <div class="card h-100 product-card">
-              <img src="https://images.unsplash.com/photo-1550258987-190a2d41a8ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Farm Fresh Eggs">
-              <div class="card-body d-flex flex-column">
-                <h5 class="card-title">Farm Fresh Eggs</h5>
-                <div class="rating mb-2">
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <small class="text-muted ms-1">(58)</small>
-                </div>
-                <p class="card-text flex-grow-1">Free-range eggs from happy, pasture-raised chickens.</p>
-                <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <h5 class="mb-0 text-success">$4.99/dozen</h5>
-                  <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
+            <a href="{{ route('shop.index') }}" class="product-link">
+              <div class="card h-100 product-card">
+                <img src="https://images.unsplash.com/photo-1550258987-190a2d41a8ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Farm Fresh Eggs">
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title">Farm Fresh Eggs</h5>
+                  <div class="rating mb-2">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <small class="text-muted ms-1">(58)</small>
+                  </div>
+                  <p class="card-text flex-grow-1">Free-range eggs from happy, pasture-raised chickens.</p>
+                  <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <h5 class="mb-0 text-success">$4.99/dozen</h5>
+                    <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </a>
           </div>
 
           <!-- Product Card 5 -->
           <div class="col">
-            <div class="card h-100 product-card">
-              <div class="badge bg-success position-absolute" style="top: 10px; right: 10px;">Organic</div>
-              <img src="https://images.unsplash.com/photo-1573246123716-6b1782bfc499?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Fresh Strawberries">
-              <div class="card-body d-flex flex-column">
-                <h5 class="card-title">Fresh Strawberries</h5>
-                <div class="rating mb-2">
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star-half-alt"></i>
-                  <i class="far fa-star"></i>
-                  <small class="text-muted ms-1">(47)</small>
-                </div>
-                <p class="card-text flex-grow-1">Sweet and juicy strawberries picked at peak ripeness.</p>
-                <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <h5 class="mb-0 text-success">$4.49/lb</h5>
-                  <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
+            <a href="{{ route('shop.index') }}" class="product-link">
+              <div class="card h-100 product-card">
+                <div class="badge bg-success position-absolute" style="top: 10px; right: 10px;">Organic</div>
+                <img src="https://images.unsplash.com/photo-1573246123716-6b1782bfc499?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Fresh Strawberries">
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title">Fresh Strawberries</h5>
+                  <div class="rating mb-2">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                    <i class="far fa-star"></i>
+                    <small class="text-muted ms-1">(47)</small>
+                  </div>
+                  <p class="card-text flex-grow-1">Sweet and juicy strawberries picked at peak ripeness.</p>
+                  <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <h5 class="mb-0 text-success">$4.49/lb</h5>
+                    <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </a>
           </div>
 
           <!-- Product Card 6 -->
           <div class="col">
-            <div class="card h-100 product-card">
-              <img src="https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Carrots">
-              <div class="card-body d-flex flex-column">
-                <h5 class="card-title">Organic Carrots</h5>
-                <div class="rating mb-2">
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="fas fa-star"></i>
-                  <i class="far fa-star"></i>
-                  <small class="text-muted ms-1">(36)</small>
-                </div>
-                <p class="card-text flex-grow-1">Sweet and crunchy carrots, perfect for snacking or cooking.</p>
-                <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <h5 class="mb-0 text-success">$2.49/lb</h5>
-                  <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
+            <a href="{{ route('shop.index') }}" class="product-link">
+              <div class="card h-100 product-card">
+                <img src="https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Carrots">
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title">Organic Carrots</h5>
+                  <div class="rating mb-2">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="far fa-star"></i>
+                    <small class="text-muted ms-1">(36)</small>
+                  </div>
+                  <p class="card-text flex-grow-1">Sweet and crunchy carrots, perfect for snacking or cooking.</p>
+                  <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <h5 class="mb-0 text-success">$2.49/lb</h5>
+                    <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </a>
           </div>
         </div>
 

@@ -3,12 +3,14 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\BuyerDashboardController;
+use App\Http\Controllers\FarmerDashboardController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('shop', [ShopController::class, 'index'])->name('shop');
+Route::get('shop', [ShopController::class, 'index'])->name('shop.index');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -26,16 +28,14 @@ Route::middleware(['auth', 'admin'])->group(function () {
     })->name('admin.dashboard');
 });
 
+//farmer Dashboard Route
 Route::middleware(['auth', 'farmer'])->group(function () {
-    Route::get('/farmer/dashboard', function () {
-        return view('farmer.dashboard');
-    })->name('farmer.dashboard');
+    Route::get('/farmer/dashboard', [FarmerDashboardController::class, 'index'])->name('farmer.dashboard');
 });
 
+//buyer Dashboard Route
 Route::middleware(['auth', 'buyer'])->group(function () {
-    Route::get('/buyer/dashboard', function () {
-        return view('buyer.dashboard');
-    })->name('buyer.dashboard');
+    Route::get('/buyer/dashboard', [BuyerDashboardController::class, 'index'])->name('buyer.dashboard');
 });
 
 require __DIR__.'/auth.php';
