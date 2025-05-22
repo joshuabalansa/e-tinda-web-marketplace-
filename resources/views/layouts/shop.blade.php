@@ -135,7 +135,7 @@
               <a class="nav-link active" href="/shop">Shop</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/contact">Contact</a>
+              <a class="nav-link" href="/forum">Forum</a>
             </li>
           </ul>
           <div class="d-flex">

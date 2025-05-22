@@ -6,6 +6,7 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\BuyerDashboardController;
 use App\Http\Controllers\FarmerDashboardController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\ForumsController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -13,6 +14,17 @@ Route::get('/', function () {
 
 Route::get('shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('shop/product/{id}', [ShopController::class, 'show'])->name('shop.product');
+
+// Forum Routes
+Route::get('forums', [ForumsController::class, 'index'])->name('forums.index');
+Route::get('forums/create', [ForumsController::class, 'create'])->name('forums.create')->middleware('auth');
+Route::post('forums', [ForumsController::class, 'store'])->name('forums.store')->middleware('auth');
+Route::get('forums/topic/{id}', [ForumsController::class, 'show'])->name('forums.topic');
+Route::get('forums/topic/{id}/edit', [ForumsController::class, 'edit'])->name('forums.edit')->middleware('auth');
+Route::put('forums/topic/{id}', [ForumsController::class, 'update'])->name('forums.update')->middleware('auth');
+Route::delete('forums/topic/{id}', [ForumsController::class, 'destroy'])->name('forums.destroy')->middleware('auth');
+Route::post('forums/topic/{id}/reply', [ForumsController::class, 'storeReply'])->name('forums.reply')->middleware('auth');
+Route::post('forums/reply/{id}/helpful', [ForumsController::class, 'markHelpful'])->name('forums.helpful')->middleware('auth');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
