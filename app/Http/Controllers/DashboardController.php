@@ -27,6 +27,7 @@ class DashboardController extends Controller
             return redirect()->intended(route('farmer.dashboard', absolute: false));
 
         } else {
+
             return redirect()->intended(route('buyer.dashboard', absolute: false));
         }
     }

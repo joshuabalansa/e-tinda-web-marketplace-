@@ -8,6 +8,8 @@ use App\Http\Controllers\FarmerDashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ForumsController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CategoryController;
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -55,5 +57,7 @@ Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
 Route::delete('/cart/remove/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
 Route::patch('/cart/update/{id}', [CartController::class, 'updateQuantity'])->name('cart.update');
+
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 
 require __DIR__.'/auth.php';
