@@ -7,10 +7,12 @@ use App\Http\Controllers\BuyerDashboardController;
 use App\Http\Controllers\FarmerDashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ForumsController;
-
+use App\Http\Controllers\DashboardController;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('shop/product/{id}', [ShopController::class, 'show'])->name('shop.product');
@@ -25,10 +27,6 @@ Route::put('forums/topic/{id}', [ForumsController::class, 'update'])->name('foru
 Route::delete('forums/topic/{id}', [ForumsController::class, 'destroy'])->name('forums.destroy')->middleware('auth');
 Route::post('forums/topic/{id}/reply', [ForumsController::class, 'storeReply'])->name('forums.reply')->middleware('auth');
 Route::post('forums/reply/{id}/helpful', [ForumsController::class, 'markHelpful'])->name('forums.helpful')->middleware('auth');
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

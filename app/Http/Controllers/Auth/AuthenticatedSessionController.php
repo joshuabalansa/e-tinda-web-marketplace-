@@ -32,9 +32,13 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user();
 
         if ($user->role->value === UserRole::Admin->value) {
+
             return redirect()->intended(route('admin.dashboard', absolute: false));
+
         } elseif ($user->role->value === UserRole::Farmer->value) {
+
             return redirect()->intended(route('farmer.dashboard', absolute: false));
+            
         } else {
             return redirect()->intended(route('buyer.dashboard', absolute: false));
         }
