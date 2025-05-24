@@ -141,7 +141,7 @@
           <div class="d-flex">
             <a href="/cart" class="btn btn-outline-light me-2">
               <i class="fas fa-shopping-cart"></i>
-              <span class="badge bg-danger ms-1">3</span>
+              <span class="badge bg-danger ms-1">{{ count(session('cart', [])) }}</span>
             </a>
             <a href="/login" class="btn btn-light text-success">Login</a>
           </div>
@@ -201,42 +201,32 @@
   <!-- Bootstrap JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- Notification Container -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    @if(session('success'))
+      <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-success text-white">
+          <strong class="me-auto">Success</strong>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          {{ session('success') }}
+        </div>
+      </div>
+    @endif
+  </div>
+
   <script>
-    // Add to cart simulation
+    // Auto-hide notifications after 3 seconds
     document.addEventListener('DOMContentLoaded', function() {
-      const buttons = document.querySelectorAll('.product-card button, .category-card button');
-      buttons.forEach(button => {
-        button.addEventListener('click', () => {
-          // Create and show Bootstrap toast notification
-          const toastHTML = `
-            <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-              <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header bg-success text-white">
-                  <strong class="me-auto">Success</strong>
-                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body">
-                  Product added to your cart!
-                </div>
-              </div>
-            </div>
-          `;
-
-          // Insert toast into DOM
-          document.body.insertAdjacentHTML('beforeend', toastHTML);
-
-          // Remove toast after 3 seconds
-          setTimeout(() => {
-            const toast = document.querySelector('.toast');
-            if (toast) {
-              toast.classList.remove('show');
-              setTimeout(() => toast.parentElement.remove(), 150);
-            }
-          }, 3000);
-        });
+      const toasts = document.querySelectorAll('.toast');
+      toasts.forEach(toast => {
+        setTimeout(() => {
+          toast.classList.remove('show');
+          setTimeout(() => toast.parentElement.remove(), 150);
+        }, 3000);
       });
     });
   </script>
-
 </body>
 </html>

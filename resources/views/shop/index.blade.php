@@ -118,6 +118,10 @@
                     <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
                       @csrf
                       <input type="hidden" name="product_id" value="{{ $products[0]['id'] }}">
+                      <input type="hidden" name="name" value="{{ $products[0]['name'] }}">
+                      <input type="hidden" name="price" value="{{ $products[0]['price'] }}">
+                      <input type="hidden" name="image" value="{{ $products[0]['image'] }}">
+                      <input type="hidden" name="unit" value="{{ $products[0]['unit'] }}">
                       <button type="submit" class="btn btn-sm btn-success">
                         <i class="fas fa-cart-plus"></i> Add
                       </button>
@@ -153,6 +157,10 @@
                     <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
                       @csrf
                       <input type="hidden" name="product_id" value="{{ $products[1]['id'] }}">
+                      <input type="hidden" name="name" value="{{ $products[1]['name'] }}">
+                      <input type="hidden" name="price" value="{{ $products[1]['price'] }}">
+                      <input type="hidden" name="image" value="{{ $products[1]['image'] }}">
+                      <input type="hidden" name="unit" value="{{ $products[1]['unit'] }}">
                       <button type="submit" class="btn btn-sm btn-success">
                         <i class="fas fa-cart-plus"></i> Add
                       </button>
@@ -293,36 +301,6 @@
         document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
       });
-    });
-
-    // Add to cart functionality
-    document.querySelectorAll('.btn-success').forEach(btn => {
-      if (btn.innerHTML.includes('cart-plus')) {
-        btn.addEventListener('click', function() {
-          const product = this.closest('.card').querySelector('.card-title').textContent;
-          const toast = `
-            <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-              <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header bg-success text-white">
-                  <strong class="me-auto">Added to Cart</strong>
-                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body">
-                  ${product} has been added to your cart.
-                </div>
-              </div>
-            </div>
-          `;
-          document.body.insertAdjacentHTML('beforeend', toast);
-
-          // Remove toast after 3 seconds
-          setTimeout(() => {
-            const toasts = document.querySelectorAll('.toast');
-            toasts.forEach(t => t.classList.remove('show'));
-            setTimeout(() => toasts.forEach(t => t.parentElement.remove()), 300);
-          }, 3000);
-        });
-      }
     });
   </script>
 @endsection

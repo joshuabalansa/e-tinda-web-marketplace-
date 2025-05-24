@@ -53,26 +53,50 @@ class CartController extends Controller
 
     public function addToCart(Request $request)
     {
+        $request->validate([
+            'product_id' => 'required',
+            'name' => 'required',
+            'price' => 'required|numeric',
+            'image' => 'required|url',
+            'unit' => 'required',
+            'quantity' => 'nullable|integer|min:1'
+        ]);
+
         $cartItems = session('cart', []);
 
-        // Add new item to cart
-        $cartItems[] = [
-            'id' => $request->product_id,
-            'name' => $request->name,
-            'price' => $request->price,
-            'quantity' => $request->quantity ?? 1,
-            'image' => $request->image,
-            'unit' => $request->unit
-        ];
+        // Check if product already exists in cart
+        $existingItemIndex = collect($cartItems)->search(function($item) use ($request) {
+            return $item['id'] == $request->product_id;
+        });
+
+        if ($existingItemIndex !== false) {
+            // Update quantity if product exists
+            $cartItems[$existingItemIndex]['quantity'] += $request->quantity ?? 1;
+            $message = "Updated quantity of {$request->name} in your cart!";
+        } else {
+            // Add new item to cart
+            $cartItems[] = [
+                'id' => $request->product_id,
+                'name' => $request->name,
+                'price' => $request->price,
+                'quantity' => $request->quantity ?? 1,
+                'image' => $request->image,
+                'unit' => $request->unit
+            ];
+            $message = "{$request->name} has been added to your cart!";
+        }
 
         session(['cart' => $cartItems]);
 
-        return redirect()->back()->with('success', 'Item added to cart successfully!');
+        return redirect()->back()->with('success', $message);
     }
 
     public function removeFromCart($id)
     {
         $cartItems = session('cart', []);
+
+        // Get item name before removing
+        $itemName = collect($cartItems)->firstWhere('id', $id)['name'] ?? 'Item';
 
         // Remove item from cart
         $cartItems = array_filter($cartItems, function($item) use ($id) {
@@ -81,7 +105,7 @@ class CartController extends Controller
 
         session(['cart' => $cartItems]);
 
-        return redirect()->back()->with('success', 'Item removed from cart successfully!');
+        return redirect()->back()->with('success', "{$itemName} has been removed from your cart!");
     }
 
     public function updateQuantity(Request $request, $id)
@@ -98,6 +122,9 @@ class CartController extends Controller
 
         session(['cart' => $cartItems]);
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Cart updated successfully!'
+        ]);
     }
 }
