@@ -67,13 +67,13 @@
                             </div>
 
                             <!-- Remember Me -->
-                            <div class="mb-3 form-check">
+                          {{--  <div class="mb-3 form-check">
                                 <input type="checkbox"
                                        class="form-check-input"
                                        id="remember_me"
                                        name="remember">
                                 <label class="form-check-label" for="remember_me">Remember me</label>
-                            </div>
+                            </div> --}}
 
                             <!-- Submit Button -->
                             <div class="d-grid mb-3">
@@ -83,13 +83,13 @@
                             </div>
 
                             <!-- Forgot Password -->
-                            @if (Route::has('password.request'))
+                            {{-- @if (Route::has('password.request'))
                                 <div class="text-center mb-3">
                                     <a href="{{ route('password.request') }}" class="text-decoration-none text-success">
                                         Forgot your password?
                                     </a>
                                 </div>
-                            @endif
+                            @endif --}}
 
                             <!-- Register Link -->
                             <div class="text-center">

@@ -92,9 +92,9 @@
                         <strong>Total</strong>
                         <strong class="text-success">₱{{ number_format($total, 2) }}</strong>
                     </div>
-                    <button class="btn btn-success w-100" onclick="window.location.href='#'">
+                    <a href="{{ route('checkout.index') }}" class="btn btn-success w-100">
                         Proceed to Checkout
-                    </button>
+                    </a>
                     <a href="{{ route('shop.index') }}" class="btn btn-outline-success w-100 mt-2">
                         Continue Shopping
                     </a>
