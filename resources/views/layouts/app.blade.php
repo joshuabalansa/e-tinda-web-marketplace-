@@ -178,7 +178,7 @@
         <div class="col-md-2 mb-4 mb-md-0">
           <h5>About</h5>
           <ul class="list-unstyled">
-            <li><a href="#" class="text-white">Blog</a></li>
+            <li><a href="/forums" class="text-white">Forums</a></li>
           </ul>
         </div>
         <div class="col-md-4">

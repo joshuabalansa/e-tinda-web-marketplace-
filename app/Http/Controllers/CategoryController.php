@@ -35,14 +35,14 @@ class CategoryController extends Controller
                 'id' => 4,
                 'name' => 'Grains & Cereals',
                 'description' => 'Organic grains and cereals',
-                'image' => 'https://images.unsplash.com/photo-1608198093002-ad4e505484ba?q=80&w=2940&auto=format&fit=crop',
+                'image' => 'https://images.unsplash.com/photo-1606495002933-354ea2413e94?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
                 'product_count' => 15
             ],
             [
                 'id' => 5,
                 'name' => 'Honey & Jams',
                 'description' => 'Natural honey and homemade jams',
-                'image' => 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=2940&auto=format&fit=crop',
+                'image' => 'https://images.unsplash.com/photo-1573697610008-4c72b4e9508f?q=80&w=2952&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
                 'product_count' => 8
             ],
             [
