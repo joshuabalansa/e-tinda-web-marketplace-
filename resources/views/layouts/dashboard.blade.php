@@ -117,6 +117,12 @@
                             </li>
                             <li>
                                 <a href="#">
+                                    <i class="entypo-list"></i>
+                                    <span class="title">Inventory</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
                                     <i class="entypo-chart-bar"></i>
                                     <span class="title">Analytics</span>
                                 </a>
@@ -172,7 +178,7 @@
                                     <span class="title">Wishlist</span>
                                 </a>
                             </li>
-                            <li>
+                             <li>
                                 <a href="#">
                                     <i class="entypo-comment"></i>
                                     <span class="title">Forums</span>

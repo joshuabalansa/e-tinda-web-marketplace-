@@ -43,7 +43,7 @@ class CartController extends Controller
         $shipping = 5.00;
         $total = $subtotal + $shipping;
 
-        return view('cart.index', compact('cartItems', 'subtotal', 'shipping', 'total'));
+        return view('buyer.carts.index', compact('cartItems', 'subtotal', 'shipping', 'total'));
     }
 
     public function addToCart(Request $request)
