@@ -1942,14 +1942,8 @@ function init_page_transitions()
 
 		if(public_vars.$body.hasClass(transition_name))
 		{
-			public_vars.$body.addClass(transition_name + '-init')
-
-			setTimeout(function()
-			{
-				public_vars.$body.removeClass(transition_name + ' ' + transition_name + '-init');
-
-			}, 850);
-
+			// Immediately remove transition classes without animation
+			public_vars.$body.removeClass(transition_name);
 			return;
 		}
 	}
@@ -2012,7 +2006,7 @@ function show_loading_bar(options)
 {
 	var defaults = {
 		pct: 0,
-		delay: 1.3,
+		delay: 0,
 		wait: 0,
 		before: function(){},
 		finish: function(){},
@@ -2024,7 +2018,6 @@ function show_loading_bar(options)
 	else
 	if(typeof options == 'number')
 		defaults.pct = options;
-
 
 	if(defaults.pct > 100)
 		defaults.pct = 100;
@@ -2041,33 +2034,19 @@ function show_loading_bar(options)
 		public_vars.$body.append( $loading_bar );
 	}
 
-	var $pct = $loading_bar.find('span'),
-		current_pct = $pct.data('pct'),
-		is_regress = current_pct > defaults.pct;
+	var $pct = $loading_bar.find('span');
 
+	defaults.before(0);
+	$loading_bar.removeClass('progress-is-hidden');
+	$pct.css('width', defaults.pct + '%');
+	$pct.data('pct', defaults.pct);
 
-	defaults.before(current_pct);
-
-	TweenMax.to($pct, defaults.delay, {css: {width: defaults.pct + '%'}, delay: defaults.wait, ease: is_regress ? Expo.easeOut : Expo.easeIn,
-	onStart: function()
+	if(defaults.pct == 100 && defaults.resetOnEnd)
 	{
-		$loading_bar.removeClass('progress-is-hidden');
-	},
-	onComplete: function()
-	{
-		var pct = $pct.data('pct');
+		hide_loading_bar();
+	}
 
-		if(pct == 100 && defaults.resetOnEnd)
-		{
-			hide_loading_bar();
-		}
-
-		defaults.finish(pct);
-	},
-	onUpdate: function()
-	{
-		$pct.data('pct', parseInt($pct.get(0).style.width, 10));
-	}});
+	defaults.finish(defaults.pct);
 }
 
 function hide_loading_bar()

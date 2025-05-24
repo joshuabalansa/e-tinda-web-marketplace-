@@ -21,7 +21,7 @@ class CategoryController extends Controller
                 'id' => 2,
                 'name' => 'Fruits',
                 'description' => 'Seasonal and exotic fruits',
-                'image' => 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=2940&auto=format&fit=crop',
+                'image' => 'https://images.unsplash.com/photo-1592558480962-903b06077406?q=80&w=2062&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
                 'product_count' => 18
             ],
             [

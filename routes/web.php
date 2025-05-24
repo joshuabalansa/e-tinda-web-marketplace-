@@ -11,6 +11,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ProductController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -66,5 +67,18 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+
+// Farmer Product Routes
+Route::middleware(['auth'])->group(function () {
+    Route::resource('farmer/products', ProductController::class)->names([
+        'index' => 'farmer.products.index',
+        'create' => 'farmer.products.create',
+        'store' => 'farmer.products.store',
+        'show' => 'farmer.products.show',
+        'edit' => 'farmer.products.edit',
+        'update' => 'farmer.products.update',
+        'destroy' => 'farmer.products.destroy',
+    ]);
+});
 
 require __DIR__.'/auth.php';

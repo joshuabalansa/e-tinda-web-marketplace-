@@ -30,7 +30,7 @@
       </div>
       <div class="col-md-4">
         <div class="category-card card h-100">
-          <img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf" class="card-img-top" alt="Fruits">
+          <img src="https://images.unsplash.com/photo-1592558480962-903b06077406?q=80&w=2062&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top" alt="Fruits">
           <div class="card-body text-center">
             <h5 class="card-title">Fruits</h5>
             <p class="card-text">Seasonal and exotic fruits.</p>
@@ -61,7 +61,7 @@
       <div class="col-md-3">
         <div class="product-card card h-100">
           <div class="card-img-wrapper" style="height: 200px; overflow: hidden;">
-            <img src="https://images.unsplash.com/photo-1566842600175-97dca489844f" class="card-img-top h-100 w-100" alt="Organic Tomatoes" style="object-fit: cover;">
+            <img src="https://images.unsplash.com/photo-1723477036930-ab1ebb3953e9?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top h-100 w-100" alt="Organic Tomatoes" style="object-fit: cover;">
           </div>
           <div class="card-body">
             <h5 class="card-title">Organic Tomatoes</h5>
@@ -74,7 +74,7 @@
       <div class="col-md-3">
         <div class="product-card card h-100">
           <div class="card-img-wrapper" style="height: 200px; overflow: hidden;">
-            <img src="https://images.unsplash.com/photo-1587049352846-4a222e784d38" class="card-img-top h-100 w-100" alt="Fresh Carrots" style="object-fit: cover;">
+            <img src="https://plus.unsplash.com/premium_photo-1661376910798-c74ed8f65819?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top h-100 w-100" alt="Fresh Carrots" style="object-fit: cover;">
           </div>
           <div class="card-body">
             <h5 class="card-title">Fresh Carrots</h5>
@@ -87,7 +87,7 @@
       <div class="col-md-3">
         <div class="product-card card h-100">
           <div class="card-img-wrapper" style="height: 200px; overflow: hidden;">
-            <img src="https://images.unsplash.com/photo-1601648764658-cf37e8c89b70" class="card-img-top h-100 w-100" alt="Fresh Lettuce" style="object-fit: cover;">
+            <img src="https://images.unsplash.com/photo-1662318183333-971ae1658e44?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top h-100 w-100" alt="Fresh Lettuce" style="object-fit: cover;">
           </div>
           <div class="card-body">
             <h5 class="card-title">Fresh Lettuce</h5>
@@ -100,7 +100,7 @@
       <div class="col-md-3">
         <div class="product-card card h-100">
           <div class="card-img-wrapper" style="height: 200px; overflow: hidden;">
-            <img src="https://images.unsplash.com/photo-1550828520-4cb496926fc9" class="card-img-top h-100 w-100" alt="Bell Peppers" style="object-fit: cover;">
+            <img src="https://images.unsplash.com/photo-1741518165791-df31747b8d8b?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top h-100 w-100" alt="Bell Peppers" style="object-fit: cover;">
           </div>
           <div class="card-body">
             <h5 class="card-title">Bell Peppers</h5>

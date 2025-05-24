@@ -1,89 +1,7 @@
 @extends('layouts.dashboard')
 @section('content')
 
-    <div class="main-content">
 
-        <div class="row">
-
-            <!-- Profile Info and Notifications -->
-            <div class="col-md-6 col-sm-8 clearfix">
-
-                <ul class="user-info pull-left pull-none-xsm">
-
-                    <!-- Profile Info -->
-                    <li class="profile-info dropdown">
-                        <!-- add class "pull-right" if you want to place this from right -->
-
-                        <h3>
-                         Welcome,  {{ ucwords(Auth::user()->name) }}
-                        </h3>
-
-                        <ul class="dropdown-menu">
-
-                            <!-- Reverse Caret -->
-                            <li class="caret"></li>
-
-                            <!-- Profile sub-links -->
-                            <li>
-                                <a href="extra-timeline.html">
-                                    <i class="entypo-user"></i>
-                                    Edit Profile
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="mailbox.html">
-                                    <i class="entypo-mail"></i>
-                                    Inbox
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="extra-calendar.html">
-                                    <i class="entypo-calendar"></i>
-                                    Calendar
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="#">
-                                    <i class="entypo-clipboard"></i>
-                                    Tasks
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-                </ul>
-
-            </div>
-
-
-            <!-- Raw Links -->
-            <div class="col-md-6 col-sm-4 clearfix hidden-xs">
-
-                <ul class="list-inline links-list pull-right">
-
-
-                    <li class="sep"></li>
-
-                    <li>
-                        <form method="POST" action="{{ route('logout') }}" class="m-0"
-                            onsubmit="return confirm('Are you sure you want to log out?');">
-                            @csrf
-                            <button type="submit" class="btn btn-danger btn-sm"
-                                style="background-color: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-size: 13px; transition: all 0.3s ease;">
-                                {{ __('Log Out') }} <i class="entypo-logout right"></i>
-                            </button>
-                        </form>
-                    </li>
-                </ul>
-
-            </div>
-
-        </div>
-
-        <hr />
 
         <script type="text/javascript">
             jQuery(document).ready(function($) {
@@ -820,5 +738,4 @@
                 </div>
             </div>
         </div>
-    </div>
 @endsection
