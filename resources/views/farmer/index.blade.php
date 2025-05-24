@@ -1,7 +1,6 @@
 @extends('layouts.dashboard')
 @section('content')
 
-
     <div class="main-content">
 
         <div class="row">

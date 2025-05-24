@@ -143,7 +143,11 @@
               <i class="fas fa-shopping-cart"></i>
               <span class="badge bg-danger ms-1">3</span>
             </a>
-            <a href="/login" class="btn btn-light text-success">Login</a>
+            @auth
+                <a href="/login" class="btn btn-light text-success">My Account</a>
+            @else
+                <a href="/login" class="btn btn-light text-success">Login</a>
+            @endauth
           </div>
         </div>
       </div>

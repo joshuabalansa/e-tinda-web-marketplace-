@@ -46,7 +46,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="d-flex align-items-center">
-                            <img src="https://via.placeholder.com/50" class="rounded-circle me-2" alt="User Avatar">
+                            {{-- <img src="https://via.placeholder.com/50" class="rounded-circle me-2" alt="User Avatar"> --}}
                             <div>
                                 <h5 class="mb-0">{{ $forum->user->name }}</h5>
                                 <small class="text-muted">Posted {{ $forum->created_at->diffForHumans() }}</small>
@@ -69,7 +69,7 @@
             <div class="card mb-3">
                 <div class="card-body">
                     <div class="d-flex mb-3">
-                        <img src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="User Avatar">
+                        {{-- <img src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="User Avatar"> --}}
                         <div>
                             <h5 class="mb-0">{{ $reply->user->name }}</h5>
                             <small class="text-muted">Posted {{ $reply->created_at->diffForHumans() }}</small>
