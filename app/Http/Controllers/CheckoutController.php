@@ -2,107 +2,116 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class CheckoutController extends Controller
 {
     public function index()
     {
-        // Get cart items from session
-        $cartItems = session('cart', []);
+        $cart = Session::get('cart', []);
+        $items = [];
+        $total = 0;
 
-        if (empty($cartItems)) {
-            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+        foreach ($cart as $id => $details) {
+            $product = Product::find($id);
+            if ($product) {
+                $items[] = [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price' => $product->price_per_unit,
+                    'quantity' => $details['quantity'],
+                    'unit' => $product->unit_type,
+                    'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://via.placeholder.com/300x200?text=No+Image',
+                    'subtotal' => $product->price_per_unit * $details['quantity']
+                ];
+                $total += $product->price_per_unit * $details['quantity'];
+            }
         }
 
-        // Calculate totals
-        $subtotal = collect($cartItems)->sum(function ($item) {
-            return $item['price'] * $item['quantity'];
-        });
-
-        $shipping = 100; // You can make this dynamic based on your shipping rules
-        $total = $subtotal + $shipping;
-
-        return view('shop.checkout', compact('cartItems', 'subtotal', 'shipping', 'total'));
+        return view('shop.checkout', compact('items', 'total'));
     }
 
     public function process(Request $request)
     {
-        // Validate the request
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
-            'address' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'state' => 'required|string|max:255',
-            'zip' => 'required|string|max:20',
+        $request->validate([
+            'shipping_address' => 'required|string',
+            'contact_number' => 'required|string',
+            'payment_method' => 'required|in:cod,gcash'
         ]);
 
-        // Get cart items
-        $cartItems = session('cart', []);
-
-        if (empty($cartItems)) {
+        $cart = Session::get('cart', []);
+        if (empty($cart)) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
-        // Calculate totals
-        $subtotal = collect($cartItems)->sum(function ($item) {
-            return $item['price'] * $item['quantity'];
-        });
-
-        $shipping = 100; // You can make this dynamic based on your shipping rules
-        $total = $subtotal + $shipping;
-
         try {
+            DB::beginTransaction();
+
             // Create order
             $order = Order::create([
-                'user_id' => Auth::id(),
-                'first_name' => $validated['first_name'],
-                'last_name' => $validated['last_name'],
-                'email' => $validated['email'],
-                'phone' => $validated['phone'],
-                'address' => $validated['address'],
-                'city' => $validated['city'],
-                'state' => $validated['state'],
-                'zip' => $validated['zip'],
-                'subtotal' => $subtotal,
-                'shipping' => $shipping,
-                'total' => $total,
-                'status' => 'pending'
+                'user_id' => auth()->id(),
+                'shipping_address' => $request->shipping_address,
+                'contact_number' => $request->contact_number,
+                'payment_method' => $request->payment_method,
+                'status' => 'pending',
+                'total_amount' => 0 // Will be updated after adding items
             ]);
 
-            // Create order items
-            foreach ($cartItems as $item) {
+            $total = 0;
+
+            // Add order items
+            foreach ($cart as $id => $details) {
+                $product = Product::findOrFail($id);
+
+                if ($product->stock_quantity < $details['quantity']) {
+                    throw new \Exception("Not enough stock available for {$product->name}");
+                }
+
+                // Create order item
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $item['id'],
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price']
+                    'product_id' => $product->id,
+                    'quantity' => $details['quantity'],
+                    'price' => $product->price_per_unit,
+                    'subtotal' => $product->price_per_unit * $details['quantity']
                 ]);
+
+                // Update product stock
+                $product->stock_quantity -= $details['quantity'];
+                $product->save();
+
+                $total += $product->price_per_unit * $details['quantity'];
             }
 
-            // Clear the cart
-            session()->forget('cart');
+            // Update order total
+            $order->total_amount = $total;
+            $order->save();
 
-            // Redirect to success page
-            return redirect()->route('checkout.success', $order->id)
-                           ->with('success', 'Your order has been placed successfully!');
+            // Clear cart
+            Session::forget('cart');
+
+            DB::commit();
+
+            return redirect()->route('checkout.success', ['orderId' => $order->id])
+                           ->with('success', 'Order placed successfully!');
 
         } catch (\Exception $e) {
-            return redirect()->back()
-                           ->with('error', 'There was an error processing your order. Please try again.')
-                           ->withInput();
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
     public function success($orderId)
     {
-        $order = Order::with('items.product')->findOrFail($orderId);
+        $order = Order::with(['items.product', 'user'])
+                     ->where('user_id', auth()->id())
+                     ->findOrFail($orderId);
+
         return view('shop.checkout-success', compact('order'));
     }
 }

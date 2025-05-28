@@ -2,129 +2,104 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 class CartController extends Controller
 {
     public function index()
     {
-        // Get cart items from session or use dummy data if empty
-        $cartItems = session('cart', [
-            [
-                'id' => 1,
-                'name' => 'Fresh Tomatoes',
-                'price' => 3.99,
-                'quantity' => 2,
-                'image' => 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
-                'unit' => 'lb'
-            ],
-            [
-                'id' => 2,
-                'name' => 'Organic Carrots',
-                'price' => 2.49,
-                'quantity' => 1,
-                'image' => 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
-                'unit' => 'lb'
-            ],
-            [
-                'id' => 3,
-                'name' => 'Farm Fresh Eggs',
-                'price' => 4.99,
-                'quantity' => 1,
-                'image' => 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
-                'unit' => 'dozen'
-            ]
-        ]);
+        $cart = Session::get('cart', []);
+        $total = 0;
+        $items = [];
 
-        // Store cart items in session if they're not already there
-        if (!session()->has('cart')) {
-            session(['cart' => $cartItems]);
-        }
-
-        $subtotal = collect($cartItems)->sum(function ($item) {
-            return $item['price'] * $item['quantity'];
-        });
-
-        $shipping = 5.00;
-        $total = $subtotal + $shipping;
-
-        return view('shop.carts', compact('cartItems', 'subtotal', 'shipping', 'total'));
-    }
-
-    public function addToCart(Request $request)
-    {
-        $request->validate([
-            'product_id' => 'required',
-            'name' => 'required',
-            'price' => 'required|numeric',
-            'image' => 'required|url',
-            'unit' => 'required',
-            'quantity' => 'nullable|integer|min:1'
-        ]);
-
-        $cartItems = session('cart', []);
-
-        // Check if product already exists in cart
-        $existingItemIndex = collect($cartItems)->search(function($item) use ($request) {
-            return $item['id'] == $request->product_id;
-        });
-
-        if ($existingItemIndex !== false) {
-            // Update quantity if product exists
-            $cartItems[$existingItemIndex]['quantity'] += $request->quantity ?? 1;
-            $message = "Updated quantity of {$request->name} in your cart!";
-        } else {
-            // Add new item to cart
-            $cartItems[] = [
-                'id' => $request->product_id,
-                'name' => $request->name,
-                'price' => $request->price,
-                'quantity' => $request->quantity ?? 1,
-                'image' => $request->image,
-                'unit' => $request->unit
-            ];
-            $message = "{$request->name} has been added to your cart!";
-        }
-
-        session(['cart' => $cartItems]);
-
-        return redirect()->back()->with('success', $message);
-    }
-
-    public function removeFromCart($id)
-    {
-        $cartItems = session('cart', []);
-
-        // Get item name before removing
-        $itemName = collect($cartItems)->firstWhere('id', $id)['name'] ?? 'Item';
-
-        // Remove item from cart
-        $cartItems = array_filter($cartItems, function($item) use ($id) {
-            return $item['id'] != $id;
-        });
-
-        session(['cart' => $cartItems]);
-
-        return redirect()->back()->with('success', "{$itemName} has been removed from your cart!");
-    }
-
-    public function updateQuantity(Request $request, $id)
-    {
-        $cartItems = session('cart', []);
-
-        // Update item quantity
-        foreach ($cartItems as &$item) {
-            if ($item['id'] == $id) {
-                $item['quantity'] = $request->quantity;
-                break;
+        foreach ($cart as $id => $details) {
+            $product = Product::find($id);
+            if ($product) {
+                $items[] = [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price' => $product->price_per_unit,
+                    'quantity' => $details['quantity'],
+                    'unit' => $product->unit_type,
+                    'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://via.placeholder.com/300x200?text=No+Image',
+                    'subtotal' => $product->price_per_unit * $details['quantity']
+                ];
+                $total += $product->price_per_unit * $details['quantity'];
             }
         }
 
-        session(['cart' => $cartItems]);
+        return view('shop.cart', compact('items', 'total'));
+    }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Cart updated successfully!'
+    public function add(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1'
         ]);
+
+        $product = Product::findOrFail($request->product_id);
+
+        if ($product->stock_quantity < $request->quantity) {
+            return back()->with('error', 'Not enough stock available.');
+        }
+
+        $cart = Session::get('cart', []);
+
+        if (isset($cart[$request->product_id])) {
+            $newQuantity = $cart[$request->product_id]['quantity'] + $request->quantity;
+            if ($newQuantity > $product->stock_quantity) {
+                return back()->with('error', 'Not enough stock available.');
+            }
+            $cart[$request->product_id]['quantity'] = $newQuantity;
+        } else {
+            $cart[$request->product_id] = [
+                'quantity' => $request->quantity
+            ];
+        }
+
+        Session::put('cart', $cart);
+        return redirect()->route('cart.index')->with('success', 'Product added to cart successfully.');
+    }
+
+    public function update(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:0'
+        ]);
+
+        $product = Product::findOrFail($request->product_id);
+        $cart = Session::get('cart', []);
+
+        if ($request->quantity == 0) {
+            unset($cart[$request->product_id]);
+        } else {
+            if ($request->quantity > $product->stock_quantity) {
+                return back()->with('error', 'Not enough stock available.');
+            }
+            $cart[$request->product_id]['quantity'] = $request->quantity;
+        }
+
+        Session::put('cart', $cart);
+        return redirect()->route('cart.index')->with('success', 'Cart updated successfully.');
+    }
+
+    public function remove($id)
+    {
+        $cart = Session::get('cart', []);
+        if (isset($cart[$id])) {
+            unset($cart[$id]);
+            Session::put('cart', $cart);
+        }
+        return redirect()->route('cart.index')->with('success', 'Product removed from cart.');
+    }
+
+    public function clear()
+    {
+        Session::forget('cart');
+        return redirect()->route('cart.index')->with('success', 'Cart cleared successfully.');
     }
 }

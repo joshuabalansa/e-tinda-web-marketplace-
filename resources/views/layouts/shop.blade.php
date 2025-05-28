@@ -144,7 +144,7 @@
               <span class="badge bg-danger ms-1">{{ count(session('cart', [])) }}</span>
             </a>
             @auth
-                <a href="/account" class="btn btn-light text-success">My Account</a>
+                <a href="/login" class="btn btn-light text-success">My Account</a>
             @else
                 <a href="/login" class="btn btn-light text-success">Login</a>
             @endauth

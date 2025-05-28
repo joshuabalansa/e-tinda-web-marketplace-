@@ -67,7 +67,7 @@
                     <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
                     <h3>Your cart is empty</h3>
                     <p class="text-muted">Add some items to your cart to see them here</p>
-                    <a href="{{ route('shop.index') }}" class="btn btn-success">Continue Shopping</a>
+                    <!-- <a href="{{ route('shop.index') }}" class="btn btn-">Continue Shopping</a> -->
                 </div>
             @endif
         </div>
@@ -95,9 +95,9 @@
                     <a href="{{ route('checkout.index') }}" class="btn btn-success w-100">
                         Proceed to Checkout
                     </a>
-                    <a href="{{ route('shop.index') }}" class="btn btn-outline-success w-100 mt-2">
+                    <!-- <a href="{{ route('shop.index') }}" class="btn btn-success w-100 mt-2">
                         Continue Shopping
-                    </a>
+                    </a> -->
                 </div>
             </div>
         </div>

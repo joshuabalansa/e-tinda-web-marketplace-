@@ -34,45 +34,65 @@
             <h5 class="mb-0">Filters</h5>
           </div>
           <div class="card-body">
-            <h6 class="mt-3">Categories</h6>
-            <div class="d-flex flex-wrap gap-2">
+            <!-- Categories -->
+            <h6 class="mb-3">Categories</h6>
+            <div class="d-flex flex-wrap gap-2 mb-4">
               <button class="btn btn-sm btn-outline-success category-btn active">All</button>
               <button class="btn btn-sm btn-outline-success category-btn">Vegetables</button>
               <button class="btn btn-sm btn-outline-success category-btn">Fruits</button>
               <button class="btn btn-sm btn-outline-success category-btn">Dairy</button>
-              <button class="btn btn-sm btn-outline-success category-btn">Grains</button>
+              <button class="btn btn-sm btn-outline-success category-btn">Meat</button>
             </div>
 
-            <h6 class="mt-4">Price Range</h6>
-            <input type="range" class="form-range" min="0" max="100" id="priceRange">
-            <div class="d-flex justify-content-between">
-              <small>$0</small>
-              <small>$100</small>
+            <!-- Price Range -->
+            <h6 class="mb-3">Price Range</h6>
+            <div class="mb-4">
+              <input type="range" class="form-range" min="0" max="1000" step="10" id="priceRange">
+              <div class="d-flex justify-content-between">
+                <span>₱0</span>
+                <span>₱1000</span>
+              </div>
             </div>
 
-            <h6 class="mt-4">Farm Location</h6>
-            <select class="form-select">
-              <option selected>All Locations</option>
-              <option>Local Farms</option>
-              <option>Organic Certified</option>
-              <option>Family Owned</option>
-            </select>
-
-            <h6 class="mt-4">Vendor</h6>
-            <select class="form-select">
-              <option selected>All Vendors</option>
-              <option>Green Harvest Farms</option>
-              <option>Fresh Valley Produce</option>
-              <option>Organic Life Co.</option>
-              <option>Nature's Best</option>
-            </select>
-
-            <button class="btn btn-success w-100 mt-4">Apply Filters</button>
+            <!-- Rating -->
+            <h6 class="mb-3">Rating</h6>
+            <div class="mb-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="rating5">
+                <label class="form-check-label" for="rating5">
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="rating4">
+                <label class="form-check-label" for="rating4">
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="far fa-star text-warning"></i>
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="rating3">
+                <label class="form-check-label" for="rating3">
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="fas fa-star text-warning"></i>
+                  <i class="far fa-star text-warning"></i>
+                  <i class="far fa-star text-warning"></i>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Product Listings -->
+      <!-- Products Grid -->
       <div class="col-lg-9">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h4 class="mb-0">Products</h4>
@@ -92,202 +112,92 @@
         </div>
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-          <!-- Product Card 1 -->
-          <div class="col">
-            <a href="{{ route('shop.product', ['id' => $products[0]['id']]) }}" class="product-link">
-              <div class="card h-100 product-card">
-                <div class="badge bg-success position-absolute" style="top: 10px; right: 10px;">Organic</div>
-                <img src="{{ $products[0]['image'] }}" class="card-img-top" alt="{{ $products[0]['name'] }}">
-                <div class="card-body d-flex flex-column">
-                  <h5 class="card-title">{{ $products[0]['name'] }}</h5>
-                  <div class="rating mb-2">
-                    @for($i = 0; $i < 5; $i++)
-                      @if($i < floor($products[0]['rating']))
-                        <i class="fas fa-star"></i>
-                      @elseif($i < ceil($products[0]['rating']) && $products[0]['rating'] - floor($products[0]['rating']) >= 0.5)
-                        <i class="fas fa-star-half-alt"></i>
-                      @else
-                        <i class="far fa-star"></i>
-                      @endif
-                    @endfor
-                    <small class="text-muted ms-1">({{ $products[0]['review_count'] }})</small>
-                  </div>
-                  <p class="card-text flex-grow-1">{{ $products[0]['description'] }}</p>
-                  <div class="d-flex justify-content-between align-items-center mt-auto">
-                    <h5 class="mb-0 text-success">₱{{ number_format($products[0]['price'], 2) }}/{{ $products[0]['unit'] }}</h5>
-                    <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
-                      @csrf
-                      <input type="hidden" name="product_id" value="{{ $products[0]['id'] }}">
-                      <input type="hidden" name="name" value="{{ $products[0]['name'] }}">
-                      <input type="hidden" name="price" value="{{ $products[0]['price'] }}">
-                      <input type="hidden" name="image" value="{{ $products[0]['image'] }}">
-                      <input type="hidden" name="unit" value="{{ $products[0]['unit'] }}">
-                      <button type="submit" class="btn btn-sm btn-success">
-                        <i class="fas fa-cart-plus"></i> Add
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <!-- Product Card 2 -->
-          <div class="col">
-            <a href="{{ route('shop.product', ['id' => $products[1]['id']]) }}" class="product-link">
-              <div class="card h-100 product-card">
-                <img src="{{ $products[1]['image'] }}" class="card-img-top" alt="{{ $products[1]['name'] }}">
-                <div class="card-body d-flex flex-column">
-                  <h5 class="card-title">{{ $products[1]['name'] }}</h5>
-                  <div class="rating mb-2">
-                    @for($i = 0; $i < 5; $i++)
-                      @if($i < floor($products[1]['rating']))
-                        <i class="fas fa-star"></i>
-                      @elseif($i < ceil($products[1]['rating']) && $products[1]['rating'] - floor($products[1]['rating']) >= 0.5)
-                        <i class="fas fa-star-half-alt"></i>
-                      @else
-                        <i class="far fa-star"></i>
-                      @endif
-                    @endfor
-                    <small class="text-muted ms-1">({{ $products[1]['review_count'] }})</small>
-                  </div>
-                  <p class="card-text flex-grow-1">{{ $products[1]['description'] }}</p>
-                  <div class="d-flex justify-content-between align-items-center mt-auto">
-                    <h5 class="mb-0 text-success">₱{{ number_format($products[1]['price'], 2) }}/{{ $products[1]['unit'] }}</h5>
-                    <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
-                      @csrf
-                      <input type="hidden" name="product_id" value="{{ $products[1]['id'] }}">
-                      <input type="hidden" name="name" value="{{ $products[1]['name'] }}">
-                      <input type="hidden" name="price" value="{{ $products[1]['price'] }}">
-                      <input type="hidden" name="image" value="{{ $products[1]['image'] }}">
-                      <input type="hidden" name="unit" value="{{ $products[1]['unit'] }}">
-                      <button type="submit" class="btn btn-sm btn-success">
-                        <i class="fas fa-cart-plus"></i> Add
-                      </button>
-                    </form>
+          @forelse($products as $product)
+            <div class="col">
+              <a href="{{ route('shop.product', ['id' => $product['id']]) }}" class="product-link">
+                <div class="card h-100 product-card">
+                  @if(isset($product['certification']) && $product['certification'] === 'Organic Certified')
+                    <div class="badge bg-success position-absolute" style="top: 10px; right: 10px;">Organic</div>
+                  @endif
+                  <img src="{{ $product['image'] }}" class="card-img-top" alt="{{ $product['name'] }}">
+                  <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ $product['name'] }}</h5>
+                    @if(isset($product['rating']))
+                      <div class="rating mb-2">
+                        @for($i = 0; $i < 5; $i++)
+                          @if($i < floor($product['rating']))
+                            <i class="fas fa-star"></i>
+                          @elseif($i < ceil($product['rating']) && $product['rating'] - floor($product['rating']) >= 0.5)
+                            <i class="fas fa-star-half-alt"></i>
+                          @else
+                            <i class="far fa-star"></i>
+                          @endif
+                        @endfor
+                        @if(isset($product['review_count']))
+                          <small class="text-muted ms-1">({{ $product['review_count'] }})</small>
+                        @endif
+                      </div>
+                    @endif
+                    <p class="card-text flex-grow-1">{{ $product['description'] }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                      <h5 class="mb-0 text-success">₱{{ number_format($product['price'], 2) }}/{{ $product['unit'] }}</h5>
+                      <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product['id'] }}">
+                        <input type="hidden" name="name" value="{{ $product['name'] }}">
+                        <input type="hidden" name="price" value="{{ $product['price'] }}">
+                        <input type="hidden" name="image" value="{{ $product['image'] }}">
+                        <input type="hidden" name="unit" value="{{ $product['unit'] }}">
+                        <button type="submit" class="btn btn-sm btn-success">
+                          <i class="fas fa-cart-plus"></i> Add
+                        </button>
+                      </form>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </a>
-          </div>
-
-          <!-- Product Card 3 -->
-          <div class="col">
-            <a href="{{ route('shop.index') }}" class="product-link">
-              <div class="card h-100 product-card">
-                <div class="badge bg-success position-absolute" style="top: 10px; right: 10px;">Organic</div>
-                <img src="https://images.unsplash.com/photo-1603569283847-aa295f0d016a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Organic Apples">
-                <div class="card-body d-flex flex-column">
-                  <h5 class="card-title">Organic Apples</h5>
-                  <div class="rating mb-2">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="far fa-star"></i>
-                    <small class="text-muted ms-1">(29)</small>
-                  </div>
-                  <p class="card-text flex-grow-1">Crisp and sweet, perfect for eating fresh or baking.</p>
-                  <div class="d-flex justify-content-between align-items-center mt-auto">
-                    <h5 class="mb-0 text-success">$1.99/lb</h5>
-                    <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <!-- Product Card 4 -->
-          <div class="col">
-            <a href="{{ route('shop.index') }}" class="product-link">
-              <div class="card h-100 product-card">
-                <img src="https://images.unsplash.com/photo-1550258987-190a2d41a8ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Farm Fresh Eggs">
-                <div class="card-body d-flex flex-column">
-                  <h5 class="card-title">Farm Fresh Eggs</h5>
-                  <div class="rating mb-2">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <small class="text-muted ms-1">(58)</small>
-                  </div>
-                  <p class="card-text flex-grow-1">Free-range eggs from happy, pasture-raised chickens.</p>
-                  <div class="d-flex justify-content-between align-items-center mt-auto">
-                    <h5 class="mb-0 text-success">$4.99/dozen</h5>
-                    <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <!-- Product Card 5 -->
-          <div class="col">
-            <a href="{{ route('shop.index') }}" class="product-link">
-              <div class="card h-100 product-card">
-                <div class="badge bg-success position-absolute" style="top: 10px; right: 10px;">Organic</div>
-                <img src="https://images.unsplash.com/photo-1573246123716-6b1782bfc499?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Fresh Strawberries">
-                <div class="card-body d-flex flex-column">
-                  <h5 class="card-title">Fresh Strawberries</h5>
-                  <div class="rating mb-2">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star-half-alt"></i>
-                    <i class="far fa-star"></i>
-                    <small class="text-muted ms-1">(47)</small>
-                  </div>
-                  <p class="card-text flex-grow-1">Sweet and juicy strawberries picked at peak ripeness.</p>
-                  <div class="d-flex justify-content-between align-items-center mt-auto">
-                    <h5 class="mb-0 text-success">$4.49/lb</h5>
-                    <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <!-- Product Card 6 -->
-          <div class="col">
-            <a href="{{ route('shop.index') }}" class="product-link">
-              <div class="card h-100 product-card">
-                <img src="https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" class="card-img-top" alt="Carrots">
-                <div class="card-body d-flex flex-column">
-                  <h5 class="card-title">Organic Carrots</h5>
-                  <div class="rating mb-2">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="far fa-star"></i>
-                    <small class="text-muted ms-1">(36)</small>
-                  </div>
-                  <p class="card-text flex-grow-1">Sweet and crunchy carrots, perfect for snacking or cooking.</p>
-                  <div class="d-flex justify-content-between align-items-center mt-auto">
-                    <h5 class="mb-0 text-success">$2.49/lb</h5>
-                    <button class="btn btn-sm btn-success"><i class="fas fa-cart-plus"></i> Add</button>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
+              </a>
+            </div>
+          @empty
+            <div class="col-12 text-center py-5">
+              <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+              <h3>No Products Available</h3>
+              <p class="text-muted">Check back later for new products</p>
+            </div>
+          @endforelse
         </div>
 
         <!-- Pagination -->
-        <nav aria-label="Page navigation" class="mt-5">
-          <ul class="pagination justify-content-center">
-            <li class="page-item disabled">
-              <a class="page-link text-success" href="#" tabindex="-1">Previous</a>
-            </li>
-            <li class="page-item active"><a class="page-link bg-success border-success" href="#">1</a></li>
-            <li class="page-item"><a class="page-link text-success" href="#">2</a></li>
-            <li class="page-item"><a class="page-link text-success" href="#">3</a></li>
-            <li class="page-item">
-              <a class="page-link text-success" href="#">Next</a>
-            </li>
-          </ul>
-        </nav>
+        @if($products->hasPages())
+          <nav aria-label="Page navigation" class="mt-5">
+            <ul class="pagination justify-content-center">
+              @if($products->onFirstPage())
+                <li class="page-item disabled">
+                  <a class="page-link text-success" href="#" tabindex="-1">Previous</a>
+                </li>
+              @else
+                <li class="page-item">
+                  <a class="page-link text-success" href="{{ $products->previousPageUrl() }}">Previous</a>
+                </li>
+              @endif
+
+              @foreach($products->getUrlRange(1, $products->lastPage()) as $page => $url)
+                <li class="page-item {{ $page == $products->currentPage() ? 'active' : '' }}">
+                  <a class="page-link {{ $page == $products->currentPage() ? 'bg-success border-success' : 'text-success' }}" href="{{ $url }}">{{ $page }}</a>
+                </li>
+              @endforeach
+
+              @if($products->hasMorePages())
+                <li class="page-item">
+                  <a class="page-link text-success" href="{{ $products->nextPageUrl() }}">Next</a>
+                </li>
+              @else
+                <li class="page-item disabled">
+                  <a class="page-link text-success" href="#">Next</a>
+                </li>
+              @endif
+            </ul>
+          </nav>
+        @endif
       </div>
     </div>
   </div>

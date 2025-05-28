@@ -24,91 +24,96 @@
 </header>
 
 <div class="container py-5">
-    <form action="{{ route('checkout.process') }}" method="POST" id="checkout-form">
-        @csrf
-        <div class="row">
-            <!-- Checkout Forms -->
-            <div class="col-lg-8">
-                <!-- Shipping Information -->
-                <div class="checkout-section">
-                    <h3 class="mb-4">Shipping Information</h3>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="first_name" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="first_name" name="first_name" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="last_name" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="last_name" name="last_name" required>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email Address</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="phone" class="form-label">Phone Number</label>
-                        <input type="tel" class="form-control" id="phone" name="phone" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="address" class="form-label">Street Address</label>
-                        <input type="text" class="form-control" id="address" name="address" required>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="city" class="form-label">City</label>
-                            <input type="text" class="form-control" id="city" name="city" required>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="state" class="form-label">State/Province</label>
-                            <input type="text" class="form-control" id="state" name="state" required>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="zip" class="form-label">ZIP/Postal Code</label>
-                            <input type="text" class="form-control" id="zip" name="zip" required>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <h1 class="mb-4">Checkout</h1>
 
-            <!-- Order Summary -->
-            <div class="col-lg-4">
-                <div class="card shadow-sm order-summary">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">Order Summary</h5>
-                    </div>
-                    <div class="card-body">
-                        @foreach($cartItems as $item)
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>{{ $item['name'] }} x {{ $item['quantity'] }}</span>
-                                <span>₱{{ number_format($item['price'] * $item['quantity'], 2) }}</span>
+    @if(session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Shipping Information -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Shipping Information</h5>
+                    <form action="{{ route('checkout.process') }}" method="POST">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="shipping_address" class="form-label">Shipping Address</label>
+                            <textarea class="form-control @error('shipping_address') is-invalid @enderror"
+                                    id="shipping_address"
+                                    name="shipping_address"
+                                    rows="3"
+                                    required>{{ old('shipping_address') }}</textarea>
+                            @error('shipping_address')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="contact_number" class="form-label">Contact Number</label>
+                            <input type="text"
+                                   class="form-control @error('contact_number') is-invalid @enderror"
+                                   id="contact_number"
+                                   name="contact_number"
+                                   value="{{ old('contact_number') }}"
+                                   required>
+                            @error('contact_number')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Payment Method</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="cod" value="cod" checked>
+                                <label class="form-check-label" for="cod">
+                                    Cash on Delivery
+                                </label>
                             </div>
-                        @endforeach
-                        <hr>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Subtotal</span>
-                            <span>₱{{ number_format($subtotal, 2) }}</span>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="gcash" value="gcash">
+                                <label class="form-check-label" for="gcash">
+                                    GCash
+                                </label>
+                            </div>
+                            @error('payment_method')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Shipping</span>
-                            <span>₱{{ number_format($shipping, 2) }}</span>
-                        </div>
-                        <hr>
-                        <div class="d-flex justify-content-between mb-3">
-                            <strong>Total</strong>
-                            <strong class="text-success">₱{{ number_format($total, 2) }}</strong>
-                        </div>
-                        <button type="submit" class="btn btn-success w-100">
+
+                        <button type="submit" class="btn btn-success">
                             Place Order
                         </button>
-                        <a href="{{ route('cart.index') }}" class="btn btn-outline-success w-100 mt-2">
-                            Back to Cart
-                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Order Summary -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Order Summary</h5>
+
+                    @foreach($items as $item)
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>{{ $item['name'] }} ({{ $item['quantity'] }} {{ $item['unit'] }})</span>
+                            <span>₱{{ number_format($item['subtotal'], 2) }}</span>
+                        </div>
+                    @endforeach
+
+                    <hr>
+                    <div class="d-flex justify-content-between mb-2">
+                        <strong>Total</strong>
+                        <strong>₱{{ number_format($total, 2) }}</strong>
                     </div>
                 </div>
             </div>
         </div>
-    </form>
+    </div>
 </div>
 
 <script>
