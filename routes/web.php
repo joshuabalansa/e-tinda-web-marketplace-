@@ -67,7 +67,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/checkout/success/{orderId}', [CheckoutController::class, 'success'])->name('checkout.success');
 });
 
+// Category Routes
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 
 // Farmer Product Routes
 Route::middleware(['auth'])->group(function () {

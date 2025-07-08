@@ -52,6 +52,22 @@
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     }
 
+    .product-link {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .product-link:hover {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .active-filter {
+      background-color: #28a745 !important;
+      color: white !important;
+      border-color: #28a745 !important;
+    }
+
     .section-title {
       color: #28a745;
       font-weight: 700;

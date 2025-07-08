@@ -9,6 +9,15 @@
             </div>
 
             <div class="panel-body">
+                @if ($errors->any())
+                    <script>
+                        $(document).ready(function() {
+                            @foreach ($errors->all() as $error)
+                                toastr.error("{{ $error }}");
+                            @endforeach
+                        });
+                    </script>
+                @endif
                 <form action="{{ route('farmer.products.update', $product) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')

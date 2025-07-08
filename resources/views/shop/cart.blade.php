@@ -90,7 +90,7 @@
             <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
             <h3>Your cart is empty</h3>
             <p class="text-muted">Add some products to your cart to continue shopping.</p>
-            <a href="{{ route('shop.index') }}" class="btn btn-primary">
+            <a href="{{ route('shop.index') }}" class="btn btn-success">
                 Continue Shopping
             </a>
         </div>

@@ -14,7 +14,7 @@
                     <p class="card-text">{{ $category['description'] }}</p>
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="badge bg-success">{{ $category['product_count'] }} Products</span>
-                        <a href="#" class="btn btn-outline-success">View Products</a>
+                        <a href="{{ route('categories.show', $category['name']) }}" class="btn btn-outline-success">View Products</a>
                     </div>
                 </div>
             </div>

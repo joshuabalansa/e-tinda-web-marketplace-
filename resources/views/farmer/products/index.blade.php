@@ -15,6 +15,11 @@
                 {{ session('success') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
+            <script>
+                $(document).ready(function() {
+                    toastr.success("{{ session('success') }}");
+                });
+            </script>
         @endif
 
         <div class="card">
