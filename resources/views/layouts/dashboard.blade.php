@@ -3,363 +3,551 @@
 
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Neon Admin Panel" />
+    <meta name="description" content="E-Tinda Marketplace - Farm to Table" />
     <meta name="author" content="" />
 
     <link rel="icon" href="{{ asset('assets/images/favicon.ico') }}">
+    <title>E-Tinda Marketplace | Dashboard</title>
 
-    <title>Neon | Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="{{ asset('assets/js/jquery-ui/css/no-theme/jquery-ui-1.10.3.custom.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/font-icons/entypo/css/entypo.css') }}">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/neon-core.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/neon-theme.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/neon-forms.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
 
-    <script src="{{ asset('assets/js/jquery-1.11.3.min.js') }}"></script>
+    <!-- Flag Icons for Language Switcher -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/6.6.6/css/flag-icons.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+    @stack('styles')
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
     <style>
+        :root {
+            --primary-color: #198754;
+            --primary-dark: #146c43;
+            --primary-light: #d1e7dd;
+            --sidebar-bg: #1a472a;
+            --sidebar-hover: #2d5a3f;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar {
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            width: 280px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-logo {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-logo i {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        .sidebar-logo h4 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .sidebar.collapsed .sidebar-logo h4,
+        .sidebar.collapsed .sidebar-logo span {
+            display: none;
+        }
+
         .sidebar-menu {
-            background-color: #1a472a !important;
-            /* Dark green color */
+            padding: 1rem 0;
         }
 
-        .sidebar-menu .main-menu>li>a {
-            color: #ffffff !important;
+        .sidebar-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
-        .sidebar-menu .main-menu>li>a:hover {
-            background-color: #2d5a3f !important;
-            /* Slightly lighter green for hover */
+        .sidebar-menu li {
+            margin: 0.25rem 0;
         }
 
-        .sidebar-menu .main-menu>li.active>a {
-            background-color: #2d5a3f !important;
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1.5rem;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--sidebar-hover);
+            color: white;
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: var(--sidebar-hover);
+            color: white;
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu i {
+            width: 20px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+
+        .sidebar.collapsed .sidebar-menu i {
+            margin-right: 0;
+        }
+
+        .sidebar.collapsed .sidebar-menu span {
+            display: none;
+        }
+
+        .top-navbar {
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 280px;
+            z-index: 999;
+            transition: all 0.3s ease;
+            width: calc(100% - 280px);
+        }
+
+        .top-navbar.expanded {
+            left: 70px;
+            width: calc(100% - 70px);
+        }
+
+        .main-content {
+            margin-left: 280px;
+            margin-top: 80px;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+            width: calc(100% - 280px);
+        }
+
+        .main-content.expanded {
+            margin-left: 70px;
+            width: calc(100% - 70px);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .user-welcome {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: #6c757d;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-toggle:hover {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        .logout-btn {
+            background-color: #dc3545;
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                margin-top: 80px;
+                width: 100%;
+            }
+
+            .top-navbar {
+                left: 0;
+                padding: 1rem;
+                width: 100%;
+            }
+
+            .user-welcome {
+                font-size: 1rem;
+            }
+
+            .sidebar-toggle {
+                font-size: 1.1rem;
+                padding: 0.4rem;
+            }
+
+            .user-info {
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .top-navbar {
+                padding: 0.75rem;
+            }
+
+            .user-welcome {
+                display: none;
+            }
+
+            .user-info .dropdown-toggle {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.875rem;
+            }
+
+            .user-info {
+                gap: 0.25rem;
+            }
+
+            .dropdown {
+                margin-left: 0.5rem;
+            }
         }
     </style>
-
-    <!--[if lt IE 9]><script src="assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-  <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
- <![endif]-->
-
-
 </head>
 
-<body class="page-body  page-fade" data-url="http://neon.dev">
-    <div class="page-container">
-        <div class="sidebar-menu">
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="{{ route('farmer.dashboard') }}" class="sidebar-logo">
+                    <i class="fas fa-leaf"></i>
+                    <h4>E-Tinda</h4>
+                </a>
+            </div>
 
-            <div class="sidebar-menu-inner">
-
-                <header class="logo-env">
-
-                    <!-- logo -->
-                    <div class="logo">
-                        <a href="index.html">
-                            <i class="fas fa-leaf fa-2x text-success"
-                                style="display: block; margin-bottom: 0.5rem; color: white; text-align: center;"></i>
-                            <h4 class="text-success fw-bold" style="display: block; margin: 0; color: white;">E-Tinda
-                                Marketplace</h4>
-                        </a>
-                    </div>
-
-                    <!-- logo collapse icon -->
-                    <div class="sidebar-collapse">
-                        <a href="#"
-                            class="sidebar-collapse-icon"><!-- add class "with-animation" if you want sidebar to have animation during expanding/collapsing transition -->
-                            <i class="entypo-menu"></i>
-                        </a>
-                    </div>
-
-
-                    <!-- open/close menu icon (do not remove if you want to enable menu on mobile devices) -->
-                    <div class="sidebar-mobile-menu visible-xs">
-                        <a href="#" class="with-animation"><!-- add class "with-animation" to support animation -->
-                            <i class="entypo-menu"></i>
-                        </a>
-                    </div>
-
-                </header>
-
-
-                <ul id="main-menu" class="main-menu">
+            <nav class="sidebar-menu">
+                <ul>
                     @auth
                         @if(auth()->user()->role->value === 'farmer')
                             <!-- Farmer Menu -->
-                            <li class="active opened active">
-                                <a href="{{ route('farmer.dashboard') }}">
-                                    <i class="entypo-gauge"></i>
-                                    <span class="title">Dashboard</span>
-                                </a>
-                            </li>
-                            <li class="{{ request()->routeIs('farmer.products.*') ? 'active' : '' }}">
-                                <a href="{{ route('farmer.products.index') }}">
-                                    <i class="entypo-basket"></i>
-                                    <span class="title">My Products</span>
+                            <li>
+                                <a href="{{ route('farmer.dashboard') }}" class="{{ request()->routeIs('farmer.dashboard') ? 'active' : '' }}">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>{{ __('dashboard.dashboard') }}</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('farmer.products.create') }}">
-                                    <i class="entypo-plus"></i>
-                                    <span class="title">Add Product</span>
+                                <a href="{{ route('farmer.products.index') }}" class="{{ request()->routeIs('farmer.products.*') ? 'active' : '' }}">
+                                    <i class="fas fa-box"></i>
+                                    <span>{{ __('dashboard.my_products') }}</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#">
-                                    <i class="entypo-list"></i>
-                                    <span class="title">Inventory</span>
+                                <a href="{{ route('farmer.products.create') }}" class="{{ request()->routeIs('farmer.products.create') ? 'active' : '' }}">
+                                    <i class="fas fa-plus"></i>
+                                    <span>{{ __('dashboard.add_product') }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#">
-                                    <i class="entypo-chart-bar"></i>
-                                    <span class="title">Analytics</span>
+                                    <i class="fas fa-list"></i>
+                                    <span>{{ __('dashboard.inventory') }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#">
-                                    <i class="entypo-doc-text"></i>
-                                    <span class="title">Orders</span>
+                                    <i class="fas fa-chart-bar"></i>
+                                    <span>{{ __('dashboard.analytics') }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#">
-                                    <i class="entypo-comment"></i>
-                                    <span class="title">Forums</span>
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span>{{ __('dashboard.orders') }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#">
-                                    <i class="entypo-user"></i>
-                                    <span class="title">Profile</span>
+                                    <i class="fas fa-comments"></i>
+                                    <span>{{ __('dashboard.forums') }}</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <i class="fas fa-user"></i>
+                                    <span>{{ __('dashboard.profile') }}</span>
                                 </a>
                             </li>
 
                         @elseif(auth()->user()->role->value === 'buyer')
                             <!-- Buyer Menu -->
-                            <li class="active opened active">
-                                <a href="#">
-                                    <i class="entypo-gauge"></i>
-                                    <span class="title">Dashboard</span>
+                            <li>
+                                <a href="#" class="active">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>{{ __('dashboard.dashboard') }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="/shop">
-                                    <i class="entypo-bag"></i>
-                                    <span class="title">Browse Products</span>
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span>{{ __('dashboard.browse_products') }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#">
-                                    <i class="entypo-basket"></i>
-                                    <span class="title">Shopping Cart</span>
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span>{{ __('dashboard.shopping_cart') }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#">
-                                    <i class="entypo-doc-text"></i>
-                                    <span class="title">Order History</span>
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>{{ __('dashboard.order_history') }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#">
-                                    <i class="entypo-heart"></i>
-                                    <span class="title">Wishlist</span>
-                                </a>
-                            </li>
-                             <li>
-                                <a href="#">
-                                    <i class="entypo-comment"></i>
-                                    <span class="title">Forums</span>
+                                    <i class="fas fa-heart"></i>
+                                    <span>{{ __('dashboard.wishlist') }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#">
-                                    <i class="entypo-user"></i>
-                                    <span class="title">Profile</span>
+                                    <i class="fas fa-comments"></i>
+                                    <span>{{ __('dashboard.forums') }}</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <i class="fas fa-user"></i>
+                                    <span>{{ __('dashboard.profile') }}</span>
                                 </a>
                             </li>
 
                         @elseif(auth()->user()->role->value === 'admin')
                             <!-- Admin Menu -->
-                            <li class="active opened active">
-                                <a href="#">
-                                    <i class="entypo-gauge"></i>
-                                    <span class="title">Dashboard</span>
+                            <li>
+                                <a href="#" class="active">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>{{ __('dashboard.dashboard') }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#">
-                                    <i class="entypo-users"></i>
-                                    <span class="title">Users</span>
+                                    <i class="fas fa-users"></i>
+                                    <span>{{ __('dashboard.users') }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#">
-                                    <i class="entypo-bag"></i>
-                                    <span class="title">Products</span>
+                                    <i class="fas fa-box"></i>
+                                    <span>{{ __('dashboard.products') }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#">
-                                    <i class="entypo-doc-text"></i>
-                                    <span class="title">Orders</span>
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>{{ __('dashboard.orders') }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#">
-                                    <i class="entypo-comment"></i>
-                                    <span class="title">Forums</span>
+                                    <i class="fas fa-comments"></i>
+                                    <span>{{ __('dashboard.forums') }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#">
-                                    <i class="entypo-list"></i>
-                                    <span class="title">System Logs</span>
+                                    <i class="fas fa-list"></i>
+                                    <span>{{ __('dashboard.system_logs') }}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#">
-                                    <i class="entypo-cog"></i>
-                                    <span class="title">Settings</span>
+                                    <i class="fas fa-cog"></i>
+                                    <span>{{ __('dashboard.settings') }}</span>
                                 </a>
                             </li>
                         @endif
                     @endauth
                 </ul>
-
-            </div>
-
+            </nav>
         </div>
 
+        <!-- Main Content -->
+        <div class="main-content" id="mainContent">
+            <!-- Top Navigation -->
+            <div class="top-navbar">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3">
+                        <button class="sidebar-toggle" id="sidebarToggle">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div class="user-welcome">
+                            {{ __('dashboard.welcome') }}, {{ ucwords(Auth::user()->name) }}
+                        </div>
+                    </div>
 
-        <div class="main-content">
-            <div class="row">
-
-            <!-- Profile Info and Notifications -->
-            <div class="col-md-6 col-sm-8 clearfix">
-
-                <ul class="user-info pull-left pull-none-xsm">
-
-                    <!-- Profile Info -->
-                    <li class="profile-info dropdown">
-                        <!-- add class "pull-right" if you want to place this from right -->
-
-                        <h3>
-                         Welcome,  {{ ucwords(Auth::user()->name) }}
-                        </h3>
-
-                        <ul class="dropdown-menu">
-
-                            <!-- Reverse Caret -->
-                            <li class="caret"></li>
-
-                            <!-- Profile sub-links -->
-                            <li>
-                                <a href="extra-timeline.html">
-                                    <i class="entypo-user"></i>
-                                    Edit Profile
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="mailbox.html">
-                                    <i class="entypo-mail"></i>
-                                    Inbox
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="extra-calendar.html">
-                                    <i class="entypo-calendar"></i>
-                                    Calendar
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="#">
-                                    <i class="entypo-clipboard"></i>
-                                    Tasks
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-                </ul>
-
-            </div>
-
-
-            <!-- Raw Links -->
-            <div class="col-md-6 col-sm-4 clearfix hidden-xs">
-
-                <ul class="list-inline links-list pull-right">
-
-
-                    <li class="sep"></li>
-
-                    <li>
-                        <form method="POST" action="{{ route('logout') }}" class="m-0"
-                            onsubmit="return confirm('Are you sure you want to log out?');">
-                            @csrf
-                            <button type="submit" class="btn btn-danger btn-sm"
-                                style="background-color: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-size: 13px; transition: all 0.3s ease;">
-                                {{ __('Log Out') }} <i class="entypo-logout right"></i>
+                    <div class="user-info">
+                        <div class="dropdown me-3">
+                            @include('components.language-switcher')
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-2"></i>{{ __('dashboard.profile') }}
                             </button>
-                        </form>
-                    </li>
-                </ul>
-
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-        </div>
-
-        <hr />
-            @yield('content')
+            <!-- Page Content -->
+            <div class="p-4">
+                @yield('content')
+            </div>
         </div>
     </div>
-    <!-- Imported styles on this page -->
-    <link rel="stylesheet" href="{{ asset('assets/js/jvectormap/jquery-jvectormap-1.2.2.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/js/rickshaw/rickshaw.min.css') }}">
 
-    <!-- Bottom scripts (common) -->
-    <script src="{{ asset('assets/js/gsap/TweenMax.min.js') }}"></script>
-    <script src="{{ asset('assets/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js') }}"></script>
-    <script src="{{ asset('assets/js/bootstrap.js') }}"></script>
-    <script src="{{ asset('assets/js/joinable.js') }}"></script>
-    <script src="{{ asset('assets/js/resizeable.js') }}"></script>
-    <script src="{{ asset('assets/js/neon-api.js') }}"></script>
-    <script src="{{ asset('assets/js/jvectormap/jquery-jvectormap-1.2.2.min.js') }}"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Imported scripts on this page -->
-    <script src="{{ asset('assets/js/jvectormap/jquery-jvectormap-europe-merc-en.js') }}"></script>
-    <script src="{{ asset('assets/js/jquery.sparkline.min.js') }}"></script>
-    <script src="{{ asset('assets/js/rickshaw/vendor/d3.v3.js') }}"></script>
-    <script src="{{ asset('assets/js/rickshaw/rickshaw.min.js') }}"></script>
-    <script src="{{ asset('assets/js/raphael-min.js') }}"></script>
-    <script src="{{ asset('assets/js/morris.min.js') }}"></script>
-    <script src="{{ asset('assets/js/toastr.js') }}"></script>
-    <script src="{{ asset('assets/js/neon-chat.js') }}"></script>
+    <!-- Toastr for notifications -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
+    <!-- Custom JavaScript -->
+    <script>
+        $(document).ready(function() {
+            // Sidebar toggle functionality
+            $('#sidebarToggle').on('click', function() {
+                if (window.innerWidth > 768) {
+                    // Desktop behavior
+                    $('#sidebar').toggleClass('collapsed');
+                    $('#mainContent').toggleClass('expanded');
+                    $('.top-navbar').toggleClass('expanded');
+                } else {
+                    // Mobile behavior
+                    $('#sidebar').toggleClass('mobile-open');
+                }
+            });
 
-    <!-- JavaScripts initializations and stuff -->
-    <script src="{{ asset('assets/js/neon-custom.js') }}"></script>
+            // Mobile sidebar toggle
+            if (window.innerWidth <= 768) {
+                $('#sidebar').addClass('mobile-open');
+            }
 
+            // Handle window resize
+            $(window).on('resize', function() {
+                if (window.innerWidth <= 768) {
+                    $('#sidebar').removeClass('collapsed');
+                    $('#mainContent').removeClass('expanded');
+                    $('.top-navbar').removeClass('expanded');
+                    $('#sidebar').addClass('mobile-open');
+                } else {
+                    $('#sidebar').removeClass('mobile-open');
+                }
+            });
 
-    <!-- Demo Settings -->
-    <script src="{{ asset('assets/js/neon-demo.js') }}"></script>
+            // Close mobile sidebar when clicking outside
+            $(document).on('click', function(e) {
+                if (window.innerWidth <= 768) {
+                    if (!$(e.target).closest('#sidebar, #sidebarToggle').length) {
+                        $('#sidebar').removeClass('mobile-open');
+                    }
+                }
+            });
 
+            // Show success messages with toastr
+            @if (session('success'))
+                toastr.success("{{ session('success') }}");
+            @endif
+
+            @if (session('error'))
+                toastr.error("{{ session('error') }}");
+            @endif
+
+            @if (session('warning'))
+                toastr.warning("{{ session('warning') }}");
+            @endif
+
+            @if (session('info'))
+                toastr.info("{{ session('info') }}");
+            @endif
+        });
+    </script>
+
+    @stack('scripts')
 </body>
 
 </html>

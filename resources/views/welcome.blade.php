@@ -1,116 +1,209 @@
 @extends('layouts.shop')
 
 @section('content')
-<!-- Hero Section -->
-<section class="hero d-flex align-items-center">
+<!-- Enhanced Hero Section -->
+<section class="hero d-flex align-items-center position-relative">
   <div class="container">
-    <div class="hero-content text-center">
-      <h1 class="display-4 fw-bold mb-4">Fresh from Local Farmers</h1>
-      <p class="lead mb-4">Support your local farmers and get fresh, organic produce delivered to your doorstep.</p>
-      <a href="/shop" class="btn btn-success btn-lg">Shop Now</a>
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <div class="hero-content">
+          <h1 class="display-3 fw-bold mb-4 text-white">
+            Fresh from Local Farmers
+            <span class="d-block fs-4 fw-normal mt-2">Supporting Community, One Harvest at a Time</span>
+          </h1>
+          <p class="lead mb-4 text-white-50">Connect directly with local farmers and get fresh, organic produce delivered to your doorstep. Support sustainable farming while enjoying the best quality food.</p>
+          <div class="d-flex flex-wrap gap-3">
+            <a href="/shop" class="btn btn-success btn-lg px-4 py-3">
+              <i class="fas fa-shopping-basket me-2"></i>Shop Now
+            </a>
+            <a href="/categories" class="btn btn-outline-light btn-lg px-4 py-3">
+              <i class="fas fa-th-large me-2"></i>Browse Categories
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 d-none d-lg-block">
+        <div class="hero-image text-center">
+          <img src="https://images.unsplash.com/photo-1706784694581-4c6e001c3c37?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+               alt="Fresh Farm Produce"
+               class="img-fluid rounded-3 shadow-lg"
+               style="max-height: 400px; object-fit: cover;">
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- Categories Section -->
-<section class="py-5">
+<!-- Features Section -->
+<section class="py-5 bg-white">
   <div class="container">
-    <h2 class="section-title text-center">Shop by Category</h2>
     <div class="row g-4">
-      <!-- Category Cards -->
-      <div class="col-md-4">
-        <div class="category-card card h-100">
-          <img src="https://images.unsplash.com/photo-1597362925123-77861d3fbac7" class="card-img-top" alt="Vegetables">
-          <div class="card-body text-center">
-            <h5 class="card-title">Vegetables</h5>
-            <p class="card-text">Fresh, locally grown vegetables.</p>
-            <a href="/shop/vegetables" class="btn btn-outline-success">Browse Vegetables</a>
+      <div class="col-md-3 text-center">
+        <div class="feature-item p-3">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-leaf fa-3x text-success"></i>
           </div>
+          <h5 class="fw-bold">Fresh & Organic</h5>
+          <p class="text-muted mb-0">Direct from farm to table, ensuring maximum freshness</p>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="category-card card h-100">
-          <img src="https://images.unsplash.com/photo-1592558480962-903b06077406?q=80&w=2062&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top" alt="Fruits">
-          <div class="card-body text-center">
-            <h5 class="card-title">Fruits</h5>
-            <p class="card-text">Seasonal and exotic fruits.</p>
-            <a href="/shop/fruits" class="btn btn-outline-success">Browse Fruits</a>
+      <div class="col-md-3 text-center">
+        <div class="feature-item p-3">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-handshake fa-3x text-success"></i>
           </div>
+          <h5 class="fw-bold">Support Local</h5>
+          <p class="text-muted mb-0">Help sustain local farming communities</p>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="category-card card h-100">
-          <img src="https://images.unsplash.com/photo-1633179963862-72c64dc6d30d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top" alt="Dairy">
-          <div class="card-body text-center">
-            <h5 class="card-title">Dairy</h5>
-            <p class="card-text">Farm-fresh dairy products.</p>
-            <a href="/shop/dairy" class="btn btn-outline-success">Browse Dairy</a>
+      <div class="col-md-3 text-center">
+        <div class="feature-item p-3">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-shield-alt fa-3x text-success"></i>
           </div>
+          <h5 class="fw-bold">Quality Assured</h5>
+          <p class="text-muted mb-0">Rigorous quality checks for all products</p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Featured Products Section -->
+<!-- Enhanced Categories Section -->
 <section class="py-5 bg-light">
   <div class="container">
-    <h2 class="section-title text-center">Featured Products</h2>
-    <div class="row g-4">
-      <!-- Product Cards -->
-      <div class="col-md-3">
-        <div class="product-card card h-100">
-          <div class="card-img-wrapper" style="height: 200px; overflow: hidden;">
-            <img src="https://images.unsplash.com/photo-1723477036930-ab1ebb3953e9?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top h-100 w-100" alt="Organic Tomatoes" style="object-fit: cover;">
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">Organic Tomatoes</h5>
-            <p class="card-text">Fresh, vine-ripened tomatoes</p>
-            <p class="text-success fw-bold">$4.99/lb</p>
-            <button class="btn btn-success w-100">Add to Cart</button>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="product-card card h-100">
-          <div class="card-img-wrapper" style="height: 200px; overflow: hidden;">
-            <img src="https://plus.unsplash.com/premium_photo-1661376910798-c74ed8f65819?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top h-100 w-100" alt="Fresh Carrots" style="object-fit: cover;">
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">Fresh Carrots</h5>
-            <p class="card-text">Locally grown organic carrots</p>
-            <p class="text-success fw-bold">$3.49/lb</p>
-            <button class="btn btn-success w-100">Add to Cart</button>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="product-card card h-100">
-          <div class="card-img-wrapper" style="height: 200px; overflow: hidden;">
-            <img src="https://images.unsplash.com/photo-1662318183333-971ae1658e44?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top h-100 w-100" alt="Fresh Lettuce" style="object-fit: cover;">
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">Fresh Lettuce</h5>
-            <p class="card-text">Crispy organic lettuce</p>
-            <p class="text-success fw-bold">$2.99/head</p>
-            <button class="btn btn-success w-100">Add to Cart</button>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="product-card card h-100">
-          <div class="card-img-wrapper" style="height: 200px; overflow: hidden;">
-            <img src="https://images.unsplash.com/photo-1741518165791-df31747b8d8b?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="card-img-top h-100 w-100" alt="Bell Peppers" style="object-fit: cover;">
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">Bell Peppers</h5>
-            <p class="card-text">Colorful organic peppers</p>
-            <p class="text-success fw-bold">$5.99/lb</p>
-            <button class="btn btn-success w-100">Add to Cart</button>
-          </div>
-        </div>
-      </div>
+    <div class="text-center mb-5">
+      <h2 class="section-title display-6 fw-bold">Shop by Category</h2>
+      <p class="lead text-muted">Discover fresh produce organized by category</p>
     </div>
+    <div class="row g-4">
+      @if($categories->count() > 0)
+        @foreach($categories as $category)
+        <div class="col-lg-4 col-md-6">
+          <div class="category-card card h-100 border-0 shadow-sm">
+            <div class="position-relative">
+              <img src="{{ $category['image'] }}" class="card-img-top" alt="{{ $category['name'] }}" style="height: 250px; object-fit: cover;">
+              <div class="position-absolute top-0 end-0 m-3">
+                <span class="badge bg-success fs-6 px-3 py-2">{{ $category['product_count'] }} Products</span>
+              </div>
+            </div>
+            <div class="card-body d-flex flex-column p-4">
+              <h4 class="card-title fw-bold mb-3">{{ $category['name'] }}</h4>
+              <p class="card-text text-muted flex-grow-1">{{ $category['description'] }}</p>
+              <div class="mt-auto">
+                <a href="{{ route('categories.show', $category['name']) }}" class="btn btn-outline-success w-100 py-2">
+                  <i class="fas fa-arrow-right me-2"></i>Browse {{ $category['name'] }}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        @endforeach
+      @else
+        <!-- Fallback if no categories exist -->
+        <div class="col-12 text-center">
+          <div class="py-5">
+            <i class="fas fa-seedling fa-4x text-muted mb-3"></i>
+            <p class="text-muted fs-5">No categories available at the moment.</p>
+            <a href="/shop" class="btn btn-success btn-lg">Browse All Products</a>
+          </div>
+        </div>
+      @endif
+    </div>
+
+    @if($categories->count() > 0)
+    <div class="text-center mt-5">
+      <a href="{{ route('categories.index') }}" class="btn btn-success btn-lg px-5">
+        <i class="fas fa-th-large me-2"></i>View All Categories
+      </a>
+    </div>
+    @endif
+  </div>
+</section>
+
+<!-- Enhanced Featured Products Section -->
+<section class="py-5 bg-white">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="section-title display-6 fw-bold">Featured Products</h2>
+      <p class="lead text-muted">Handpicked fresh products from our trusted farmers</p>
+    </div>
+    <div class="row g-4">
+      @if($featuredProducts->count() > 0)
+        @foreach($featuredProducts as $product)
+        <div class="col-lg-3 col-md-6">
+          <div class="product-card card h-100 border-0 shadow-sm">
+            <div class="position-relative">
+              <img src="{{ $product['image'] }}" class="card-img-top" alt="{{ $product['name'] }}" style="height: 220px; object-fit: cover;">
+              @if($product['stock'] > 0)
+                <div class="position-absolute top-0 start-0 m-2">
+                  <span class="badge bg-success">In Stock</span>
+                </div>
+              @else
+                <div class="position-absolute top-0 start-0 m-2">
+                  <span class="badge bg-danger">Out of Stock</span>
+                </div>
+              @endif
+              <div class="position-absolute top-0 end-0 m-2">
+                <span class="badge bg-warning text-dark">{{ $product['category'] }}</span>
+              </div>
+            </div>
+            <div class="card-body d-flex flex-column p-4">
+              <h5 class="card-title fw-bold mb-2">{{ $product['name'] }}</h5>
+              <p class="card-text text-muted small flex-grow-1">{{ Str::limit($product['description'], 60) }}</p>
+              <div class="mb-3">
+                <span class="h5 text-success fw-bold mb-0">${{ number_format($product['price'], 2) }}</span>
+                <small class="text-muted">/{{ $product['unit'] }}</small>
+              </div>
+              <div class="mb-3">
+                <small class="text-muted">
+                  <i class="fas fa-user me-1"></i>{{ $product['vendor'] }}
+                </small>
+              </div>
+              <div class="mt-auto">
+                <div class="d-grid gap-2">
+                  <a href="{{ route('shop.product', $product['id']) }}" class="btn btn-outline-success">
+                    <i class="fas fa-eye me-2"></i>View Details
+                  </a>
+                  @if($product['stock'] > 0)
+                    <form action="{{ route('cart.add') }}" method="POST">
+                      @csrf
+                      <input type="hidden" name="product_id" value="{{ $product['id'] }}">
+                      <input type="hidden" name="quantity" value="1">
+                      <button type="submit" class="btn btn-success w-100">
+                        <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                      </button>
+                    </form>
+                  @else
+                    <button class="btn btn-secondary w-100" disabled>
+                      <i class="fas fa-times me-2"></i>Out of Stock
+                    </button>
+                  @endif
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        @endforeach
+      @else
+        <!-- Fallback if no products exist -->
+        <div class="col-12 text-center">
+          <div class="py-5">
+            <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+            <p class="text-muted fs-5">No products available at the moment.</p>
+            <a href="/shop" class="btn btn-success btn-lg">Check Back Later</a>
+          </div>
+        </div>
+      @endif
+    </div>
+
+    @if($featuredProducts->count() > 0)
+    <div class="text-center mt-5">
+      <a href="{{ route('shop.index') }}" class="btn btn-success btn-lg px-5">
+        <i class="fas fa-store me-2"></i>View All Products
+      </a>
+    </div>
+    @endif
   </div>
 </section>
 @endsection

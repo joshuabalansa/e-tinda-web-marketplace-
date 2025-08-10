@@ -1,0 +1,48 @@
+/* Product Create Form (Farmer) */
+
+/* Sections */
+.section-title {
+  letter-spacing: 0.08em;
+}
+
+/* Card */
+.card.rounded-4 {
+  border-radius: 1rem !important;
+}
+.card-header.bg-white {
+  background-color: #ffffff !important;
+}
+
+/* Dropzone */
+.border-dashed {
+  border-style: dashed !important;
+}
+.dropzone-active {
+  background-color: #f8f9fa;
+  border-color: #0d6efd !important;
+}
+
+/* Helpers */
+.form-text {
+  color: #6c757d;
+}
+
+/* Spacing tweaks for groups */
+.row.g-4 > [class^="col-"] {
+  margin-top: 0 !important;
+}
+
+/* Breadcrumb + header */
+.breadcrumb {
+  --bs-breadcrumb-divider: '>';
+}
+
+/* Buttons */
+.btn-outline-secondary {
+  border-color: #d0d5dd;
+}
+
+/* Ensure preview image is nicely rounded */
+#previewImage {
+  border-radius: .5rem;
+}

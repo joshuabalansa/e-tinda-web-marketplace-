@@ -12,10 +12,37 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\WelcomeController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Language switching route
+Route::get('language/{locale}', function ($locale) {
+    if (in_array($locale, ['en', 'hil'])) {
+        // Set locale in cookie for persistence
+        cookie()->queue('locale', $locale, 60 * 24 * 365); // 1 year
+
+        // Set locale in session as backup
+        session()->put('locale', $locale);
+
+        // Set locale in application
+        app()->setLocale($locale);
+
+        // Log the change for debugging
+        \Log::info("Language changed to: {$locale}", [
+            'session_locale' => session('locale'),
+            'cookie_locale' => request()->cookie('locale'),
+            'app_locale' => app()->getLocale(),
+            'user_id' => auth()->id()
+        ]);
+
+        // Clear any cached views to ensure new language takes effect
+        if (app()->environment('local')) {
+            \Artisan::call('view:clear');
+        }
+    }
+    return redirect()->back();
+})->name('language.switch');
+
+Route::get('/', [WelcomeController::class, 'index']);
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 

@@ -21,17 +21,20 @@
     }
 
     .hero {
-      background: url('https://images.unsplash.com/photo-1605000797499-95a51c5269ae?q=80&w=2942&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') center/cover no-repeat;
-      min-height: 300px;
-      height: 60vh;
+      background: linear-gradient(135deg, rgba(40, 167, 69, 0.9), rgba(40, 167, 69, 0.7)),
+                  url('https://images.unsplash.com/photo-1605000797499-95a51c5269ae?q=80&w=2942&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') center/cover no-repeat;
+      min-height: 400px;
+      height: 80vh;
       position: relative;
       color: white;
+      display: flex;
+      align-items: center;
     }
 
     .hero::before {
       content: "";
       position: absolute;
-      background-color: rgba(0, 0, 0, 0.4);
+      background: linear-gradient(45deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
       width: 100%;
       height: 100%;
       top: 0; left: 0;
@@ -42,14 +45,51 @@
       z-index: 1;
     }
 
-    .category-card, .product-card {
+    .hero-image img {
       transition: transform 0.3s ease;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .hero-image:hover img {
+      transform: scale(1.05);
+    }
+
+    .feature-item {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-radius: 10px;
+    }
+
+    .feature-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-icon {
+      transition: transform 0.3s ease;
+    }
+
+    .feature-item:hover .feature-icon {
+      transform: scale(1.1);
+    }
+
+    .category-card, .product-card {
+      transition: all 0.3s ease;
+      border-radius: 15px;
+      overflow: hidden;
     }
 
     .category-card:hover, .product-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      transform: translateY(-8px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .category-card .card-img-top,
+    .product-card .card-img-top {
+      transition: transform 0.3s ease;
+    }
+
+    .category-card:hover .card-img-top,
+    .product-card:hover .card-img-top {
+      transform: scale(1.05);
     }
 
     .product-link {
@@ -88,23 +128,86 @@
       color: white !important;
       font-weight: 500;
       padding: 0.5rem 1rem !important;
+      transition: all 0.3s ease;
     }
 
     .nav-link:hover {
       opacity: 0.8;
+      transform: translateY(-2px);
+    }
+
+    .nav-link.active {
+      background-color: rgba(255, 255, 255, 0.2) !important;
+      border-radius: 8px;
+      font-weight: 600;
     }
 
     .auth-links .btn {
       margin-left: 0.5rem;
+      transition: all 0.3s ease;
     }
 
+    .auth-links .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Enhanced button styles */
+    .btn {
+      transition: all 0.3s ease;
+      border-radius: 8px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-lg {
+      border-radius: 10px;
+    }
+
+    /* Card enhancements */
+    .card {
+      border-radius: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* Badge enhancements */
+    .badge {
+      border-radius: 6px;
+      font-weight: 500;
+    }
+
+    /* Enhanced shadows */
+    .shadow-sm {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    /* Stats section styling */
+    .hero .h4 {
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero small {
+      font-weight: 500;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Responsive improvements */
     @media (max-width: 768px) {
       .hero {
-        height: 50vh;
+        height: 60vh;
+        min-height: 300px;
       }
 
       .hero-content h1 {
-        font-size: 2rem !important;
+        font-size: 2.5rem !important;
       }
 
       .hero-content p {
@@ -112,7 +215,7 @@
       }
 
       .section-title {
-        font-size: 1.5rem !important;
+        font-size: 2rem !important;
       }
 
       .navbar-nav {
@@ -123,6 +226,35 @@
       .auth-links {
         justify-content: center !important;
         padding-bottom: 1rem;
+      }
+
+      .hero .d-flex.align-items-center {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .hero .me-4 {
+        margin-right: 1rem !important;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .hero {
+        height: 50vh;
+        min-height: 250px;
+      }
+
+      .hero-content h1 {
+        font-size: 2rem !important;
+      }
+
+      .hero .d-flex.align-items-center {
+        flex-direction: column;
+      }
+
+      .hero .me-4 {
+        margin-right: 0.5rem !important;
+        margin-bottom: 1rem;
       }
     }
   </style>
@@ -142,16 +274,16 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav me-auto">
             <li class="nav-item">
-              <a class="nav-link" href="/">Home</a>
+              <a class="nav-link {{ request()->is('/') ? 'active' : '' }}" href="/">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/categories">Categories</a>
+              <a class="nav-link {{ request()->is('categories*') ? 'active' : '' }}" href="/categories">Categories</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" href="/shop">Shop</a>
+              <a class="nav-link {{ request()->is('shop*') ? 'active' : '' }}" href="/shop">Shop</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/forums">Forums</a>
+              <a class="nav-link {{ request()->is('forums*') ? 'active' : '' }}" href="/forums">Forums</a>
             </li>
           </ul>
           <div class="d-flex">
@@ -160,7 +292,7 @@
               <span class="badge bg-danger ms-1">{{ count(session('cart', [])) }}</span>
             </a>
             @auth
-                <a href="/login" class="btn btn-light text-success">My Account</a>
+                <a href="/dashboard" class="btn btn-light text-success">My Account</a>
             @else
                 <a href="/login" class="btn btn-light text-success">Login</a>
             @endauth
