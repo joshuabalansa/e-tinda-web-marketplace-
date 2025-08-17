@@ -322,7 +322,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="#">
+                                <a href="{{ route('farmer.orders.index') }}" class="{{ request()->routeIs('farmer.orders.*') ? 'active' : '' }}">
                                     <i class="fas fa-shopping-cart"></i>
                                     <span>{{ __('dashboard.orders') }}</span>
                                 </a>

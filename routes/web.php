@@ -13,6 +13,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\FarmerOrderController;
 
 // Language switching route
 Route::get('language/{locale}', function ($locale) {
@@ -73,6 +74,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
 //farmer Dashboard Route
 Route::middleware(['auth', 'farmer'])->group(function () {
     Route::get('/farmer/dashboard', [FarmerDashboardController::class, 'index'])->name('farmer.dashboard');
+
+    // Farmer Orders Routes
+    Route::get('/farmer/orders', [FarmerOrderController::class, 'index'])->name('farmer.orders.index');
+    Route::get('/farmer/orders/{order}', [FarmerOrderController::class, 'show'])->name('farmer.orders.show');
+    Route::patch('/farmer/orders/{order}/status', [FarmerOrderController::class, 'updateStatus'])->name('farmer.orders.updateStatus');
 });
 
 //buyer Dashboard Route

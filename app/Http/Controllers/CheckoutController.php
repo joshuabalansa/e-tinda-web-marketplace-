@@ -39,9 +39,15 @@ class CheckoutController extends Controller
     public function process(Request $request)
     {
         $request->validate([
-            'shipping_address' => 'required|string',
-            'contact_number' => 'required|string',
-            'payment_method' => 'required|in:cod,gcash'
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'state' => 'required|string|max:255',
+            'zip' => 'required|string|max:255',
+            'shipping' => 'required|numeric|min:0'
         ]);
 
         $cart = Session::get('cart', []);
@@ -52,17 +58,33 @@ class CheckoutController extends Controller
         try {
             DB::beginTransaction();
 
+            // Calculate subtotal from cart
+            $subtotal = 0;
+            foreach ($cart as $id => $details) {
+                $product = Product::findOrFail($id);
+                $subtotal += $product->price_per_unit * $details['quantity'];
+            }
+
+            // Calculate total with shipping
+            $shipping = $request->shipping;
+            $total = $subtotal + $shipping;
+
             // Create order
             $order = Order::create([
                 'user_id' => auth()->id(),
-                'shipping_address' => $request->shipping_address,
-                'contact_number' => $request->contact_number,
-                'payment_method' => $request->payment_method,
-                'status' => 'pending',
-                'total_amount' => 0 // Will be updated after adding items
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'address' => $request->address,
+                'city' => $request->city,
+                'state' => $request->state,
+                'zip' => $request->zip,
+                'subtotal' => $subtotal,
+                'shipping' => $shipping,
+                'total' => $total,
+                'status' => 'pending'
             ]);
-
-            $total = 0;
 
             // Add order items
             foreach ($cart as $id => $details) {
@@ -77,20 +99,13 @@ class CheckoutController extends Controller
                     'order_id' => $order->id,
                     'product_id' => $product->id,
                     'quantity' => $details['quantity'],
-                    'price' => $product->price_per_unit,
-                    'subtotal' => $product->price_per_unit * $details['quantity']
+                    'price' => $product->price_per_unit
                 ]);
 
                 // Update product stock
                 $product->stock_quantity -= $details['quantity'];
                 $product->save();
-
-                $total += $product->price_per_unit * $details['quantity'];
             }
-
-            // Update order total
-            $order->total_amount = $total;
-            $order->save();
 
             // Clear cart
             Session::forget('cart');
