@@ -40,8 +40,22 @@ Route::get('language/{locale}', function ($locale) {
             \Artisan::call('view:clear');
         }
     }
-    return redirect()->back();
+
+    // Redirect back with a success message
+    return redirect()->back()->with('success', 'Language changed to ' . ($locale == 'en' ? 'English' : 'Hiligaynon'));
 })->name('language.switch');
+
+// Test route to check current locale
+Route::get('test-locale', function () {
+    return response()->json([
+        'current_locale' => app()->getLocale(),
+        'session_locale' => session('locale'),
+        'cookie_locale' => request()->cookie('locale'),
+        'english_test' => __('common.english'),
+        'hiligaynon_test' => __('common.hiligaynon'),
+        'categories_test' => __('common.categories')
+    ]);
+});
 
 Route::get('/', [WelcomeController::class, 'index']);
 

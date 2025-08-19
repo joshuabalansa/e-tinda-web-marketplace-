@@ -1,7 +1,7 @@
 @extends('layouts.shop')
 @section('content')
 <div class="container py-5">
-    <h1 class="mb-4">Shopping Cart</h1>
+    <h1 class="mb-4">{{ __('shop.shopping_cart') }}</h1>
 
     @if(session('success'))
         <div class="alert alert-success">
@@ -43,7 +43,7 @@
                                     <p class="mb-0">₱{{ number_format($item['subtotal'], 2) }}</p>
                                     <form action="{{ route('cart.remove', $item['id']) }}" method="POST" class="d-inline">
                                         @csrf
-                                        <button type="submit" class="btn btn-link text-danger p-0">Remove</button>
+                                        <button type="submit" class="btn btn-link text-danger p-0">{{ __('shop.remove') }}</button>
                                     </form>
                                 </div>
                             </div>
@@ -56,7 +56,7 @@
 
                 <!-- Continue Shopping -->
                 <a href="{{ route('shop.index') }}" class="btn btn-outline-primary">
-                    <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                    <i class="fas fa-arrow-left me-2"></i>{{ __('shop.continue_shopping') }}
                 </a>
             </div>
 
@@ -64,22 +64,22 @@
                 <!-- Order Summary -->
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Order Summary</h5>
+                        <h5 class="card-title">{{ __('shop.order_summary') }}</h5>
                         <div class="d-flex justify-content-between mb-3">
-                            <span>Subtotal</span>
+                            <span>{{ __('shop.subtotal') }}</span>
                             <span>₱{{ number_format($total, 2) }}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-3">
-                            <span>Shipping</span>
-                            <span>Free</span>
+                            <span>{{ __('shop.shipping') }}</span>
+                            <span>{{ __('shop.free') }}</span>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between mb-3">
-                            <strong>Total</strong>
+                            <strong>{{ __('shop.total') }}</strong>
                             <strong>₱{{ number_format($total, 2) }}</strong>
                         </div>
                         <a href="{{ route('checkout.index') }}" class="btn btn-success w-100">
-                            Proceed to Checkout
+                            {{ __('shop.proceed_to_checkout') }}
                         </a>
                     </div>
                 </div>
@@ -88,10 +88,10 @@
     @else
         <div class="text-center py-5">
             <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-            <h3>Your cart is empty</h3>
-            <p class="text-muted">Add some products to your cart to continue shopping.</p>
+            <h3>{{ __('shop.your_cart_empty') }}</h3>
+            <p class="text-muted">{{ __('shop.add_products_cart') }}</p>
             <a href="{{ route('shop.index') }}" class="btn btn-success">
-                Continue Shopping
+                {{ __('shop.continue_shopping') }}
             </a>
         </div>
     @endif

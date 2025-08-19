@@ -1,0 +1,40 @@
+<?php
+
+return [
+    // Language names
+    'english' => 'English',
+    'hiligaynon' => 'Hiligaynon',
+
+    // Common UI elements
+    'language' => 'Language',
+    'home' => 'Home',
+    'categories' => 'Categories',
+    'shop' => 'Shop',
+    'forums' => 'Forums',
+    'cart' => 'Cart',
+    'my_account' => 'My Account',
+    'login' => 'Login',
+    'logout' => 'Logout',
+    'register' => 'Register',
+    'profile' => 'Profile',
+    'dashboard' => 'Dashboard',
+    'search' => 'Search',
+    'submit' => 'Submit',
+    'cancel' => 'Cancel',
+    'save' => 'Save',
+    'edit' => 'Edit',
+    'delete' => 'Delete',
+    'view' => 'View',
+    'add' => 'Add',
+    'update' => 'Update',
+    'back' => 'Back',
+    'next' => 'Next',
+    'previous' => 'Previous',
+    'close' => 'Close',
+    'loading' => 'Loading...',
+    'no_results' => 'No results found',
+    'error' => 'Error',
+    'success' => 'Success',
+    'warning' => 'Warning',
+    'info' => 'Information',
+];

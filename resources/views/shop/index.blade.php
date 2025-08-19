@@ -27,8 +27,8 @@
 
   <header class="bg-light py-5">
     <div class="container text-center">
-      <h1 class="display-4 fw-bold text-success">Fresh From Our Farms</h1>
-      <p class="lead">Organic, locally-sourced produce delivered to your doorstep</p>
+      <h1 class="display-4 fw-bold text-success">{{ __('shop.fresh_from_farms') }}</h1>
+      <p class="lead">{{ __('shop.organic_description') }}</p>
     </div>
   </header>
 
@@ -39,15 +39,15 @@
       <div class="mb-4">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('categories.index') }}">Categories</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('categories.index') }}">{{ __('shop.categories') }}</a></li>
             <li class="breadcrumb-item active" aria-current="page">{{ $currentCategory }}</li>
           </ol>
         </nav>
-        <h1 class="section-title">{{ $currentCategory }} Products</h1>
-        <p class="text-muted">Browse our selection of {{ strtolower($currentCategory) }} products from local farmers.</p>
+        <h1 class="section-title">{{ $currentCategory }} {{ __('shop.products') }}</h1>
+        <p class="text-muted">{{ __('shop.browse_category_products', ['category' => strtolower($currentCategory)]) }}</p>
       </div>
     @else
-      <h1 class="section-title text-center">Shop All Products</h1>
+      <h1 class="section-title text-center">{{ __('shop.shop_all_products') }}</h1>
     @endif
 
     <!-- Flash Messages -->
@@ -68,7 +68,7 @@
     <div class="row mb-4">
       <div class="col-md-8 mx-auto">
         <form method="GET" action="{{ route('shop.index') }}" class="d-flex">
-          <input type="text" name="query" class="form-control me-2" placeholder="Search products..." value="{{ request('query') }}">
+          <input type="text" name="query" class="form-control me-2" placeholder="{{ __('shop.search_products') }}" value="{{ request('query') }}">
           <button type="submit" class="btn btn-success">
             <i class="fas fa-search"></i>
           </button>
@@ -81,15 +81,15 @@
       <div class="col-lg-3 mb-4">
         <div class="card shadow-sm">
           <div class="card-header bg-success text-white">
-            <h5 class="mb-0">Filters</h5>
+            <h5 class="mb-0">{{ __('shop.filters') }}</h5>
           </div>
           <div class="card-body">
             <form id="filterForm" method="GET" action="{{ route('shop.index') }}">
               <!-- Categories -->
-              <h6 class="mb-3">Categories</h6>
+              <h6 class="mb-3">{{ __('shop.categories') }}</h6>
               <div class="d-flex flex-wrap gap-2 mb-4">
                 <button type="button" class="btn btn-sm btn-outline-success category-btn {{ !request('category') || request('category') == 'all' ? 'active-filter' : '' }}"
-                        onclick="setCategory('all')">All</button>
+                        onclick="setCategory('all')">{{ __('shop.all') }}</button>
                 @foreach($categories as $category)
                   <button type="button" class="btn btn-sm btn-outline-success category-btn {{ request('category') == $category ? 'active-filter' : '' }}"
                           onclick="setCategory('{{ $category }}')">{{ $category }}</button>
@@ -98,13 +98,13 @@
               <input type="hidden" name="category" id="categoryInput" value="{{ request('category', 'all') }}">
 
               <!-- Price Range -->
-              <h6 class="mb-3">Price Range</h6>
+              <h6 class="mb-3">{{ __('shop.price_range') }}</h6>
               <div class="row g-2 mb-4">
                 <div class="col-6">
-                  <input type="number" name="min_price" id="min_price" class="form-control form-control-sm" placeholder="Min" value="{{ request('min_price') }}" min="0" step="0.01">
+                  <input type="number" name="min_price" id="min_price" class="form-control form-control-sm" placeholder="{{ __('shop.min') }}" value="{{ request('min_price') }}" min="0" step="0.01">
                 </div>
                 <div class="col-6">
-                  <input type="number" name="max_price" id="max_price" class="form-control form-control-sm" placeholder="Max" value="{{ request('max_price') }}" min="0" step="0.01">
+                  <input type="number" name="max_price" id="max_price" class="form-control form-control-sm" placeholder="{{ __('shop.max') }}" value="{{ request('max_price') }}" min="0" step="0.01">
                 </div>
               </div>
 
@@ -114,14 +114,14 @@
                   <input class="form-check-input" type="checkbox" name="in_stock" id="in_stock"
                          {{ request('in_stock') ? 'checked' : '' }} onchange="applyFilters()">
                   <label class="form-check-label" for="in_stock">
-                    In Stock Only
+                    {{ __('shop.in_stock_only') }}
                   </label>
                 </div>
               </div>
 
               <!-- Clear Filters -->
               <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="clearFilters()">
-                Clear All Filters
+                {{ __('shop.clear_all_filters') }}
               </button>
             </form>
           </div>
@@ -131,9 +131,9 @@
       <!-- Products Grid -->
       <div class="col-lg-9">
         <div class="d-flex justify-content-between align-items-center mb-4">
-          <h4 class="mb-0">Products
+          <h4 class="mb-0">{{ __('shop.products') }}
             @if(request()->hasAny(['category', 'min_price', 'max_price', 'query', 'in_stock']))
-              <small class="text-muted">({{ $products->total() }} results)</small>
+              <small class="text-muted">({{ $products->total() }} {{ __('shop.results') }})</small>
             @endif
           </h4>
           <div class="d-flex">
@@ -144,12 +144,12 @@
               @endforeach
 
               <select name="sort" class="form-select me-2" style="width: auto;" onchange="this.form.submit()">
-                <option value="">Sort by</option>
-                <option value="price_low_high" {{ request('sort') == 'price_low_high' ? 'selected' : '' }}>Price: Low to High</option>
-                <option value="price_high_low" {{ request('sort') == 'price_high_low' ? 'selected' : '' }}>Price: High to Low</option>
-                <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>Name: A to Z</option>
-                <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Name: Z to A</option>
-                <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Newest First</option>
+                <option value="">{{ __('shop.sort_by') }}</option>
+                <option value="price_low_high" {{ request('sort') == 'price_low_high' ? 'selected' : '' }}>{{ __('shop.price_low_high') }}</option>
+                <option value="price_high_low" {{ request('sort') == 'price_high_low' ? 'selected' : '' }}>{{ __('shop.price_high_low') }}</option>
+                <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>{{ __('shop.name_asc') }}</option>
+                <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>{{ __('shop.name_desc') }}</option>
+                <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>{{ __('shop.newest_first') }}</option>
               </select>
             </form>
           </div>
@@ -158,21 +158,21 @@
         <!-- Active Filters Display -->
         @if(request()->hasAny(['category', 'min_price', 'max_price', 'query', 'in_stock']))
           <div class="mb-3">
-            <small class="text-muted">Active filters:</small>
+            <small class="text-muted">{{ __('shop.active_filters') }}</small>
             @if(request('category') && request('category') != 'all')
               <span class="badge bg-success me-1">{{ request('category') }}</span>
             @endif
             @if(request('min_price'))
-              <span class="badge bg-success me-1">Min: ₱{{ request('min_price') }}</span>
+              <span class="badge bg-success me-1">{{ __('shop.min_price', ['price' => request('min_price')]) }}</span>
             @endif
             @if(request('max_price'))
-              <span class="badge bg-success me-1">Max: ₱{{ request('max_price') }}</span>
+              <span class="badge bg-success me-1">{{ __('shop.max_price', ['price' => request('max_price')]) }}</span>
             @endif
             @if(request('query'))
-              <span class="badge bg-success me-1">Search: "{{ request('query') }}"</span>
+              <span class="badge bg-success me-1">{{ __('shop.search_query', ['query' => request('query')]) }}</span>
             @endif
             @if(request('in_stock'))
-              <span class="badge bg-success me-1">In Stock Only</span>
+              <span class="badge bg-success me-1">{{ __('shop.in_stock_only') }}</span>
             @endif
           </div>
         @endif
@@ -183,12 +183,12 @@
               <a href="{{ route('shop.product', ['id' => $product['id']]) }}" class="product-link">
                 <div class="card h-100 product-card">
                   @if(isset($product['certification']) && $product['certification'] === 'Organic Certified')
-                    <div class="badge bg-success position-absolute" style="top: 10px; right: 10px;">Organic</div>
+                    <div class="badge bg-success position-absolute" style="top: 10px; right: 10px;">{{ __('shop.organic') }}</div>
                   @endif
                   @if($product['stock'] <= 0)
-                    <div class="badge bg-danger position-absolute" style="top: 10px; left: 10px;">Out of Stock</div>
+                    <div class="badge bg-danger position-absolute" style="top: 10px; left: 10px;">{{ __('shop.out_of_stock') }}</div>
                   @elseif($product['stock'] <= 5)
-                    <div class="badge bg-warning position-absolute" style="top: 10px; left: 10px;">Low Stock</div>
+                    <div class="badge bg-warning position-absolute" style="top: 10px; left: 10px;">{{ __('shop.low_stock') }}</div>
                   @endif
                   <img src="{{ $product['image'] }}" class="card-img-top" alt="{{ $product['name'] }}">
                   <div class="card-body d-flex flex-column">
@@ -222,7 +222,7 @@
                         <input type="hidden" name="unit" value="{{ $product['unit'] }}">
                         <input type="hidden" name="quantity" value="1">
                         <button type="submit" class="btn btn-sm btn-success" {{ $product['stock'] <= 0 ? 'disabled' : '' }}>
-                          <i class="fas fa-cart-plus"></i> {{ $product['stock'] <= 0 ? 'Out of Stock' : 'Add' }}
+                          <i class="fas fa-cart-plus"></i> {{ $product['stock'] <= 0 ? __('shop.out_of_stock') : __('shop.add') }}
                         </button>
                       </form>
                     </div>
@@ -233,16 +233,16 @@
           @empty
             <div class="col-12 text-center py-5">
               <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
-              <h3>No Products Found</h3>
+              <h3>{{ __('shop.no_products_found') }}</h3>
               <p class="text-muted">
                 @if(request()->hasAny(['category', 'min_price', 'max_price', 'query', 'in_stock']))
-                  Try adjusting your filters or search terms
+                  {{ __('shop.try_adjusting_filters') }}
                 @else
-                  Check back later for new products
+                  {{ __('shop.check_back_later') }}
                 @endif
               </p>
               @if(request()->hasAny(['category', 'min_price', 'max_price', 'query', 'in_stock']))
-                <button class="btn btn-outline-success" onclick="clearFilters()">Clear All Filters</button>
+                <button class="btn btn-outline-success" onclick="clearFilters()">{{ __('shop.clear_all_filters_btn') }}</button>
               @endif
             </div>
           @endforelse
@@ -250,7 +250,7 @@
 
         <!-- Pagination -->
         @if($products->hasPages())
-          <nav aria-label="Page navigation" class="mt-5">
+          <nav aria-label="{{ __('shop.page_navigation') }}" class="mt-5">
             {{ $products->appends(request()->query())->links('pagination::bootstrap-4') }}
           </nav>
         @endif

@@ -3,30 +3,30 @@
 <div class="container py-5">
     <div class="text-center mb-5">
         <i class="fas fa-check-circle text-success fa-4x mb-3"></i>
-        <h1>Order Placed Successfully!</h1>
-        <p class="lead">Thank you for your order. Your order number is #{{ $order->id }}</p>
+        <h1>{{ __('shop.order_placed_successfully') }}</h1>
+        <p class="lead">{{ __('shop.thank_you_order_number', ['id' => $order->id]) }}</p>
     </div>
 
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title mb-4">Order Details</h5>
+                    <h5 class="card-title mb-4">{{ __('shop.order_details') }}</h5>
 
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <h6>Shipping Information</h6>
+                            <h6>{{ __('shop.shipping_information') }}</h6>
                             <p class="mb-1">{{ $order->shipping_address }}</p>
-                            <p class="mb-1">Contact: {{ $order->contact_number }}</p>
+                            <p class="mb-1">{{ __('shop.contact') }}: {{ $order->contact_number }}</p>
                         </div>
                         <div class="col-md-6">
-                            <h6>Payment Information</h6>
-                            <p class="mb-1">Payment Method: {{ strtoupper($order->payment_method) }}</p>
-                            <p class="mb-1">Order Status: {{ ucfirst($order->status) }}</p>
+                            <h6>{{ __('shop.payment_information') }}</h6>
+                            <p class="mb-1">{{ __('shop.payment_method') }}: {{ strtoupper($order->payment_method) }}</p>
+                            <p class="mb-1">{{ __('shop.order_status') }}: {{ ucfirst($order->status) }}</p>
                         </div>
                     </div>
 
-                    <h6 class="mb-3">Order Items</h6>
+                    <h6 class="mb-3">{{ __('shop.order_items') }}</h6>
                     @foreach($order->items as $item)
                         <div class="row mb-3">
                             <div class="col-md-8">
@@ -46,7 +46,7 @@
 
                     <hr>
                     <div class="d-flex justify-content-between">
-                        <strong>Total Amount</strong>
+                        <strong>{{ __('shop.total_amount') }}</strong>
                         <strong>₱{{ number_format($order->total_amount, 2) }}</strong>
                     </div>
                 </div>
@@ -54,7 +54,7 @@
 
             <div class="text-center mt-4">
                 <a href="{{ route('shop.index') }}" class="btn btn-primary">
-                    Continue Shopping
+                    {{ __('shop.continue_shopping') }}
                 </a>
             </div>
         </div>

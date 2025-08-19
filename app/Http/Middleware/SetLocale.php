@@ -4,45 +4,44 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Session;
 
 class SetLocale
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next)
     {
-        // Ensure session is started
-        if (!$request->session()->isStarted()) {
-            $request->session()->start();
-        }
-
-        // Check if locale is set in cookie first (more reliable)
-        if ($request->hasCookie('locale')) {
-            $locale = $request->cookie('locale');
-            if (in_array($locale, ['en', 'hil'])) {
-                app()->setLocale($locale);
-                // Also update session for consistency
-                $request->session()->put('locale', $locale);
-                return $next($request);
-            }
-        }
-
         // Check if locale is set in session
-        if ($request->session()->has('locale')) {
-            $locale = $request->session()->get('locale');
-            if (in_array($locale, ['en', 'hil'])) {
-                app()->setLocale($locale);
-                return $next($request);
-            }
+        if (Session::has('locale')) {
+            $locale = Session::get('locale');
+        }
+        // Check if locale is set in cookie
+        elseif ($request->cookie('locale')) {
+            $locale = $request->cookie('locale');
+        }
+        // Default to English
+        else {
+            $locale = 'en';
         }
 
-        // Set default locale if none is set
-        app()->setLocale('en');
-        $request->session()->put('locale', 'en');
+        // Set the application locale
+        App::setLocale($locale);
+
+        // Log for debugging
+        \Log::info("SetLocale middleware: Setting locale to {$locale}", [
+            'session_locale' => Session::get('locale'),
+            'cookie_locale' => $request->cookie('locale'),
+            'final_locale' => $locale,
+            'app_locale' => App::getLocale(),
+            'url' => $request->url()
+        ]);
 
         return $next($request);
     }

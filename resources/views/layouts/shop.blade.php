@@ -98,6 +98,45 @@
     }
 
     .product-link:hover {
+      color: #28a745;
+    }
+
+    /* Language Toggle Styles */
+    .navbar .dropdown-menu {
+      border: none;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .navbar .dropdown-item {
+      padding: 12px 20px;
+      transition: all 0.2s ease;
+      color: #333;
+    }
+
+    .navbar .dropdown-item:hover {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      transform: translateX(5px);
+    }
+
+    .navbar .dropdown-item i {
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Mobile Responsiveness for Language Toggle */
+    @media (max-width: 768px) {
+      .navbar .dropdown-menu {
+        min-width: 180px;
+      }
+
+      .navbar .dropdown {
+        margin-bottom: 1rem;
+      }
+    }
       text-decoration: none;
       color: inherit;
     }
@@ -274,27 +313,42 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav me-auto">
             <li class="nav-item">
-              <a class="nav-link {{ request()->is('/') ? 'active' : '' }}" href="/">Home</a>
+              <a class="nav-link {{ request()->is('/') ? 'active' : '' }}" href="/">{{ __('common.home') }}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link {{ request()->is('categories*') ? 'active' : '' }}" href="/categories">Categories</a>
+              <a class="nav-link {{ request()->is('categories*') ? 'active' : '' }}" href="/categories">{{ __('common.categories') }}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link {{ request()->is('shop*') ? 'active' : '' }}" href="/shop">Shop</a>
+              <a class="nav-link {{ request()->is('shop*') ? 'active' : '' }}" href="/shop">{{ __('common.shop') }}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link {{ request()->is('forums*') ? 'active' : '' }}" href="/forums">Forums</a>
+              <a class="nav-link {{ request()->is('forums*') ? 'active' : '' }}" href="/forums">{{ __('common.forums') }}</a>
             </li>
           </ul>
-          <div class="d-flex">
+          <div class="d-flex align-items-center">
+            <!-- Language Toggle -->
+            <div class="dropdown me-3">
+              <button class="btn btn-outline-light dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-globe me-2"></i>{{ app()->getLocale() == 'en' ? __('common.english') : __('common.hiligaynon') }}
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                <li><a class="dropdown-item" href="{{ route('language.switch', 'en') }}">
+                  <i class="fas fa-flag me-2"></i>{{ __('common.english') }}
+                </a></li>
+                <li><a class="dropdown-item" href="{{ route('language.switch', 'hil') }}">
+                  <i class="fas fa-flag me-2"></i>{{ __('common.hiligaynon') }}
+                </a></li>
+              </ul>
+            </div>
+
             <a href="/cart" class="btn btn-outline-light me-2">
               <i class="fas fa-shopping-cart"></i>
               <span class="badge bg-danger ms-1">{{ count(session('cart', [])) }}</span>
             </a>
             @auth
-                <a href="/dashboard" class="btn btn-light text-success">My Account</a>
+                <a href="/dashboard" class="btn btn-light text-success">{{ __('common.my_account') }}</a>
             @else
-                <a href="/login" class="btn btn-light text-success">Login</a>
+                <a href="/login" class="btn btn-light text-success">{{ __('common.login') }}</a>
             @endauth
           </div>
         </div>

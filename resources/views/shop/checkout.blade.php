@@ -18,13 +18,13 @@
 
 <header class="bg-light py-5">
     <div class="container text-center">
-        <h1 class="display-4 fw-bold text-success">Checkout</h1>
-        <p class="lead">Complete your purchase</p>
+        <h1 class="display-4 fw-bold text-success">{{ __('shop.checkout') }}</h1>
+        <p class="lead">{{ __('shop.complete_purchase') }}</p>
     </div>
 </header>
 
 <div class="container py-5">
-    <h1 class="mb-4">Checkout</h1>
+    <h1 class="mb-4">{{ __('shop.checkout') }}</h1>
 
     @if(session('error'))
         <div class="alert alert-danger">
@@ -37,14 +37,14 @@
             <!-- Shipping Information -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <h5 class="card-title mb-4">Shipping Information</h5>
+                    <h5 class="card-title mb-4">{{ __('shop.shipping_information') }}</h5>
                     <form action="{{ route('checkout.process') }}" method="POST">
                         @csrf
 
                         <!-- Personal Information -->
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="first_name" class="form-label">First Name</label>
+                                <label for="first_name" class="form-label">{{ __('shop.first_name') }}</label>
                                 <input type="text"
                                        class="form-control @error('first_name') is-invalid @enderror"
                                        id="first_name"
@@ -56,7 +56,7 @@
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="last_name" class="form-label">Last Name</label>
+                                <label for="last_name" class="form-label">{{ __('shop.last_name') }}</label>
                                 <input type="text"
                                        class="form-control @error('last_name') is-invalid @enderror"
                                        id="last_name"
@@ -71,7 +71,7 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="email" class="form-label">Email</label>
+                                <label for="email" class="form-label">{{ __('shop.email') }}</label>
                                 <input type="email"
                                        class="form-control @error('email') is-invalid @enderror"
                                        id="email"
@@ -83,7 +83,7 @@
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="phone" class="form-label">Phone Number</label>
+                                <label for="phone" class="form-label">{{ __('shop.phone') }}</label>
                                 <input type="text"
                                        class="form-control @error('phone') is-invalid @enderror"
                                        id="phone"

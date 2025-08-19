@@ -1,0 +1,40 @@
+<?php
+
+return [
+    // Language names
+    'english' => 'English',
+    'hiligaynon' => 'Hiligaynon',
+
+    // Common UI elements
+    'language' => 'Lengwahe',
+    'home' => 'Home',
+    'categories' => 'Mga Kategorya',
+    'shop' => 'Shop',
+    'forums' => 'Mga Forum',
+    'cart' => 'Cart',
+    'my_account' => 'Akon Account',
+    'login' => 'Login',
+    'logout' => 'Logout',
+    'register' => 'Register',
+    'profile' => 'Profile',
+    'dashboard' => 'Dashboard',
+    'search' => 'Mangita',
+    'submit' => 'I-submit',
+    'cancel' => 'I-cancel',
+    'save' => 'I-save',
+    'edit' => 'I-edit',
+    'delete' => 'I-delete',
+    'view' => 'Tan-awon',
+    'add' => 'I-add',
+    'update' => 'I-update',
+    'back' => 'Balik',
+    'next' => 'Sunod',
+    'previous' => 'Una',
+    'close' => 'I-close',
+    'loading' => 'Gin-load...',
+    'no_results' => 'Wala sang results',
+    'error' => 'Error',
+    'success' => 'Success',
+    'warning' => 'Warning',
+    'info' => 'Information',
+];

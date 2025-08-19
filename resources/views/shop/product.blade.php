@@ -22,9 +22,9 @@
             <!-- Vendor Info -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <h5 class="card-title">Vendor Information</h5>
-                    <p class="mb-1"><strong>Farm:</strong> {{ $productData['vendor'] }}</p>
-                    <p class="mb-1"><strong>Location:</strong> {{ $productData['location'] }}</p>
+                    <h5 class="card-title">{{ __('shop.vendor_information') }}</h5>
+                    <p class="mb-1"><strong>{{ __('shop.farm') }}:</strong> {{ $productData['vendor'] }}</p>
+                    <p class="mb-1"><strong>{{ __('shop.location') }}:</strong> {{ $productData['location'] }}</p>
                 </div>
             </div>
 
@@ -42,7 +42,7 @@
                     </div>
                     <div class="col">
                         <button type="submit" class="btn btn-success btn-lg" {{ $productData['stock'] <= 0 ? 'disabled' : '' }}>
-                            <i class="fas fa-cart-plus me-2"></i>{{ $productData['stock'] <= 0 ? 'Out of Stock' : 'Add to Cart' }}
+                            <i class="fas fa-cart-plus me-2"></i>{{ $productData['stock'] <= 0 ? __('shop.out_of_stock') : __('shop.add_to_cart') }}
                         </button>
                     </div>
                 </div>
@@ -51,12 +51,12 @@
             <!-- Additional Info -->
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Product Details</h5>
+                    <h5 class="card-title">{{ __('shop.product_details') }}</h5>
                     <ul class="list-unstyled mb-0">
-                        <li><strong>Category:</strong> {{ $productData['category'] }}</li>
-                        <li><strong>Stock:</strong> {{ $productData['stock'] }} {{ $productData['unit'] }}s available</li>
-                        <li><strong>Harvest Date:</strong> {{ $productData['harvest_date'] }}</li>
-                        <li><strong>Storage:</strong> {{ $productData['storage'] }}</li>
+                        <li><strong>{{ __('shop.category') }}:</strong> {{ $productData['category'] }}</li>
+                        <li><strong>{{ __('shop.stock') }}:</strong> {{ $productData['stock'] }} {{ $productData['unit'] }}s {{ __('shop.available') }}</li>
+                        <li><strong>{{ __('shop.harvest_date') }}:</strong> {{ $productData['harvest_date'] }}</li>
+                        <li><strong>{{ __('shop.storage') }}:</strong> {{ $productData['storage'] }}</li>
                     </ul>
                 </div>
             </div>
@@ -66,7 +66,7 @@
     <!-- Related Products -->
     @if($relatedProducts->count() > 0)
     <div class="mt-5">
-        <h3 class="mb-4">Related Products</h3>
+        <h3 class="mb-4">{{ __('shop.related_products') }}</h3>
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
             @foreach($relatedProducts as $relatedProduct)
             <div class="col">

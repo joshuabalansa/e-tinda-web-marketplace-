@@ -16,6 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'farmer' => \App\Http\Middleware\FarmerMiddleware::class,
             'buyer' => \App\Http\Middleware\BuyerMiddleware::class,
         ]);
+
+        // Ensure locale is set for every web request
+        $middleware->appendToGroup('web', \App\Http\Middleware\SetLocale::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
