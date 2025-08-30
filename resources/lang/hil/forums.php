@@ -127,4 +127,9 @@ return [
     'new_reply_notification' => 'Bag-o nga reply sa imo topic',
     'topic_mentioned_notification' => 'Na-mention ka sa isa ka topic',
     'helpful_vote_notification' => 'May nakakita sang imo reply nga helpful',
+    'video_replace_warning' => 'Ang pag-upload sang bag-o nga video i-replace ang current nga video.',
+    'has_video' => 'May video attachment',
+    'video_load_error' => 'Indi ma-load ang video. Ang file pwede nga wala ukon corrupted.',
+    'no_video_attached' => 'Wala sang video nga na-attach sa sini nga topic.',
+    'no_video_attached_reply' => 'Wala sang video nga na-attach sa sini nga reply.',
 ];

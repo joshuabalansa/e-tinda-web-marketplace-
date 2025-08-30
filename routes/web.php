@@ -14,6 +14,8 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\FarmerOrderController;
+use App\Http\Controllers\BuyerOrderController;
+use App\Http\Controllers\BuyerWishlistController;
 
 // Language switching route
 Route::get('language/{locale}', function ($locale) {
@@ -74,6 +76,10 @@ Route::put('forums/topic/{id}', [ForumsController::class, 'update'])->name('foru
 Route::delete('forums/topic/{id}', [ForumsController::class, 'destroy'])->name('forums.destroy')->middleware('auth');
 Route::post('forums/topic/{id}/reply', [ForumsController::class, 'storeReply'])->name('forums.reply')->middleware('auth');
 Route::post('forums/reply/{id}/helpful', [ForumsController::class, 'markHelpful'])->name('forums.helpful')->middleware('auth');
+Route::delete('forums/reply/{id}', [ForumsController::class, 'deleteReply'])->name('forums.reply.delete')->middleware('auth');
+
+// Test route for video functionality (remove in production)
+Route::get('forums/test-video', [ForumsController::class, 'testVideo'])->name('forums.test-video');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -98,6 +104,15 @@ Route::middleware(['auth', 'farmer'])->group(function () {
 //buyer Dashboard Route
 Route::middleware(['auth', 'buyer'])->group(function () {
     Route::get('/buyer/dashboard', [BuyerDashboardController::class, 'index'])->name('buyer.dashboard');
+
+    // Buyer Orders Routes
+    Route::get('/buyer/orders', [BuyerOrderController::class, 'index'])->name('buyer.orders');
+    Route::get('/buyer/orders/{order}', [BuyerOrderController::class, 'show'])->name('buyer.orders.show');
+
+    // Buyer Wishlist Routes
+    Route::get('/buyer/wishlist', [BuyerWishlistController::class, 'index'])->name('buyer.wishlist');
+    Route::post('/buyer/wishlist/add', [BuyerWishlistController::class, 'add'])->name('buyer.wishlist.add');
+    Route::delete('/buyer/wishlist/remove/{id}', [BuyerWishlistController::class, 'remove'])->name('buyer.wishlist.remove');
 });
 
 // Cart Routes

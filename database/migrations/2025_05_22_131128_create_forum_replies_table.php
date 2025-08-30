@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('forum_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->text('content');
+            $table->string('video_path')->nullable();
+            $table->string('video_original_name')->nullable();
             $table->integer('helpful_votes')->default(0);
             $table->timestamps();
         });

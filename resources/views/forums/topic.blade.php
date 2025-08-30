@@ -56,9 +56,39 @@
                             <span class="badge bg-success">{{ $forum->category }}</span>
                         </div>
                     </div>
-                    <div class="topic-content">
+                    <div class="topic-content mb-3">
                         {!! nl2br(e($forum->content)) !!}
                     </div>
+
+                    <!-- Topic Video Display -->
+                    @if($forum->hasVideo())
+                    <div class="topic-video mb-3">
+                        <h6 class="text-muted mb-2">{{ __('forums.video_attachment') }}:</h6>
+                        <div class="video-container position-relative">
+                            <video controls class="w-100" style="max-height: 400px;" preload="metadata"
+                                   onerror="handleVideoError(this)" onloadstart="handleVideoLoadStart(this)" oncanplay="handleVideoCanPlay(this)">
+                                <source src="{{ $forum->video_url }}" type="{{ $forum->video_mime_type }}">
+                                {{ __('forums.video_not_supported') }}
+                            </video>
+                            <div class="video-loading position-absolute top-50 start-50 translate-middle" style="display: none;">
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="visually-hidden">{{ __('forums.loading') }}</span>
+                                </div>
+                            </div>
+                            <div class="video-error alert alert-warning" style="display: none;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                {{ __('forums.video_load_error') }}
+                            </div>
+                        </div>
+                    </div>
+                    @else
+                    <div class="mb-3">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <small>{{ __('forums.no_video_attached') }}</small>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
 
@@ -75,14 +105,47 @@
                             <small class="text-muted">{{ __('forums.posted') }} {{ $reply->created_at->diffForHumans() }}</small>
                         </div>
                     </div>
-                    <p>{!! nl2br(e($reply->content)) !!}</p>
+                    <div class="reply-content mb-3">
+                        <p>{!! nl2br(e($reply->content)) !!}</p>
+                    </div>
+
+                    <!-- Reply Video Display -->
+                    @if($reply->hasVideo())
+                    <div class="reply-video mb-3">
+                        <h6 class="text-muted mb-2">{{ __('forums.video_attachment') }}:</h6>
+                        <div class="video-container position-relative">
+                            <video controls class="w-100" style="max-height: 300px;" preload="metadata"
+                                   onerror="handleVideoError(this)" onloadstart="handleVideoLoadStart(this)" oncanplay="handleVideoCanPlay(this)">
+                                <source src="{{ $reply->video_url }}" type="{{ $reply->video_mime_type }}">
+                                {{ __('forums.video_not_supported') }}
+                            </video>
+                            <div class="video-loading position-absolute top-50 start-50 translate-middle" style="display: none;">
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="visually-hidden">{{ __('forums.loading') }}</span>
+                                </div>
+                            </div>
+                            <div class="video-error alert alert-warning" style="display: none;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                {{ __('forums.video_load_error') }}
+                            </div>
+                        </div>
+                    </div>
+                    @else
+                    <div class="mb-3">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <small>{{ __('forums.no_video_attached_reply') }}</small>
+                        </div>
+                    </div>
+                    @endif
+
                     <div class="d-flex justify-content-end">
                         @auth
                         <form action="{{ route('forums.helpful', $reply->id) }}" method="POST" class="me-2">
                             @csrf
-                                                    <button type="submit" class="btn btn-sm btn-outline-success">
-                            <i class="fas fa-thumbs-up"></i> {{ __('forums.helpful') }} ({{ $reply->helpful_votes }})
-                        </button>
+                            <button type="submit" class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-thumbs-up"></i> {{ __('forums.helpful') }} ({{ $reply->helpful_votes }})
+                            </button>
                         </form>
                         @else
                         <button class="btn btn-sm btn-outline-secondary me-2" disabled>
@@ -90,6 +153,15 @@
                         </button>
                         @endauth
                         @auth
+                            @if(Auth::id() === $reply->user_id)
+                            <form action="{{ route('forums.reply.delete', $reply->id) }}" method="POST" class="me-2 d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('{{ __('forums.delete_reply_confirmation') }}')">
+                                    {{ __('forums.delete') }}
+                                </button>
+                            </form>
+                            @endif
                         <button class="btn btn-sm btn-outline-secondary reply-button" data-reply-to="{{ $reply->user->name }}">{{ __('forums.reply') }}</button>
                         @else
                         <a href="{{ route('login') }}" class="btn btn-sm btn-outline-secondary">{{ __('forums.login_to_reply') }}</a>
@@ -112,7 +184,7 @@
                     <h4 class="h5 mb-0">{{ __('forums.post_reply') }}</h4>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('forums.reply', $forum->id) }}" method="POST">
+                    <form action="{{ route('forums.reply', $forum->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-3">
                             <textarea class="form-control @error('content') is-invalid @enderror" name="content" rows="4" placeholder="{{ __('forums.write_reply_placeholder') }}" required></textarea>
@@ -120,6 +192,25 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+
+                        <!-- Video Upload for Reply -->
+                        <div class="mb-3">
+                            <label for="reply-video" class="form-label">{{ __('forums.video_attachment') }}</label>
+                            <input type="file" class="form-control @error('video') is-invalid @enderror" id="reply-video" name="video" accept="video/*" data-max-size="52428800">
+                            <div class="form-text">{{ __('forums.video_help_text') }} (Max: 50MB)</div>
+                            @error('video')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3" id="reply-video-preview" style="display: none;">
+                            <label class="form-label">{{ __('forums.video_preview') }}</label>
+                            <video id="preview-reply-video" controls class="w-100" style="max-height: 300px;">
+                                <source id="reply-video-source" src="" type="video/mp4">
+                                {{ __('forums.video_not_supported') }}
+                            </video>
+                        </div>
+
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success">{{ __('forums.post_reply_btn') }}</button>
                         </div>
@@ -191,7 +282,82 @@
                 replyTextarea.focus();
             });
         });
+
+        // Video preview for reply form
+        const replyVideoInput = document.getElementById('reply-video');
+        const replyVideoPreview = document.getElementById('reply-video-preview');
+        const previewReplyVideo = document.getElementById('preview-reply-video');
+        const replyVideoSource = document.getElementById('reply-video-source');
+
+        replyVideoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+
+            if (file) {
+                // Check file size (50MB = 52428800 bytes)
+                const maxSize = parseInt(replyVideoInput.dataset.maxSize);
+
+                if (file.size > maxSize) {
+                    alert('File size must be less than 50MB. Current size: ' + (file.size / (1024 * 1024)).toFixed(2) + 'MB');
+                    replyVideoInput.value = '';
+                    replyVideoPreview.style.display = 'none';
+                    return;
+                }
+
+                if (file.type.startsWith('video/')) {
+                    const url = URL.createObjectURL(file);
+                    replyVideoSource.src = url;
+                    replyVideoSource.type = file.type; // Set proper MIME type
+                    previewReplyVideo.load();
+                    replyVideoPreview.style.display = 'block';
+                } else {
+                    alert('{{ __("forums.please_select_video") }}');
+                    replyVideoInput.value = '';
+                    replyVideoPreview.style.display = 'none';
+                }
+            } else {
+                replyVideoPreview.style.display = 'none';
+            }
+        });
+
+        // Form submission handler for reply form
+        const replyForm = document.querySelector('form[action*="reply"]');
+        if (replyForm) {
+            replyForm.addEventListener('submit', function(e) {
+                const replyVideoFile = replyVideoInput.files[0];
+                if (replyVideoFile) {
+                    // Form submission with video
+                } else {
+                    // Form submission without video
+                }
+            });
+        }
     });
+
+    // Global video handling functions
+    function handleVideoError(videoElement) {
+        const container = videoElement.closest('.video-container');
+        const loading = container.querySelector('.video-loading');
+        const error = container.querySelector('.video-error');
+
+        if (loading) loading.style.display = 'none';
+        if (error) error.style.display = 'block';
+    }
+
+    function handleVideoLoadStart(videoElement) {
+        const container = videoElement.closest('.video-container');
+        const loading = container.querySelector('.video-loading');
+        const error = container.querySelector('.video-error');
+
+        if (loading) loading.style.display = 'block';
+        if (error) error.style.display = 'none';
+    }
+
+    function handleVideoCanPlay(videoElement) {
+        const container = videoElement.closest('.video-container');
+        const loading = container.querySelector('.video-loading');
+
+        if (loading) loading.style.display = 'none';
+    }
 </script>
 @endpush
 @endsection

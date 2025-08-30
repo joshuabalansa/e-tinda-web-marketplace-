@@ -62,7 +62,14 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-md-9">
-                            <h5><a href="{{ route('forums.topic', $forum->id) }}" class="text-decoration-none text-dark">{{ $forum->title }}</a></h5>
+                            <h5>
+                                <a href="{{ route('forums.topic', $forum->id) }}" class="text-decoration-none text-dark">
+                                    {{ $forum->title }}
+                                    @if($forum->hasVideo())
+                                        <i class="fas fa-video text-success ms-2" title="{{ __('forums.has_video') }}"></i>
+                                    @endif
+                                </a>
+                            </h5>
                             <div class="text-muted small">
                                 <span class="fw-bold">{{ __('forums.category') }}:</span> {{ $forum->category }}
                                 <span class="mx-2">|</span>

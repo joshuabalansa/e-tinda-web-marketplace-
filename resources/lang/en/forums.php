@@ -26,6 +26,20 @@ return [
     'update_topic' => 'Update Topic',
     'delete' => 'Delete',
     'delete_confirmation' => 'Are you sure you want to delete this topic?',
+    'delete_reply_confirmation' => 'Are you sure you want to delete this reply?',
+
+    // Video Upload
+    'video_attachment' => 'Video Attachment (Optional)',
+    'video_help_text' => 'Supported formats: MP4, AVI, MOV, WMV. Max size: 50MB.',
+    'video_preview' => 'Video Preview',
+    'video_not_supported' => 'Your browser does not support the video tag.',
+    'please_select_video' => 'Please select a valid video file.',
+    'current_video' => 'Current Video',
+    'video_replace_warning' => 'Uploading a new video will replace the current one.',
+    'has_video' => 'Has video attachment',
+    'video_load_error' => 'Unable to load video. The file may be missing or corrupted.',
+    'no_video_attached' => 'No video attached to this topic.',
+    'no_video_attached_reply' => 'No video attached to this reply.',
 
     // Forum Categories
     'crop_farming' => 'Crop Farming',
@@ -36,6 +50,7 @@ return [
 
     // Forum Topic Page
     'forums' => 'Forums',
+    'breadcrumb_forums' => 'Forums',
     'posted' => 'Posted',
     'edit' => 'Edit',
     'replies_count' => 'Replies',
@@ -87,7 +102,6 @@ return [
     'years_ago' => 'years ago',
 
     // Navigation
-    'breadcrumb_forums' => 'Forums',
     'breadcrumb_category' => 'Category',
     'breadcrumb_topic' => 'Topic',
 

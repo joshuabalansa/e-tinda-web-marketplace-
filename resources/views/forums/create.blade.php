@@ -9,8 +9,33 @@
                     <h2 class="h4 mb-0">{{ __('forums.create_new_topic') }}</h2>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('forums.store') }}" method="POST">
+                    <form action="{{ route('forums.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
+
+                        @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        @endif
+
+                        @if(session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ session('error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        @endif
+
+                        @if($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <ul class="mb-0">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        @endif
 
                         <div class="mb-3">
                             <label for="title" class="form-label">{{ __('forums.title') }}</label>
@@ -43,6 +68,24 @@
                             @enderror
                         </div>
 
+                        <div class="mb-3">
+                            <label for="video" class="form-label">{{ __('forums.video_attachment') }}</label>
+                            <input type="file" class="form-control @error('video') is-invalid @enderror" id="video" name="video" accept="video/*" data-max-size="52428800">
+                            <div class="form-text">{{ __('forums.video_help_text') }} (Max: 50MB)</div>
+                            <div class="form-text text-info">Supported formats: MP4, AVI, MOV, WMV, FLV, WebM, MKV</div>
+                            @error('video')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3" id="video-preview" style="display: none;">
+                            <label class="form-label">{{ __('forums.video_preview') }}</label>
+                            <video id="preview-video" controls class="w-100" style="max-height: 300px;" preload="metadata">
+                                <source id="video-source" src="" type="">
+                                {{ __('forums.video_not_supported') }}
+                            </video>
+                        </div>
+
                         <div class="d-flex justify-content-between">
                             <a href="{{ route('forums.index') }}" class="btn btn-outline-secondary">{{ __('forums.cancel') }}</a>
                             <button type="submit" class="btn btn-success">{{ __('forums.create_topic_btn') }}</button>
@@ -53,4 +96,45 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const videoInput = document.getElementById('video');
+    const videoPreview = document.getElementById('video-preview');
+    const previewVideo = document.getElementById('preview-video');
+    const videoSource = document.getElementById('video-source');
+
+    videoInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+
+        if (file) {
+            // Check file size (50MB = 52428800 bytes)
+            const maxSize = parseInt(videoInput.dataset.maxSize);
+
+            if (file.size > maxSize) {
+                alert('File size must be less than 50MB. Current size: ' + (file.size / (1024 * 1024)).toFixed(2) + 'MB');
+                videoInput.value = '';
+                videoPreview.style.display = 'none';
+                return;
+            }
+
+            if (file.type.startsWith('video/')) {
+                const url = URL.createObjectURL(file);
+                videoSource.src = url;
+                videoSource.type = file.type; // Set proper MIME type
+                previewVideo.load();
+                videoPreview.style.display = 'block';
+            } else {
+                alert('{{ __("forums.please_select_video") }}');
+                videoInput.value = '';
+                videoPreview.style.display = 'none';
+            }
+        } else {
+            videoPreview.style.display = 'none';
+        }
+    });
+});
+</script>
+@endpush
 @endsection

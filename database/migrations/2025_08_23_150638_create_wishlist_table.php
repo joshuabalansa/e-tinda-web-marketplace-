@@ -11,16 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('forums', function (Blueprint $table) {
+        Schema::create('wishlists', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('title');
-            $table->text('content');
-            $table->string('category');
-            $table->string('video_path')->nullable();
-            $table->string('video_original_name')->nullable();
-            $table->integer('views')->default(0);
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->timestamps();
+
+            // Ensure a user can only add a product to wishlist once
+            $table->unique(['user_id', 'product_id']);
         });
     }
 
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('forums');
+        Schema::dropIfExists('wishlists');
     }
 };
