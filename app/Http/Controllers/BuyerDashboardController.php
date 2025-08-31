@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 class BuyerDashboardController extends Controller
 {
@@ -11,8 +12,21 @@ class BuyerDashboardController extends Controller
      */
     public function index()
     {
+        $user = auth()->user();
 
-        return view('buyer.index');
+        // Get the authenticated user's orders
+        $orders = $user->orders()->with(['items.product'])->latest()->get();
+
+        // Get wishlist items count
+        $wishlistItems = $user->wishlist()->count();
+
+        // Get cart items count from session
+        $cartItems = count(Session::get('cart', []));
+
+        // Get reviews count
+        $reviews = $user->reviews()->count();
+
+        return view('buyer.index', compact('orders', 'wishlistItems', 'cartItems', 'reviews'));
     }
 
     /**

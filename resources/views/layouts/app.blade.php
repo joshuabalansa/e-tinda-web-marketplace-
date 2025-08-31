@@ -144,7 +144,24 @@
               <span class="badge bg-danger ms-1">3</span>
             </a>
             @auth
-                <a href="/login" class="btn btn-light text-success">My Account</a>
+                <div class="dropdown">
+                  <button class="btn btn-light text-success dropdown-toggle" type="button" id="accountDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    My Account
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
+                    <li><a class="dropdown-item" href="/buyer/orders"><i class="fas fa-shopping-bag me-2"></i>My Orders</a></li>
+                    <li><a class="dropdown-item" href="/buyer/wishlist"><i class="fas fa-heart me-2"></i>Wishlist</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                      <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                        @csrf
+                        <button type="submit" class="dropdown-item text-danger">
+                          <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </button>
+                      </form>
+                    </li>
+                  </ul>
+                </div>
             @else
                 <a href="/login" class="btn btn-light text-success">Login</a>
             @endauth

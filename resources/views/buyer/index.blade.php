@@ -1,251 +1,305 @@
-@extends('layouts.dashboard')
+@extends('layouts.app')
 @section('content')
 
-<div class="main-content">
-    <div class="row">
-        <!-- Profile Info and Notifications -->
-        <div class="col-md-6 col-sm-8 clearfix">
-            <ul class="user-info pull-left pull-none-xsm">
-                <!-- Profile Info -->
-                <li class="profile-info dropdown">
-                    <h3>
-                        Welcome, {{ ucwords(Auth::user()->name) }}
-                    </h3>
-                    <ul class="dropdown-menu">
-                        <!-- Reverse Caret -->
-                        <li class="caret"></li>
-                        <!-- Profile sub-links -->
-                        <li>
-                            <a href="{{ route('profile.edit') }}">
-                                <i class="entypo-user"></i>
-                                Edit Profile
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('buyer.orders') }}">
-                                <i class="entypo-basket"></i>
-                                My Orders
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('buyer.wishlist') }}">
-                                <i class="entypo-heart"></i>
-                                Wishlist
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Raw Links -->
-        <div class="col-md-6 col-sm-4 clearfix hidden-xs">
-            <ul class="list-inline links-list pull-right">
-                <li class="sep"></li>
-                <li>
-                    <form method="POST" action="{{ route('logout') }}" class="m-0"
-                        onsubmit="return confirm('Are you sure you want to log out?');">
-                        @csrf
-                        <button type="submit" class="btn btn-danger btn-sm"
-                            style="background-color: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-size: 13px; transition: all 0.3s ease;">
-                            {{ __('Log Out') }} <i class="entypo-logout right"></i>
-                        </button>
-                    </form>
-                </li>
-            </ul>
-        </div>
-    </div>
-
-    <hr />
-
-    <!-- Buyer Dashboard Stats -->
-    <div class="row">
-        <div class="col-sm-3 col-xs-6">
-            <div class="tile-stats tile-red">
-                <div class="icon"><i class="entypo-basket"></i></div>
-                <div class="num" data-start="0" data-end="{{ Auth::user()->orders()->count() }}" data-postfix="" data-duration="1500" data-delay="0">0</div>
-                <h3>Total Orders</h3>
-                <p>Your purchase history</p>
-            </div>
-        </div>
-
-        <div class="col-sm-3 col-xs-6">
-            <div class="tile-stats tile-green">
-                <div class="icon"><i class="entypo-heart"></i></div>
-                <div class="num" data-start="0" data-end="{{ Auth::user()->wishlist()->count() ?? 0 }}" data-postfix="" data-duration="1500" data-delay="600">0</div>
-                <h3>Wishlist Items</h3>
-                <p>Saved for later</p>
-            </div>
-        </div>
-
-        <div class="clear visible-xs"></div>
-
-        <div class="col-sm-3 col-xs-6">
-            <div class="tile-stats tile-aqua">
-                <div class="icon"><i class="entypo-star"></i></div>
-                <div class="num" data-start="0" data-end="{{ Auth::user()->reviews()->count() ?? 0 }}" data-postfix="" data-duration="1500" data-delay="1200">0</div>
-                <h3>Reviews Given</h3>
-                <p>Your feedback count</p>
-            </div>
-        </div>
-
-        <div class="col-sm-3 col-xs-6">
-            <div class="tile-stats tile-blue">
-                <div class="icon"><i class="entypo-users"></i></div>
-                <div class="num" data-start="0" data-end="{{ \App\Models\User::where('role', 'farmer')->count() }}" data-postfix="" data-duration="1500" data-delay="1800">0</div>
-                <h3>Active Farmers</h3>
-                <p>Available sellers</p>
-            </div>
-        </div>
-    </div>
-
-    <br />
-
-    <!-- Quick Actions -->
-    <div class="row">
-        <div class="col-sm-8">
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <div class="panel-title">Quick Actions</div>
+<div class="main-content py-5">
+    <div class="container">
+        <!-- Welcome Header -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="text-center">
+                    <h1 class="section-title mb-3">Welcome, {{ ucwords(Auth::user()->name) }}!</h1>
+                    <p class="lead text-muted">Manage your shopping experience and track your orders</p>
                 </div>
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <a href="{{ route('shop.index') }}" class="btn btn-success btn-lg btn-block" style="margin-bottom: 15px;">
-                                <i class="entypo-shop"></i> Browse Products
-                            </a>
-                            <a href="{{ route('buyer.orders') }}" class="btn btn-info btn-lg btn-block" style="margin-bottom: 15px;">
-                                <i class="entypo-basket"></i> View Orders
-                            </a>
+            </div>
+        </div>
+
+        <!-- Dashboard Navigation Cards -->
+        <div class="row g-4 mb-5">
+            <!-- Orders Card -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 category-card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-shopping-bag fa-3x text-success"></i>
                         </div>
-                        <div class="col-sm-6">
-                            <a href="{{ route('buyer.wishlist') }}" class="btn btn-warning btn-lg btn-block" style="margin-bottom: 15px;">
-                                <i class="entypo-heart"></i> My Wishlist
-                            </a>
-                            <a href="{{ route('forums.index') }}" class="btn btn-primary btn-lg btn-block" style="margin-bottom: 15px;">
-                                <i class="entypo-chat"></i> Farmer Forums
-                            </a>
+                        <h5 class="card-title fw-bold">My Orders</h5>
+                        <p class="card-text text-muted">Track your current orders and view order history</p>
+                        <a href="{{ route('buyer.orders') }}" class="btn btn-success w-100">
+                            <i class="fas fa-arrow-right me-2"></i>View Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- Wishlist Card -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 category-card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-heart fa-3x text-danger"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">My Wishlist</h5>
+                        <p class="card-text text-muted">Save products you love for later purchase</p>
+                        <a href="{{ route('buyer.wishlist') }}" class="btn btn-danger w-100">
+                            <i class="fas fa-arrow-right me-2"></i>View Wishlist
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Card -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 category-card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-shopping-cart fa-3x text-warning"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">Shopping Cart</h5>
+                        <p class="card-text text-muted">Review items in your cart and proceed to checkout</p>
+                        <a href="{{ route('cart.index') }}" class="btn btn-warning w-100 text-dark">
+                            <i class="fas fa-arrow-right me-2"></i>View Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Section -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6 col-lg-3">
+                                <a href="/shop" class="btn btn-outline-success w-100">
+                                    <i class="fas fa-store me-2"></i>Continue Shopping
+                                </a>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <a href="/categories" class="btn btn-outline-success w-100">
+                                    <i class="fas fa-tags me-2"></i>Browse Categories
+                                </a>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <a href="/forums" class="btn btn-outline-success w-100">
+                                    <i class="fas fa-comments me-2"></i>Visit Forums
+                                </a>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <a href="/profile" class="btn btn-outline-success w-100">
+                                    <i class="fas fa-user-edit me-2"></i>Edit Profile
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-sm-4">
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <div class="panel-title">
-                        <h4>
-                            Recent Activity
-                            <br />
-                            <small>Your latest actions</small>
-                        </h4>
+        <!-- Shipping Status & Tracking Section -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-truck me-2"></i>Shipping Status & Tracking</h5>
+                    </div>
+                    <div class="card-body">
+                        @if(isset($orders) && $orders && $orders->count() > 0)
+                            <div class="list-group list-group-flush">
+                                @foreach($orders->take(4) as $order)
+                                    <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                                        <div>
+                                            @if($order->status === 'pending')
+                                                <i class="fas fa-clock text-warning me-2"></i>
+                                                <span class="fw-medium">Order #{{ $order->id }} - Pending</span>
+                                                <small class="text-muted d-block">
+                                                    @if($order->items->count() > 0)
+                                                        {{ $order->items->first()->product->name ?? 'Product' }}
+                                                        @if($order->items->count() > 1)
+                                                            +{{ $order->items->count() - 1 }} more items
+                                                        @endif
+                                                    @else
+                                                        Order items
+                                                    @endif
+                                                </small>
+                                                <div class="mt-2">
+                                                    <small class="text-warning">
+                                                        <i class="fas fa-hourglass-half me-1"></i>
+                                                        Order is being processed
+                                                    </small>
+                                                </div>
+                                            @elseif($order->status === 'processing')
+                                                <i class="fas fa-cog text-info me-2"></i>
+                                                <span class="fw-medium">Order #{{ $order->id }} - Processing</span>
+                                                <small class="text-muted d-block">
+                                                    @if($order->items->count() > 0)
+                                                        {{ $order->items->first()->product->name ?? 'Product' }}
+                                                        @if($order->items->count() > 1)
+                                                            +{{ $order->items->count() - 1 }} more items
+                                                        @endif
+                                                    @else
+                                                        Order items
+                                                    @endif
+                                                </small>
+                                                <div class="mt-2">
+                                                    <small class="text-info">
+                                                        <i class="fas fa-box me-1"></i>
+                                                        Order is being prepared for shipping
+                                                    </small>
+                                                </div>
+                                            @elseif($order->status === 'shipped')
+                                                <i class="fas fa-shipping-fast text-primary me-2"></i>
+                                                <span class="fw-medium">Order #{{ $order->id }} - Shipped</span>
+                                                <small class="text-muted d-block">
+                                                    @if($order->items->count() > 0)
+                                                        {{ $order->items->first()->product->name ?? 'Product' }}
+                                                        @if($order->items->count() > 1)
+                                                            +{{ $order->items->count() - 1 }} more items
+                                                        @endif
+                                                    @else
+                                                        Order items
+                                                    @endif
+                                                </small>
+                                                <div class="mt-2">
+                                                    <small class="text-primary">
+                                                        <i class="fas fa-route me-1"></i>
+                                                        Package is on its way
+                                                    </small>
+                                                </div>
+                                            @elseif($order->status === 'delivered')
+                                                <i class="fas fa-check-circle text-success me-2"></i>
+                                                <span class="fw-medium">Order #{{ $order->id }} - Delivered</span>
+                                                <small class="text-muted d-block">
+                                                    @if($order->items->count() > 0)
+                                                        {{ $order->items->first()->product->name ?? 'Product' }}
+                                                        @if($order->items->count() > 1)
+                                                            +{{ $order->items->count() - 1 }} more items
+                                                        @endif
+                                                    @else
+                                                        Order items
+                                                    @endif
+                                                </small>
+                                                <div class="mt-2">
+                                                    <small class="text-success">
+                                                        <i class="fas fa-home me-1"></i>
+                                                        Delivered on {{ $order->updated_at->format('M d, Y') }}
+                                                    </small>
+                                                </div>
+                                            @elseif($order->status === 'cancelled')
+                                                <i class="fas fa-times-circle text-danger me-2"></i>
+                                                <span class="fw-medium">Order #{{ $order->id }} - Cancelled</span>
+                                                <small class="text-muted d-block">
+                                                    @if($order->items->count() > 0)
+                                                        {{ $order->items->first()->product->name ?? 'Product' }}
+                                                        @if($order->items->count() > 1)
+                                                            +{{ $order->items->count() - 1 }} more items
+                                                        @endif
+                                                    @else
+                                                        Order items
+                                                    @endif
+                                                </small>
+                                                <div class="mt-2">
+                                                    <small class="text-danger">
+                                                        <i class="fas fa-ban me-1"></i>
+                                                        Order was cancelled
+                                                    </small>
+                                                </div>
+                                            @else
+                                                <i class="fas fa-question-circle text-secondary me-2"></i>
+                                                <span class="fw-medium">Order #{{ $order->id }} - {{ ucfirst($order->status) }}</span>
+                                                <small class="text-muted d-block">
+                                                    @if($order->items->count() > 0)
+                                                        {{ $order->items->first()->product->name ?? 'Product' }}
+                                                        @if($order->items->count() > 1)
+                                                            +{{ $order->items->count() - 1 }} more items
+                                                        @endif
+                                                    @else
+                                                        Order items
+                                                    @endif
+                                                </small>
+                                                <div class="mt-2">
+                                                    <small class="text-secondary">
+                                                        <i class="fas fa-info-circle me-1"></i>
+                                                        Status: {{ ucfirst($order->status) }}
+                                                    </small>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="d-flex flex-column align-items-end">
+                                            <span class="badge bg-{{ $order->status === 'delivered' ? 'success' : ($order->status === 'shipped' ? 'primary' : ($order->status === 'processing' ? 'info' : ($order->status === 'pending' ? 'warning' : ($order->status === 'cancelled' ? 'danger' : 'secondary')))) }} mb-2">
+                                                {{ ucfirst($order->status) }}
+                                            </span>
+                                            <a href="{{ route('buyer.orders.show', $order->id) }}" class="btn btn-outline-success btn-sm">
+                                                <i class="fas fa-eye me-1"></i> View Order
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center py-4">
+                                <i class="fas fa-truck text-muted mb-3" style="font-size: 3rem;"></i>
+                                <h6 class="text-muted">
+                                    @if(isset($orders))
+                                        No Orders Yet
+                                    @else
+                                        Loading Orders...
+                                    @endif
+                                </h6>
+                                <p class="text-muted small">
+                                    @if(isset($orders))
+                                        Start shopping to see your order tracking here
+                                    @else
+                                        Please wait while we load your order information
+                                    @endif
+                                </p>
+                                @if(isset($orders))
+                                    <a href="{{ route('shop.index') }}" class="btn btn-outline-success btn-sm">
+                                        <i class="fas fa-shopping-cart me-1"></i> Start Shopping
+                                    </a>
+                                @endif
+                            </div>
+                        @endif
                     </div>
                 </div>
-                <div class="panel-body">
-                    <div class="list-group">
-                        <a href="#" class="list-group-item">
-                            <i class="entypo-basket text-success"></i> Order #1234 placed
-                            <small class="text-muted pull-right">2 hours ago</small>
-                        </a>
-                        <a href="#" class="list-group-item">
-                            <i class="entypo-heart text-danger"></i> Added tomatoes to wishlist
-                            <small class="text-muted pull-right">1 day ago</small>
-                        </a>
-                        <a href="#" class="list-group-item">
-                            <i class="entypo-star text-warning"></i> Reviewed organic rice
-                            <small class="text-muted pull-right">3 days ago</small>
-                        </a>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Quick Stats</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <div class="border-end">
+                                    <h4 class="text-success fw-bold">{{ isset($orders) ? $orders->count() : 0 }}</h4>
+                                    <small class="text-muted">Total Orders</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <h4 class="text-info fw-bold">{{ isset($wishlistItems) ? $wishlistItems : 0 }}</h4>
+                                <small class="text-muted">Wishlist Items</small>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-warning fw-bold">{{ isset($cartItems) ? $cartItems : 0 }}</h4>
+                                <small class="text-muted">Cart Items</small>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-danger fw-bold">{{ isset($reviews) ? $reviews : 0 }}</h4>
+                                <small class="text-muted">Reviews Given</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <br />
-
-    <!-- Recent Orders and Popular Products -->
-    <div class="row">
-        <div class="col-sm-8">
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <div class="panel-title">Recent Orders</div>
-                    <div class="panel-options">
-                        <a href="{{ route('buyer.orders') }}" class="btn btn-sm btn-default">View All</a>
-                    </div>
-                </div>
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>Product</th>
-                                    <th>Farmer</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse(Auth::user()->orders()->latest()->take(5)->get() as $order)
-                                <tr>
-                                    <td>#{{ $order->id }}</td>
-                                    <td>{{ $order->items->first()->product->name ?? 'N/A' }}</td>
-                                    <td>{{ $order->items->first()->product->user->name ?? 'N/A' }}</td>
-                                    <td>
-                                        <span class="label label-{{ $order->status === 'completed' ? 'success' : ($order->status === 'pending' ? 'warning' : 'info') }}">
-                                            {{ ucfirst($order->status) }}
-                                        </span>
-                                    </td>
-                                    <td>{{ $order->created_at->format('M d, Y') }}</td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="5" class="text-center">No orders yet. <a href="{{ route('shop.index') }}">Start shopping!</a></td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-sm-4">
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <div class="panel-title">Popular Categories</div>
-                </div>
-                <div class="panel-body">
-                    <div class="list-group">
-                        <a href="{{ route('shop.index') }}?category=Crop+Farming" class="list-group-item">
-                            <i class="entypo-leaf text-success"></i> Crop Farming
-                            <span class="badge pull-right">{{ \App\Models\Product::where('category', 'Crop Farming')->count() }}</span>
-                        </a>
-                        <a href="{{ route('shop.index') }}?category=Livestock" class="list-group-item">
-                            <i class="entypo-users text-info"></i> Livestock
-                            <span class="badge pull-right">{{ \App\Models\Product::where('category', 'Livestock')->count() }}</span>
-                        </a>
-                        <a href="{{ route('shop.index') }}?category=Organic+Farming" class="list-group-item">
-                            <i class="entypo-star text-warning"></i> Organic Farming
-                            <span class="badge pull-right">{{ \App\Models\Product::where('category', 'Organic Farming')->count() }}</span>
-                        </a>
-                        <a href="{{ route('shop.index') }}?category=Market+Prices" class="list-group-item">
-                            <i class="entypo-chart-line text-primary"></i> Market Prices
-                            <span class="badge pull-right">{{ \App\Models\Product::where('category', 'Market Prices')->count() }}</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <br />
-
-    <!-- Footer -->
-    <footer class="main">
-        &copy; {{ date('Y') }} <strong>E-Tinda Marketplace</strong> - Buyer Dashboard
-    </footer>
 </div>
 
 @endsection
