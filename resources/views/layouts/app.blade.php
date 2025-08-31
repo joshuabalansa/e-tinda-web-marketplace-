@@ -138,7 +138,12 @@
               <a class="nav-link" href="/forums">forums</a>
             </li>
           </ul>
-          <div class="d-flex">
+          <div class="d-flex align-items-center">
+            <!-- Language Switcher -->
+            <div class="me-3">
+                @include('components.language-switcher')
+            </div>
+
             <a href="/cart" class="btn btn-outline-light me-2">
               <i class="fas fa-shopping-cart"></i>
               <span class="badge bg-danger ms-1">3</span>

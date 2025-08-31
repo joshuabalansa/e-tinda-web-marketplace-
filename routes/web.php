@@ -113,6 +113,7 @@ Route::middleware(['auth', 'buyer'])->group(function () {
     Route::get('/buyer/wishlist', [BuyerWishlistController::class, 'index'])->name('buyer.wishlist');
     Route::post('/buyer/wishlist/add', [BuyerWishlistController::class, 'add'])->name('buyer.wishlist.add');
     Route::delete('/buyer/wishlist/remove/{id}', [BuyerWishlistController::class, 'remove'])->name('buyer.wishlist.remove');
+    Route::delete('/buyer/wishlist/remove-product/{productId}', [BuyerWishlistController::class, 'removeByProduct'])->name('buyer.wishlist.removeByProduct');
 });
 
 // Cart Routes

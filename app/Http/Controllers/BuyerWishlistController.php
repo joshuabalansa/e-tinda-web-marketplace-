@@ -86,4 +86,31 @@ class BuyerWishlistController extends Controller
             'message' => 'Product removed from wishlist successfully'
         ]);
     }
+
+    /**
+     * Remove a product from the buyer's wishlist by product ID.
+     *
+     * @param  int  $productId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function removeByProduct($productId)
+    {
+        $wishlistItem = Wishlist::where('product_id', $productId)
+                                ->where('user_id', Auth::id())
+                                ->first();
+
+        if (!$wishlistItem) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found in wishlist'
+            ]);
+        }
+
+        $wishlistItem->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product removed from wishlist successfully'
+        ]);
+    }
 }

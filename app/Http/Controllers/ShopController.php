@@ -129,6 +129,12 @@ class ShopController extends Controller
             abort(404);
         }
 
+        // Check if product is in user's wishlist
+        $isInWishlist = false;
+        if (auth()->check()) {
+            $isInWishlist = auth()->user()->wishlist()->where('product_id', $product->id)->exists();
+        }
+
         $productData = [
             'id' => $product->id,
             'name' => $product->name,
@@ -161,7 +167,7 @@ class ShopController extends Controller
                 ];
             });
 
-        return view('shop.product', compact('productData', 'relatedProducts'));
+        return view('shop.product', compact('productData', 'relatedProducts', 'isInWishlist'));
     }
 
     /**
