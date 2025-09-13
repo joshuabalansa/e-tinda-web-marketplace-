@@ -16,6 +16,7 @@ use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\FarmerOrderController;
 use App\Http\Controllers\BuyerOrderController;
 use App\Http\Controllers\BuyerWishlistController;
+use App\Http\Controllers\Farmer\InventoryController;
 
 // Language switching route
 Route::get('language/{locale}', function ($locale) {
@@ -99,6 +100,17 @@ Route::middleware(['auth', 'farmer'])->group(function () {
     Route::get('/farmer/orders', [FarmerOrderController::class, 'index'])->name('farmer.orders.index');
     Route::get('/farmer/orders/{order}', [FarmerOrderController::class, 'show'])->name('farmer.orders.show');
     Route::patch('/farmer/orders/{order}/status', [FarmerOrderController::class, 'updateStatus'])->name('farmer.orders.updateStatus');
+
+    // Farmer Inventory Routes
+    Route::resource('farmer/inventory', InventoryController::class)->names([
+        'index' => 'farmer.inventory.index',
+        'create' => 'farmer.inventory.create',
+        'store' => 'farmer.inventory.store',
+        'show' => 'farmer.inventory.show',
+        'edit' => 'farmer.inventory.edit',
+        'update' => 'farmer.inventory.update',
+        'destroy' => 'farmer.inventory.destroy',
+    ]);
 });
 
 //buyer Dashboard Route

@@ -18,7 +18,7 @@
                 <!-- Statistics Cards -->
                 <div class="row">
                     <div class="col-sm-3">
-                        <div class="tile-progress tile-primary">
+                        <div class="tile-progress tile-aqua">
                             <div class="tile-header">
                                 <h3>Total Orders</h3>
                                 <span>All time orders</span>
@@ -34,7 +34,7 @@
                     </div>
 
                     <div class="col-sm-3">
-                        <div class="tile-progress tile-warning">
+                        <div class="tile-progress tile-red">
                             <div class="tile-header">
                                 <h3>Pending Orders</h3>
                                 <span>Awaiting processing</span>
@@ -50,7 +50,7 @@
                     </div>
 
                     <div class="col-sm-3">
-                        <div class="tile-progress tile-info">
+                        <div class="tile-progress tile-orange">
                             <div class="tile-header">
                                 <h3>Processing</h3>
                                 <span>Currently processing</span>
@@ -66,7 +66,7 @@
                     </div>
 
                     <div class="col-sm-3">
-                        <div class="tile-progress tile-success">
+                        <div class="tile-progress tile-green">
                             <div class="tile-header">
                                 <h3>Total Revenue</h3>
                                 <span>From your products</span>

@@ -132,7 +132,7 @@
                                                 <label for="harvest_date" class="control-label">Harvest Date</label>
                                                 <input type="date" class="form-control @error('harvest_date') is-invalid @enderror"
                                                        id="harvest_date" name="harvest_date"
-                                                       value="{{ old('harvest_date', $product->harvest_date) }}" required>
+                                                       value="{{ old('harvest_date', optional($product->harvest_date)->format('Y-m-d')) }}">
                                                 @error('harvest_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
                                         </div>
@@ -164,7 +164,8 @@
                                                     <div class="upload-content">
                                                         <i class="entypo-upload"></i>
                                                         <p>{{ $product->image_url ? 'Click to replace image' : 'Click to upload or drag and drop' }}</p>
-                                                        <small class="text-muted">PNG, JPG, JPEG up to 5MB</small>
+                                                        @php($maxMb = (int) round(config('upload.max_image_size', 10 * 1024 * 1024) / (1024 * 1024)))
+                                                        <small class="text-muted">PNG, JPG, JPEG, WEBP up to {{ $maxMb }}MB</small>
                                                     </div>
                                                     <div class="preview-area" style="display: none;">
                                                         <img src="" alt="Preview" class="img-responsive">
@@ -172,7 +173,7 @@
                                                             <i class="entypo-trash"></i> Remove
                                                         </button>
                                                     </div>
-                                                    <input type="file" id="image_url" name="image_url" accept="image/*" class="d-none">
+                                                    <input type="file" id="image_url" name="image_url" accept="image/*" class="d-none @error('image_url') is-invalid @enderror">
                                                 </div>
                                                 @error('image_url')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                             </div>

@@ -160,7 +160,8 @@
                                     <div class="upload-content">
                                         <i class="entypo-upload"></i>
                                         <p>Drag & drop image here or click to browse</p>
-                                        <small class="text-muted">PNG, JPG, JPEG up to 5MB</small>
+                                        @php($maxMb = (int) round(config('upload.max_image_size', 10 * 1024 * 1024) / (1024 * 1024)))
+                                        <small class="text-muted">PNG, JPG, JPEG, WEBP up to {{ $maxMb }}MB</small>
                                     </div>
                                     <div class="preview-area" style="display: none;">
                                         <img id="previewImage" src="" alt="Preview" class="img-responsive">

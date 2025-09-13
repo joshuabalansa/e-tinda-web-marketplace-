@@ -21,6 +21,8 @@
     <link rel="stylesheet" href="{{ asset('template-assets/css/neon-forms.css') }}">
     <link rel="stylesheet" href="{{ asset('template-assets/css/skins/green.css') }}">
     <link rel="stylesheet" href="{{ asset('template-assets/css/custom.css') }}">
+    <!-- Toastr CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
     <!-- Custom CSS for Sidebar Collapse -->
     <style>
@@ -308,7 +310,7 @@
                     <a href="{{ route('farmer.orders.index') }}">
                         <i class="entypo-mail"></i>
                         <span class="title">Order Management</span>
-                        @if(isset($stats) && $stats['pending_orders'] > 0)
+                        @if(isset($stats) && isset($stats['pending_orders']) && $stats['pending_orders'] > 0)
                             <span class="badge badge-secondary badge-roundless">{{ $stats['pending_orders'] }}</span>
                         @endif
                     </a>
@@ -323,6 +325,39 @@
                             <a href="{{ route('farmer.orders.index') }}">
                                 <i class="entypo-attach"></i>
                                 <span class="title">Order Tracking</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="has-sub {{ request()->routeIs('farmer.inventory.*') ? 'active opened' : '' }}">
+                    <a href="{{ route('farmer.inventory.index') }}">
+                        <i class="entypo-box"></i>
+                        <span class="title">Inventory Management</span>
+                    </a>
+                    <ul>
+                        <li class="{{ request()->routeIs('farmer.inventory.index') ? 'active' : '' }}">
+                            <a href="{{ route('farmer.inventory.index') }}">
+                                <i class="entypo-list"></i>
+                                <span class="title">View Inventory</span>
+                            </a>
+                        </li>
+                        <li class="{{ request()->routeIs('farmer.inventory.create') ? 'active' : '' }}">
+                            <a href="{{ route('farmer.inventory.create') }}">
+                                <i class="entypo-plus"></i>
+                                <span class="title">Add Stock</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('farmer.inventory.index') }}">
+                                <i class="entypo-arrows-ccw"></i>
+                                <span class="title">Stock Adjustments</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('farmer.inventory.index') }}">
+                                <i class="entypo-chart-line"></i>
+                                <span class="title">Inventory Reports</span>
                             </a>
                         </li>
                     </ul>
@@ -441,99 +476,13 @@
                 </ul>
 
                 <ul class="user-info pull-left pull-right-xs pull-none-xsm">
-                    <!-- Raw Notifications -->
-                    <li class="notifications dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-                            <i class="entypo-attention"></i>
-                            @if(isset($stats) && $stats['pending_orders'] > 0)
-                                <span class="badge badge-info">{{ $stats['pending_orders'] }}</span>
-                            @endif
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li class="top">
-                                <p class="small">
-                                    <a href="{{ route('farmer.orders.index') }}" class="pull-right">View All</a>
-                                    You have <strong>{{ $stats['pending_orders'] ?? 0 }}</strong> new notifications.
-                                </p>
-                            </li>
-
-                            <li>
-                                <ul class="dropdown-menu-list scroller">
-                                    <li class="unread notification-success">
-                                        <a href="{{ route('farmer.orders.index') }}">
-                                            <i class="entypo-user-add pull-right"></i>
-                                            <span class="line">
-                                                <strong>New orders received</strong>
-                                            </span>
-                                            <span class="line small">
-                                                Check your order management
-                                            </span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-
-                            <li class="external">
-                                <a href="{{ route('farmer.orders.index') }}">View all notifications</a>
-                            </li>
-                        </ul>
-                    </li>
-
-                    <!-- Message Notifications -->
-                    <li class="notifications dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-                            <i class="entypo-mail"></i>
-                            <span class="badge badge-secondary">0</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <form class="top-dropdown-search">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" placeholder="Search anything..." name="s" />
-                                    </div>
-                                </form>
-                            </li>
-                            <li class="external">
-                                <a href="#">All Messages</a>
-                            </li>
-                        </ul>
-                    </li>
-
-                    <!-- Task Notifications -->
-                    <li class="notifications dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
-                            <i class="entypo-list"></i>
-                            <span class="badge badge-warning">0</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li class="top">
-                                <p>You have 0 pending tasks</p>
-                            </li>
-                            <li class="external">
-                                <a href="#">See all tasks</a>
-                            </li>
-                        </ul>
-                    </li>
+                    <!-- Notifications removed - keeping only logout functionality -->
                 </ul>
             </div>
 
             <!-- Raw Links -->
             <div class="col-md-6 col-sm-4 clearfix hidden-xs">
                 <ul class="list-inline links-list pull-right">
-                    <li>
-                        <a href="{{ route('farmer.dashboard') }}">
-                            <i class="entypo-gauge"></i>
-                            Dashboard
-                        </a>
-                    </li>
-                    <li class="sep"></li>
-                    <li>
-                        <a href="#" data-toggle="chat" data-collapse-sidebar="1">
-                            <i class="entypo-chat"></i>
-                            Chat
-                        </a>
-                    </li>
-                    <li class="sep"></li>
                     <li>
                         <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                             Log Out <i class="entypo-logout right"></i>
@@ -587,6 +536,8 @@
 <script src="{{ asset('template-assets/js/neon-chat.js') }}"></script>
 <script src="{{ asset('template-assets/js/neon-custom.js') }}"></script>
 <script src="{{ asset('template-assets/js/neon-skins.js') }}"></script>
+<!-- Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 <!-- Custom JavaScript -->
 <script>
@@ -833,14 +784,18 @@ $(document).ready(function() {
 
     }, 200); // Increased delay to ensure Neon theme is fully loaded
 
-    // Show success messages
+    // Toast notifications
     @if(session('success'))
-        // You can add toastr or custom notification here
-        alert("{{ session('success') }}");
+        toastr.success("{{ session('success') }}");
     @endif
-
     @if(session('error'))
-        alert("{{ session('error') }}");
+        toastr.error("{{ session('error') }}");
+    @endif
+    @if(session('warning'))
+        toastr.warning("{{ session('warning') }}");
+    @endif
+    @if(session('info'))
+        toastr.info("{{ session('info') }}");
     @endif
 });
 </script>

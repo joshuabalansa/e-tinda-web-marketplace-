@@ -55,7 +55,7 @@
                 </div>
 
                 <!-- Continue Shopping -->
-                <a href="{{ route('shop.index') }}" class="btn btn-outline-primary">
+                <a href="{{ route('shop.index') }}" class="btn btn-success">
                     <i class="fas fa-arrow-left me-2"></i>{{ __('shop.continue_shopping') }}
                 </a>
             </div>

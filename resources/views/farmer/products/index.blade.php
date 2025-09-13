@@ -1,10 +1,10 @@
 @extends('layouts.farmer')
 
 @section('content')
-<!-- Add New Product Button - Above Container -->
+<!-- Add New Product Button - Left Side -->
 <div class="row mb-3">
     <div class="col-sm-12">
-        <div class="text-right">
+        <div class="text-left">
             <a href="{{ route('farmer.products.create') }}" class="btn btn-primary btn-sm">
                 <i class="entypo-plus"></i> Add New Product
             </a>
@@ -12,37 +12,6 @@
     </div>
 </div>
 
-<!-- Status Filter Buttons - Outside Container -->
-<div class="row mb-3">
-    <div class="col-sm-12">
-        <div class="panel panel-default" data-collapsed="0">
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-md-3 col-sm-6">
-                        <button class="btn btn-success btn-block status-filter-btn" data-status="available">
-                            <i class="entypo-check"></i> Available
-                        </button>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <button class="btn btn-warning btn-block status-filter-btn" data-status="out_of_stock">
-                            <i class="entypo-attention"></i> Out of Stock
-                        </button>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <button class="btn btn-danger btn-block status-filter-btn" data-status="unavailable">
-                            <i class="entypo-cancel"></i> Unavailable
-                        </button>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <button class="btn btn-default btn-block status-filter-btn" data-status="">
-                            <i class="entypo-list"></i> All Status
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="row">
     <div class="col-sm-12">
@@ -53,54 +22,95 @@
                 </div>
             </div>
             <div class="panel-body">
-                @if (session('success'))
-                    <div class="alert alert-success">
-                        <i class="entypo-check"></i>{{ session('success') }}
-                    </div>
-                @endif
-
-                <!-- Filters and Search -->
-                <div class="panel panel-default" data-collapsed="0">
-                    <div class="panel-heading">
-                        <div class="panel-title">
-                            <h5><i class="entypo-search"></i> Search & Filters</h5>
+                <!-- Status Counter Cards -->
+                <div class="row mb-4" id="statusCounters">
+                    <div class="col-sm-4">
+                        <div class="tile-progress tile-green status-counter-card" data-status="available">
+                            <div class="tile-header">
+                                <h3>Available Products</h3>
+                                <span>Ready for sale</span>
+                            </div>
+                            <div class="tile-progressbar">
+                                <span data-fill="100%"></span>
+                            </div>
+                            <div class="tile-footer">
+                                <h4 class="status-count">0</h4>
+                                <span>products</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-md-6 col-sm-12">
-                                <div class="form-group">
-                                    <label for="searchInput" class="control-label">Search Products</label>
-                                    <div class="input-group">
-                                        <span class="input-group-addon">
-                                            <i class="entypo-search"></i>
-                                        </span>
-                                        <input type="text" id="searchInput" class="form-control" placeholder="Search products...">
-                                    </div>
-                                </div>
+                    <div class="col-sm-4">
+                        <div class="tile-progress tile-orange status-counter-card" data-status="out_of_stock">
+                            <div class="tile-header">
+                                <h3>Out of Stock</h3>
+                                <span>Need restocking</span>
                             </div>
-                            <div class="col-md-4 col-sm-8">
-                                <div class="form-group">
-                                    <label for="categoryFilter" class="control-label">Category</label>
-                                    <select id="categoryFilter" class="form-control">
-                                        <option value="">All Categories</option>
-                                        <option value="Vegetables">🥬 Vegetables</option>
-                                        <option value="Fruits">🍎 Fruits</option>
-                                        <option value="Grains">🌾 Grains</option>
-                                        <option value="Dairy">🥛 Dairy</option>
-                                        <option value="Meat">🥩 Meat</option>
-                                        <option value="Other">📦 Other</option>
-                                    </select>
-                                </div>
+                            <div class="tile-progressbar">
+                                <span data-fill="100%"></span>
                             </div>
-                            <div class="col-md-2 col-sm-4">
-                                <div class="form-group">
-                                    <label class="control-label">&nbsp;</label>
-                                    <button class="btn btn-default btn-block" id="clearFilters">
-                                        <i class="entypo-cancel"></i> Clear
-                                    </button>
-                                </div>
+                            <div class="tile-footer">
+                                <h4 class="status-count">0</h4>
+                                <span>products</span>
                             </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="tile-progress tile-red status-counter-card" data-status="unavailable">
+                            <div class="tile-header">
+                                <h3>Unavailable</h3>
+                                <span>Not for sale</span>
+                            </div>
+                            <div class="tile-progressbar">
+                                <span data-fill="100%"></span>
+                            </div>
+                            <div class="tile-footer">
+                                <h4 class="status-count">0</h4>
+                                <span>products</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters and Search -->
+                <div class="row mb-3">
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label for="searchInput" class="control-label">Search Products</label>
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <i class="entypo-search"></i>
+                                </span>
+                                <input type="text" id="searchInput" class="form-control" placeholder="Search products...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-8">
+                        <div class="form-group">
+                            <label for="categoryFilter" class="control-label">Category</label>
+                            <select id="categoryFilter" class="form-control">
+                                <option value="">All Categories</option>
+                                <option value="Vegetables">🥬 Vegetables</option>
+                                <option value="Fruits">🍎 Fruits</option>
+                                <option value="Grains">🌾 Grains</option>
+                                <option value="Dairy">🥛 Dairy</option>
+                                <option value="Meat">🥩 Meat</option>
+                                <option value="Other">📦 Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4">
+                        <div class="form-group">
+                            <label class="control-label">&nbsp;</label>
+                            <button class="btn btn-default btn-block" id="clearFilters" style="height: 34px; line-height: 1.42857143; text-align: center;">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-12">
+                        <div class="results-meta small text-muted">
+                            <i class="entypo-info"></i> <span id="resultCount">{{ $products->total() }} results</span>
                         </div>
                     </div>
                 </div>
@@ -112,7 +122,7 @@
                              data-name="{{ strtolower($product->name) }}"
                              data-category="{{ $product->category }}"
                              data-status="{{ $product->status }}">
-                            <div class="panel panel-default">
+                            <div class="panel panel-default card-elevated">
                                 <!-- Product Image -->
                                 <div class="panel-body p-0">
                                     <div class="position-relative">
@@ -147,27 +157,24 @@
                                     <div class="p-3">
                                         <h6 class="product-title">{{ $product->name }}</h6>
 
-                                        <!-- Price and Stock Info -->
-                                        <div class="row text-center mb-2">
-                                            <div class="col-6">
-                                                <div class="border-end">
-                                                    <h6 class="text-primary mb-0">₱{{ number_format($product->price_per_unit, 2) }}</h6>
-                                                    <small class="text-muted small">per {{ $product->unit_type }}</small>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <h6 class="text-success mb-0">{{ $product->stock_quantity }}</h6>
-                                                <small class="text-muted small">{{ $product->unit_type }} in stock</small>
-                                            </div>
-                                        </div>
-
-                                        <!-- Harvest Date -->
-                                        <div class="mb-3">
-                                            <small class="text-muted small">
-                                                <i class="entypo-calendar"></i>
-                                                Harvested: {{ \Carbon\Carbon::parse($product->harvest_date)->format('M d, Y') }}
-                                            </small>
-                                        </div>
+                                        <!-- Product Meta Details -->
+                                        <ul class="product-meta mb-3">
+                                            <li class="meta-item">
+                                                <span class="meta-icon text-primary"><i class="entypo-tag"></i></span>
+                                                <span class="meta-label">Price</span>
+                                                <span class="meta-value">₱{{ number_format($product->price_per_unit, 2) }} <small class="text-muted">/ {{ $product->unit_type }}</small></span>
+                                            </li>
+                                            <li class="meta-item">
+                                                <span class="meta-icon text-success"><i class="entypo-basket"></i></span>
+                                                <span class="meta-label">Stock</span>
+                                                <span class="meta-value">{{ $product->stock_quantity }} <small class="text-muted">{{ $product->unit_type }}</small></span>
+                                            </li>
+                                            <li class="meta-item">
+                                                <span class="meta-icon"><i class="entypo-calendar"></i></span>
+                                                <span class="meta-label">Harvested</span>
+                                                <span class="meta-value">{{ \Carbon\Carbon::parse($product->harvest_date)->format('M d, Y') }}</span>
+                                            </li>
+                                        </ul>
 
                                         <!-- Action Buttons -->
                                         <div class="d-grid gap-1">
@@ -404,33 +411,6 @@
         width: 100%;
     }
 
-    /* Status Filter Buttons */
-    .status-filter-btn {
-        margin-bottom: 10px;
-        transition: all 0.3s ease;
-        border-radius: 0;
-        font-weight: 500;
-    }
-
-    .status-filter-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-
-    .status-filter-btn.active {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        font-weight: 600;
-    }
-
-    .status-filter-btn.active::after {
-        content: '✓';
-        position: absolute;
-        top: 5px;
-        right: 10px;
-        font-weight: bold;
-        color: white;
-    }
 
     .btn-sm {
         padding: 5px 10px;
@@ -450,6 +430,11 @@
     .product-card .panel {
         transition: all 0.3s ease;
         height: 100%;
+    }
+
+    .card-elevated {
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     }
 
     .product-card .panel:hover {
@@ -479,6 +464,18 @@
 
     .no-image-placeholder i {
         font-size: 2.5rem;
+    }
+
+    /* Badge positions */
+    .status-badge {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+    }
+    .category-badge {
+        position: absolute;
+        right: 10px;
+        top: 10px;
     }
 
     /* Badges */
@@ -589,6 +586,81 @@
         font-size: 0.875em;
     }
 
+    .product-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: .5rem;
+    }
+
+    /* Product Meta List */
+    .product-meta {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .product-meta .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 0;
+        border-top: 1px dashed #eee;
+    }
+    .product-meta .meta-item:first-child {
+        border-top: 0;
+        padding-top: 0;
+    }
+    .product-meta .meta-icon {
+        width: 18px;
+        text-align: center;
+        color: #adb5bd;
+    }
+    .product-meta .meta-label {
+        color: #6c757d;
+        font-size: 0.85rem;
+        min-width: 70px;
+    }
+    .product-meta .meta-value {
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* Status Counter Cards */
+    .status-counter-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .status-counter-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .status-counter-card.active {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+
+    .status-count {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    /* Form Controls Alignment */
+    .form-control, .btn {
+        height: 34px;
+        line-height: 1.42857143;
+    }
+
+    .input-group .form-control {
+        height: 34px;
+    }
+
+    .input-group-addon {
+        height: 34px;
+        line-height: 1.42857143;
+    }
+
     /* Border Utilities */
     .border-end {
         border-right: 1px solid #dee2e6;
@@ -626,13 +698,14 @@
         .panel-options { position: static; margin-top: 10px; }
         .product-image { height: 140px !important; }
         .no-image-placeholder { height: 140px !important; }
+        .status-badge, .category-badge { top: 6px; }
 
         /* Filter responsive adjustments */
         .form-group { margin-bottom: 10px; }
         .col-sm-12 .form-group:last-child { margin-bottom: 0; }
 
         /* Button responsive adjustments */
-        .text-right { text-align: center !important; }
+        .text-left { text-align: center !important; }
         .btn-lg { padding: 10px 20px; font-size: 15px; }
     }
 
@@ -665,10 +738,30 @@ $(document).ready(function() {
     // Search and filter functionality with debouncing
     let searchTimeout;
 
+    function updateStatusCounters() {
+        var statusCounts = {
+            'available': 0,
+            'out_of_stock': 0,
+            'unavailable': 0
+        };
+
+        $('.product-card').each(function() {
+            var status = $(this).data('status');
+            if (statusCounts.hasOwnProperty(status)) {
+                statusCounts[status]++;
+            }
+        });
+
+        // Update counter displays
+        $('.status-counter-card[data-status="available"] .status-count').text(statusCounts.available);
+        $('.status-counter-card[data-status="out_of_stock"] .status-count').text(statusCounts.out_of_stock);
+        $('.status-counter-card[data-status="unavailable"] .status-count').text(statusCounts.unavailable);
+    }
+
     function filterProducts() {
         var searchValue = $('#searchInput').val().toLowerCase().trim();
         var categoryValue = $('#categoryFilter').val();
-        var statusValue = $('.status-filter-btn.active').data('status'); // Get active status filter
+        var statusValue = $('.status-counter-card.active').data('status'); // Get active status filter
 
         var visibleCount = 0;
         var totalCount = $('.product-card').length;
@@ -711,6 +804,9 @@ $(document).ready(function() {
         } else {
             $('#noResultsMessage').remove();
         }
+
+        // Update result counter
+        $('#resultCount').text(visibleCount + ' of ' + totalCount + ' results');
     }
 
     // Bind filter events with debouncing for search
@@ -720,8 +816,11 @@ $(document).ready(function() {
     });
 
     $('#categoryFilter').on('change', filterProducts);
-    $('.status-filter-btn').on('click', function() {
-        $('.status-filter-btn').removeClass('active');
+
+    // Status counter card click handlers
+    $('.status-counter-card').on('click', function() {
+        var status = $(this).data('status');
+        $('.status-counter-card').removeClass('active');
         $(this).addClass('active');
         filterProducts();
     });
@@ -730,8 +829,7 @@ $(document).ready(function() {
     $('#clearFilters').on('click', function() {
         $('#searchInput').val('');
         $('#categoryFilter').val('');
-        $('.status-filter-btn').removeClass('active');
-        $('.status-filter-btn[data-status=""]').addClass('active'); // Set All Status as active
+        $('.status-counter-card').removeClass('active');
         $('.product-card').show();
         $('#noResultsMessage').remove();
     });
@@ -741,10 +839,8 @@ $(document).ready(function() {
         $('#clearFilters').click();
     });
 
-    // Set initial active state
-    $('.status-filter-btn[data-status=""]').addClass('active');
-
-    // Initial filter
+    // Initialize counters and filter
+    updateStatusCounters();
     filterProducts();
 });
 </script>

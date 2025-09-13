@@ -79,7 +79,7 @@
                         <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>{{ __('dashboard.quick_actions') }}</h5>
                     </div>
                     <div class="card-body">
-                        <div class="row g-3">
+                        <div class="row g-3 justify-content-center">
                             <div class="col-md-6 col-lg-3">
                                 <a href="/shop" class="btn btn-outline-success w-100">
                                     <i class="fas fa-store me-2"></i>{{ __('dashboard.continue_shopping') }}
@@ -93,11 +93,6 @@
                             <div class="col-md-6 col-lg-3">
                                 <a href="/forums" class="btn btn-outline-success w-100">
                                     <i class="fas fa-comments me-2"></i>{{ __('dashboard.visit_forums') }}
-                                </a>
-                            </div>
-                            <div class="col-md-6 col-lg-3">
-                                <a href="/profile" class="btn btn-outline-success w-100">
-                                    <i class="fas fa-user-edit me-2"></i>{{ __('dashboard.edit_profile') }}
                                 </a>
                             </div>
                         </div>

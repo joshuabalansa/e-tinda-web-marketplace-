@@ -10,6 +10,9 @@
                 <p class="lead mb-0">Order #{{ $order->id }}</p>
             </div>
             <div class="col-md-4 text-md-end">
+                <a href="{{ route('buyer.dashboard') }}" class="btn btn-outline-success me-2">
+                    <i class="fas fa-home me-2"></i> Back to Dashboard
+                </a>
                 <a href="{{ route('buyer.orders') }}" class="btn btn-outline-success">
                     <i class="fas fa-arrow-left me-2"></i> Back to Orders
                 </a>
