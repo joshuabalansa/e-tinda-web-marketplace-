@@ -420,8 +420,8 @@
                 </li>
 
                 <!-- Reports -->
-                <li>
-                    <a href="#">
+                <li class="{{ request()->routeIs('farmer.reports.*') ? 'active' : '' }}">
+                    <a href="{{ route('farmer.reports.index') }}">
                         <i class="entypo-doc-text"></i>
                         <span class="title">Reports</span>
                     </a>
