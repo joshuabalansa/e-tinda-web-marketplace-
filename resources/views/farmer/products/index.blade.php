@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- Add New Product Button - Left Side -->
-<div class="row mb-3">
+<div class="row mb-3" style="margin-top: 20px;">
     <div class="col-sm-12">
         <div class="text-left">
             <a href="{{ route('farmer.products.create') }}" class="btn btn-primary btn-sm">
@@ -222,10 +222,8 @@
 
                 <!-- Pagination -->
                 @if($products->hasPages())
-                    <div class="d-flex justify-content-center mt-4 mt-md-5">
-                        <nav aria-label="Products pagination">
-                            {{ $products->links('pagination::bootstrap-5') }}
-                        </nav>
+                    <div class="text-center mt-4 mt-md-5">
+                        {{ $products->links('pagination::bootstrap-4') }}
                     </div>
                 @endif
             </div>

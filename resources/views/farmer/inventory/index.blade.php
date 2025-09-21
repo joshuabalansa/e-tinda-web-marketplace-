@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- Add New Inventory Record Button -->
-<div class="row mb-4">
+<div class="row mb-4" style="margin-top: 20px;">
     <div class="col-sm-12">
         <div class="text-left">
             <a href="{{ route('farmer.inventory.create') }}" class="btn btn-primary btn-sm" style="margin-bottom: 20px;">
@@ -200,10 +200,8 @@
 
                 <!-- Pagination -->
                 @if($inventoryRecords->hasPages())
-                    <div class="d-flex justify-content-center mt-4">
-                        <nav aria-label="Inventory pagination">
-                            {{ $inventoryRecords->links('pagination::bootstrap-5') }}
-                        </nav>
+                    <div class="text-center mt-4">
+                        {{ $inventoryRecords->links('pagination::bootstrap-4') }}
                     </div>
                 @endif
             </div>

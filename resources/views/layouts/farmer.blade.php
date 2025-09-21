@@ -50,9 +50,6 @@
             opacity: 0;
         }
 
-        .page-container.sidebar-collapsed .sidebar-menu #main-menu > li > ul {
-            display: none !important;
-        }
 
         .page-container.sidebar-collapsed .sidebar-menu #main-menu > li > a > i {
             margin-right: 0;
@@ -105,27 +102,6 @@
             box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
         }
 
-        .page-container.sidebar-collapsed .sidebar-menu #main-menu > li:hover > ul {
-            position: absolute;
-            left: 65px;
-            top: 100%;
-            width: 200px;
-            background: #303641;
-            border-radius: 0 3px 3px 0;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-            display: block !important;
-            z-index: 1000;
-        }
-
-        .page-container.sidebar-collapsed .sidebar-menu #main-menu > li:hover > ul > li > a {
-            padding: 10px 20px;
-            color: #fff;
-            border-bottom: 1px solid #454a54;
-        }
-
-        .page-container.sidebar-collapsed .sidebar-menu #main-menu > li:hover > ul > li > a:hover {
-            background: #454a54;
-        }
 
         /* Ensure proper positioning in collapsed mode */
         .page-container.sidebar-collapsed .sidebar-menu #main-menu > li {
@@ -137,27 +113,8 @@
         }
 
         /* Smooth transitions for hover effects */
-        .page-container.sidebar-collapsed .sidebar-menu #main-menu > li > a > span,
-        .page-container.sidebar-collapsed .sidebar-menu #main-menu > li > ul {
+        .page-container.sidebar-collapsed .sidebar-menu #main-menu > li > a > span {
             transition: all 0.2s ease;
-        }
-
-        /* Ensure submenu items are properly styled */
-        .page-container.sidebar-collapsed .sidebar-menu #main-menu > li > ul > li > a {
-            display: block;
-            padding: 10px 20px;
-            color: #fff;
-            text-decoration: none;
-            border-bottom: 1px solid #454a54;
-            transition: background-color 0.2s ease;
-        }
-
-        .page-container.sidebar-collapsed .sidebar-menu #main-menu > li > ul > li > a:hover {
-            background-color: #454a54;
-        }
-
-        .page-container.sidebar-collapsed .sidebar-menu #main-menu > li > ul > li:last-child > a {
-            border-bottom: none;
         }
 
         /* Ensure the collapse icon is visible and clickable */
@@ -198,23 +155,10 @@
             background-color: #094a19 !important;
             color: #ffffff;
         }
-        .sidebar-menu #main-menu > li > ul {
-            background: #0a5221 !important;
-        }
-        .sidebar-menu #main-menu > li > ul > li > a {
-            color: #e8f5e9;
-        }
-        .sidebar-menu #main-menu > li > ul > li > a:hover {
-            background-color: #094a19;
-            color: #ffffff;
-        }
         /* Collapsed hover popout colors override to dark green */
         .page-container.sidebar-collapsed .sidebar-menu #main-menu > li:hover > a > span:not(.badge) {
             background: #0b5e20 !important;
             color: #ffffff;
-        }
-        .page-container.sidebar-collapsed .sidebar-menu #main-menu > li:hover > ul {
-            background: #0b5e20 !important;
         }
 
         /* Logo sizing and icon color overrides */
@@ -233,6 +177,158 @@
         .fa-leaf {
             color: #ffffff !important;
         }
+
+        /* Sticky Sidebar Styles */
+        .page-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar-menu {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            height: 100vh !important;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 1000;
+            width: 280px;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar-menu-inner {
+            height: 100% !important;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .main-content {
+            margin-left: 280px !important;
+            flex: 1;
+            min-height: 100vh;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Collapsed sidebar styles */
+        .page-container.sidebar-collapsed .sidebar-menu {
+            width: 65px !important;
+        }
+
+        .page-container.sidebar-collapsed .main-content {
+            margin-left: 65px !important;
+        }
+
+        /* Header styling - no longer sticky */
+        .main-content > .row:first-child {
+            background: #fff;
+            margin: 0;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        /* Content area styling */
+        .main-content > hr {
+            margin: 0;
+            border: none;
+            height: 1px;
+            background: #e5e5e5;
+        }
+
+        /* Footer positioning */
+        .main-content > footer.main {
+            margin-top: auto;
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .sidebar-menu {
+                width: 280px !important;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar-menu.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                width: 100%;
+            }
+
+            .page-container.sidebar-collapsed .sidebar-menu {
+                width: 280px !important;
+                transform: translateX(-100%);
+            }
+
+            .page-container.sidebar-collapsed .main-content {
+                margin-left: 0 !important;
+            }
+
+            /* Mobile overlay */
+            .mobile-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+                display: none;
+            }
+
+            .mobile-overlay.active {
+                display: block;
+            }
+
+            /* Mobile menu button */
+            .mobile-menu-toggle {
+                display: block;
+                position: fixed;
+                top: 15px;
+                left: 15px;
+                z-index: 1001;
+                background: #0b5e20;
+                color: white;
+                border: none;
+                padding: 10px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            .mobile-menu-toggle:hover {
+                background: #094a19;
+            }
+
+            /* Adjust header for mobile */
+            .main-content > .row:first-child {
+                padding-left: 60px;
+            }
+
+            /* Ensure sidebar is above everything on mobile */
+            .sidebar-menu {
+                z-index: 1000;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .mobile-menu-toggle {
+                display: none;
+            }
+
+            .mobile-overlay {
+                display: none !important;
+            }
+        }
+
+        /* Prevent body scroll when mobile menu is open */
+        body.mobile-menu-open {
+            overflow: hidden;
+        }
     </style>
 
     <!-- CSRF Token -->
@@ -244,7 +340,15 @@
 <body class="page-body page-fade" data-url="http://neon.dev">
 
 <div class="page-container">
-    <div class="sidebar-menu">
+    <!-- Mobile Menu Toggle Button -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="entypo-menu"></i>
+    </button>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <div class="sidebar-menu" id="sidebarMenu">
         <div class="sidebar-menu-inner">
 
             <header class="logo-env">
@@ -271,42 +375,24 @@
             </header>
 
             <ul id="main-menu" class="main-menu">
-                <!-- add class "multiple-expanded" to allow multiple submenus to open -->
-                <!-- class "auto-inherit-active-class" will automatically add "active" class for parent elements who are marked already with class "active" -->
-                <li class="{{ request()->routeIs('farmer.dashboard') ? 'active opened active' : '' }} has-sub">
+                <!-- Dashboard -->
+                <li class="{{ request()->routeIs('farmer.dashboard') ? 'active' : '' }}">
                     <a href="{{ route('farmer.dashboard') }}">
                         <i class="entypo-gauge"></i>
                         <span class="title">Dashboard</span>
                     </a>
-                    <ul class="{{ request()->routeIs('farmer.dashboard') ? 'visible' : '' }}">
-                        <li class="{{ request()->routeIs('farmer.dashboard') ? 'active' : '' }}">
-                            <a href="{{ route('farmer.dashboard') }}">
-                                <span class="title">Main Dashboard</span>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
 
-                <li class="has-sub {{ request()->routeIs('farmer.products.*') ? 'active opened' : '' }}">
+                <!-- Product Management -->
+                <li class="{{ request()->routeIs('farmer.products.index') ? 'active' : '' }}">
                     <a href="{{ route('farmer.products.index') }}">
                         <i class="entypo-newspaper"></i>
-                        <span class="title">Product Management</span>
+                        <span class="title">Manage Products</span>
                     </a>
-                    <ul>
-                        <li class="{{ request()->routeIs('farmer.products.create') ? 'active' : '' }}">
-                            <a href="{{ route('farmer.products.create') }}">
-                                <span class="title">Add New Product</span>
-                            </a>
-                        </li>
-                        <li class="{{ request()->routeIs('farmer.products.index') ? 'active' : '' }}">
-                            <a href="{{ route('farmer.products.index') }}">
-                                <span class="title">Manage Products</span>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
 
-                <li class="has-sub {{ request()->routeIs('farmer.orders.*') ? 'active opened' : '' }}">
+                <!-- Order Management -->
+                <li class="{{ request()->routeIs('farmer.orders.index') ? 'active' : '' }}">
                     <a href="{{ route('farmer.orders.index') }}">
                         <i class="entypo-mail"></i>
                         <span class="title">Order Management</span>
@@ -314,55 +400,18 @@
                             <span class="badge badge-secondary badge-roundless">{{ $stats['pending_orders'] }}</span>
                         @endif
                     </a>
-                    <ul>
-                        <li class="{{ request()->routeIs('farmer.orders.index') ? 'active' : '' }}">
-                            <a href="{{ route('farmer.orders.index') }}">
-                                <i class="entypo-inbox"></i>
-                                <span class="title">View Orders</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('farmer.orders.index') }}">
-                                <i class="entypo-attach"></i>
-                                <span class="title">Order Tracking</span>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
 
-                <li class="has-sub {{ request()->routeIs('farmer.inventory.*') ? 'active opened' : '' }}">
+                <!-- Inventory Management -->
+                <li class="{{ request()->routeIs('farmer.inventory.index') ? 'active' : '' }}">
                     <a href="{{ route('farmer.inventory.index') }}">
                         <i class="entypo-box"></i>
-                        <span class="title">Inventory Management</span>
+                        <span class="title">View Inventory</span>
                     </a>
-                    <ul>
-                        <li class="{{ request()->routeIs('farmer.inventory.index') ? 'active' : '' }}">
-                            <a href="{{ route('farmer.inventory.index') }}">
-                                <i class="entypo-list"></i>
-                                <span class="title">View Inventory</span>
-                            </a>
-                        </li>
-                        <li class="{{ request()->routeIs('farmer.inventory.create') ? 'active' : '' }}">
-                            <a href="{{ route('farmer.inventory.create') }}">
-                                <i class="entypo-plus"></i>
-                                <span class="title">Add Stock</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('farmer.inventory.index') }}">
-                                <i class="entypo-arrows-ccw"></i>
-                                <span class="title">Stock Adjustments</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('farmer.inventory.index') }}">
-                                <i class="entypo-chart-line"></i>
-                                <span class="title">Inventory Reports</span>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
 
+
+                <!-- Analytics Dashboard -->
                 <li class="{{ request()->routeIs('farmer.analytics.*') ? 'active' : '' }}">
                     <a href="{{ route('farmer.analytics.index') }}">
                         <i class="entypo-chart-bar"></i>
@@ -370,53 +419,29 @@
                     </a>
                 </li>
 
-                <li class="has-sub">
+                <!-- Reports -->
+                <li>
                     <a href="#">
                         <i class="entypo-doc-text"></i>
                         <span class="title">Reports</span>
                     </a>
-                    <ul>
-                        <li>
-                            <a href="#">
-                                <span class="title">Monthly Reports</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <span class="title">Annual Reports</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <span class="title">Custom Reports</span>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
 
-                <li class="has-sub">
-                    <a href="#">
+                <!-- Settings -->
+                <li class="{{ request()->routeIs('farmer.profile.index') ? 'active' : '' }}">
+                    <a href="{{ route('farmer.profile.index') }}">
                         <i class="entypo-cog"></i>
-                        <span class="title">Settings</span>
+                        <span class="title">Profile Settings</span>
                     </a>
-                    <ul>
-                        <li>
-                            <a href="{{ route('profile.edit') }}">
-                                <span class="title">Profile Settings</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <span class="title">Account Settings</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <span class="title">Preferences</span>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
+
+                <li class="{{ request()->routeIs('farmer.account.index') ? 'active' : '' }}">
+                    <a href="{{ route('farmer.account.index') }}">
+                        <i class="entypo-cog"></i>
+                        <span class="title">Account Settings</span>
+                    </a>
+                </li>
+
             </ul>
 
         </div>
@@ -613,92 +638,25 @@ $(document).ready(function() {
             }
         });
 
-        // Click-to-expand for submenus (single click, even if sidebar is collapsed)
-        public_vars.$mainMenu.on('click', '> li.has-sub > a', function(e) {
-            var $parentLi = $(this).parent('li');
-            var $submenu = $parentLi.children('ul');
-
-            // If there is no submenu, allow default navigation
-            if ($submenu.length === 0) {
-                return;
-            }
-
-            // Prevent navigation and stop duplicate handlers
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-
-            var $pageContainer = public_vars.$pageContainer || $('.page-container');
-            var $sidebarMenu = public_vars.$sidebarMenu || $('.sidebar-menu');
-            var $mainContent = public_vars.$mainContent || $('.main-content');
-
-            // If collapsed, expand first so submenu can be shown
-            if ($pageContainer.hasClass('sidebar-collapsed')) {
-                if (typeof toggle_sidebar_menu === 'function') {
-                    toggle_sidebar_menu(false); // expand without animation flags
-                } else {
-                    $pageContainer.removeClass('sidebar-collapsed');
-                    $sidebarMenu.css('width', '280px');
-                    $mainContent.css('margin-left', '280px');
-                    $('.sidebar-menu #main-menu > li > a > span:not(.badge)').show();
-                    $('.sidebar-menu #main-menu > li > ul').hide();
-                }
-            }
-
-            var animate = true;
-
-            if ($parentLi.hasClass('opened')) {
-                $parentLi.removeClass('opened active');
-                animate ? $submenu.stop(true, true).slideUp(200) : $submenu.hide();
-            } else {
-                if (!public_vars.$mainMenu.hasClass('multiple-expanded')) {
-                    $parentLi.siblings('.opened').removeClass('opened active')
-                        .children('ul').stop(true, true).slideUp(200);
-                }
-                $parentLi.addClass('opened active');
-                animate ? $submenu.stop(true, true).slideDown(200) : $submenu.show();
-            }
+        // Simple navigation for flattened menu (no dropdowns)
+        public_vars.$mainMenu.on('click', '> li > a', function(e) {
+            // Allow default navigation for all menu items
+            // No need to prevent default since we removed dropdowns
         });
 
-        // Ensure active menu's parent is opened on load (expanded sidebar)
-        if (!public_vars.$pageContainer.hasClass('sidebar-collapsed')) {
-            public_vars.$mainMenu.find('> li.has-sub').each(function() {
-                var $li = $(this);
-                var $submenu = $li.children('ul');
-                if ($li.find('ul li.active').length) {
-                    $li.addClass('opened active');
-                    $submenu.show();
-                }
-            });
-        }
-
-        // Handle menu hover effects in collapsed mode
+        // Handle menu hover effects in collapsed mode (simplified for flat menu)
         $(document).on('mouseenter', '.page-container.sidebar-collapsed .sidebar-menu #main-menu > li', function() {
             var $this = $(this);
-            var $submenu = $this.find('> ul');
             var $linkText = $this.find('> a > span:not(.badge)');
 
-            // Show submenu and link text on hover
-            if ($submenu.length > 0) {
-                $submenu.show().css({
-                    'position': 'absolute',
-                    'left': '65px',
-                    'top': '100%',
-                    'width': '200px',
-                    'background': '#303641',
-                    'z-index': '1000',
-                    'border-radius': '0 3px 3px 0',
-                    'box-shadow': '2px 2px 5px rgba(0,0,0,0.3)'
-                });
-            }
-
+            // Show link text on hover in collapsed mode
             if ($linkText.length > 0) {
                 $linkText.show().css({
                     'position': 'absolute',
                     'left': '65px',
                     'top': '0',
                     'width': '200px',
-                    'background': '#303641',
+                    'background': '#0b5e20',
                     'color': '#fff',
                     'padding': '15px 20px',
                     'border-radius': '0 3px 3px 0',
@@ -712,37 +670,75 @@ $(document).ready(function() {
 
         $(document).on('mouseleave', '.page-container.sidebar-collapsed .sidebar-menu #main-menu > li', function() {
             var $this = $(this);
-            var $submenu = $this.find('> ul');
             var $linkText = $this.find('> a > span:not(.badge)');
 
-            // Hide submenu and link text when not hovering
-            $submenu.hide();
+            // Hide link text when not hovering
             $linkText.hide();
-        });
-
-        // Additional handling for submenu hover
-        $(document).on('mouseenter', '.page-container.sidebar-collapsed .sidebar-menu #main-menu > li > ul', function() {
-            // Keep submenu visible when hovering over it
-            $(this).show();
-        });
-
-        $(document).on('mouseleave', '.page-container.sidebar-collapsed .sidebar-menu #main-menu > li > ul', function() {
-            // Hide submenu when leaving it
-            $(this).hide();
         });
 
         // Ensure proper cleanup when sidebar is expanded
         $(document).on('click', '.sidebar-collapse-icon', function() {
-            // Hide all expanded menus when toggling sidebar
+            // Show all menu text when expanding sidebar
             setTimeout(function() {
                 if (!$('.page-container').hasClass('sidebar-collapsed')) {
-                    $('.sidebar-menu #main-menu > li > ul').show();
                     $('.sidebar-menu #main-menu > li > a > span').show();
                 }
             }, 300);
         });
 
-        // Mobile menu toggle
+        // Mobile menu toggle functionality
+        $('#mobileMenuToggle').on('click', function(e) {
+            e.preventDefault();
+            toggleMobileMenu();
+        });
+
+        // Close mobile menu when clicking overlay
+        $('#mobileOverlay').on('click', function() {
+            closeMobileMenu();
+        });
+
+        // Close mobile menu when clicking outside on mobile
+        $(document).on('click', function(e) {
+            if ($(window).width() <= 768) {
+                if (!$(e.target).closest('.sidebar-menu, #mobileMenuToggle').length) {
+                    closeMobileMenu();
+                }
+            }
+        });
+
+        // Handle window resize
+        $(window).on('resize', function() {
+            if ($(window).width() > 768) {
+                closeMobileMenu();
+            }
+        });
+
+        function toggleMobileMenu() {
+            if ($(window).width() <= 768) {
+                var $sidebar = $('#sidebarMenu');
+                var $overlay = $('#mobileOverlay');
+
+                if ($sidebar.hasClass('mobile-open')) {
+                    closeMobileMenu();
+                } else {
+                    openMobileMenu();
+                }
+            }
+        }
+
+        function openMobileMenu() {
+            $('#sidebarMenu').addClass('mobile-open');
+            $('#mobileOverlay').addClass('active');
+            $('body').addClass('mobile-menu-open');
+        }
+
+        function closeMobileMenu() {
+            $('#sidebarMenu').removeClass('mobile-open');
+            $('#mobileOverlay').removeClass('active');
+            $('body').removeClass('mobile-menu-open');
+        }
+
+        // Legacy mobile menu toggle (for existing functionality)
         $('.sidebar-mobile-menu a').on('click', function(e) {
             e.preventDefault();
             var with_animation = $(this).hasClass('with-animation');
