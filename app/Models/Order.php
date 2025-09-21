@@ -22,7 +22,13 @@ class Order extends Model
         'subtotal',
         'shipping',
         'total',
-        'status'
+        'status',
+        'delivery_option',
+        'payment_method',
+        'special_instructions',
+        'pickup_date',
+        'delivery_date',
+        'farmer_notes'
     ];
 
     public function items()

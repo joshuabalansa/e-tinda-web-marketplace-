@@ -16,10 +16,12 @@ class CheckoutController extends Controller
         $cart = Session::get('cart', []);
         $items = [];
         $total = 0;
+        $shippingCost = 100; // Default shipping cost
 
         foreach ($cart as $id => $details) {
-            $product = Product::find($id);
+            $product = Product::with('user')->find($id);
             if ($product) {
+                $farmer = $product->user;
                 $items[] = [
                     'id' => $product->id,
                     'name' => $product->name,
@@ -27,13 +29,16 @@ class CheckoutController extends Controller
                     'quantity' => $details['quantity'],
                     'unit' => $product->unit_type,
                     'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://placehold.co/600x400?text=' . urlencode($product->name),
-                    'subtotal' => $product->price_per_unit * $details['quantity']
+                    'subtotal' => $product->price_per_unit * $details['quantity'],
+                    'farmer_name' => $farmer->business_name ?? $farmer->name,
+                    'farmer_location' => $farmer->city ? $farmer->city . ', ' . $farmer->state : 'Philippines',
+                    'farmer_id' => $farmer->id
                 ];
                 $total += $product->price_per_unit * $details['quantity'];
             }
         }
 
-        return view('shop.checkout', compact('items', 'total'));
+        return view('shop.checkout', compact('items', 'total', 'shippingCost'));
     }
 
     public function process(Request $request)
@@ -43,12 +48,25 @@ class CheckoutController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:255',
-            'address' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'state' => 'required|string|max:255',
-            'zip' => 'required|string|max:255',
-            'shipping' => 'required|numeric|min:0'
+            'address' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
+            'zip' => 'nullable|string|max:255',
+            'shipping' => 'required|numeric|min:0',
+            'delivery_option' => 'required|in:pickup,delivery',
+            'payment_method' => 'required|in:cash,gcash,bank_transfer',
+            'special_instructions' => 'nullable|string|max:1000'
         ]);
+
+        // Additional validation for delivery option
+        if ($request->delivery_option === 'delivery') {
+            $request->validate([
+                'address' => 'required|string|max:255',
+                'city' => 'required|string|max:255',
+                'state' => 'required|string|max:255',
+                'zip' => 'required|string|max:255',
+            ]);
+        }
 
         $cart = Session::get('cart', []);
         if (empty($cart)) {
@@ -76,14 +94,17 @@ class CheckoutController extends Controller
                 'last_name' => $request->last_name,
                 'email' => $request->email,
                 'phone' => $request->phone,
-                'address' => $request->address,
-                'city' => $request->city,
-                'state' => $request->state,
-                'zip' => $request->zip,
+                'address' => $request->address ?? 'Farm Pickup',
+                'city' => $request->city ?? 'Farm Location',
+                'state' => $request->state ?? 'Farm Province',
+                'zip' => $request->zip ?? '0000',
                 'subtotal' => $subtotal,
                 'shipping' => $shipping,
                 'total' => $total,
-                'status' => 'pending'
+                'status' => 'pending',
+                'delivery_option' => $request->delivery_option,
+                'payment_method' => $request->payment_method,
+                'special_instructions' => $request->special_instructions
             ]);
 
             // Add order items
