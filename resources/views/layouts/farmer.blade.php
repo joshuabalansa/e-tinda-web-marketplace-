@@ -363,28 +363,11 @@
                     </ul>
                 </li>
 
-                <li class="has-sub">
-                    <a href="#">
+                <li class="{{ request()->routeIs('farmer.analytics.*') ? 'active' : '' }}">
+                    <a href="{{ route('farmer.analytics.index') }}">
                         <i class="entypo-chart-bar"></i>
-                        <span class="title">Analytics</span>
+                        <span class="title">Analytics Dashboard</span>
                     </a>
-                    <ul>
-                        <li>
-                            <a href="#">
-                                <span class="title">Sales Reports</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <span class="title">Inventory Reports</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <span class="title">Performance Metrics</span>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
 
                 <li class="has-sub">

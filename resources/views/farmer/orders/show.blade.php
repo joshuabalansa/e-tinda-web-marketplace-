@@ -49,9 +49,10 @@
                                                          alt="{{ $item->product->name }}"
                                                          class="img-responsive img-rounded">
                                                 @else
-                                                    <div class="text-center" style="height: 80px; background: #f5f5f5; border-radius: 5px; display: flex; align-items: center; justify-content: center;">
-                                                        <i class="entypo-image" style="font-size: 24px; color: #ccc;"></i>
-                                                    </div>
+                                                    <img src="https://placehold.co/600x400?text={{ urlencode($item->product->name) }}"
+                                                         alt="{{ $item->product->name }}"
+                                                         class="img-responsive img-rounded"
+                                                         style="height: 80px; object-fit: cover;">
                                                 @endif
                                             </div>
                                             <div class="col-md-6">

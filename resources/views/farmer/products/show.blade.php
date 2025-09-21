@@ -35,13 +35,12 @@
                                              data-toggle="modal"
                                              data-target="#imageModal">
                                     @else
-                                        <div class="bg-light d-flex align-items-center justify-content-center"
-                                             style="height: 300px;">
-                                            <div class="text-center">
-                                                <i class="entypo-image text-muted mb-3" style="font-size: 3rem;"></i>
-                                                <p class="text-muted mb-0 small">No image available</p>
-                                            </div>
-                                        </div>
+                                        <img src="https://placehold.co/600x400?text={{ urlencode($product->name) }}"
+                                             alt="{{ $product->name }}"
+                                             class="img-responsive w-100"
+                                             style="height: 300px; object-fit: cover; cursor: pointer;"
+                                             data-toggle="modal"
+                                             data-target="#imageModal">
                                     @endif
 
                                     <!-- Status Badge -->

@@ -13,14 +13,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // Create test user
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
 
-        // Seed products
+        // Seed admin user
+        $this->call(AdminSeeder::class);
+
+        // Seed products with categories and multiple farmers
         $this->call(ProductSeeder::class);
+
+        $this->command->info('Database seeding completed successfully!');
     }
 }

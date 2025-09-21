@@ -23,7 +23,7 @@ class CartController extends Controller
                     'price' => $product->price_per_unit,
                     'quantity' => $details['quantity'],
                     'unit' => $product->unit_type,
-                    'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://via.placeholder.com/300x200?text=No+Image',
+                    'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://placehold.co/600x400?text=' . urlencode($product->name),
                     'subtotal' => $product->price_per_unit * $details['quantity']
                 ];
                 $total += $product->price_per_unit * $details['quantity'];

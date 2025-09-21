@@ -17,6 +17,7 @@ use App\Http\Controllers\FarmerOrderController;
 use App\Http\Controllers\BuyerOrderController;
 use App\Http\Controllers\BuyerWishlistController;
 use App\Http\Controllers\Farmer\InventoryController;
+use App\Http\Controllers\FarmerAnalyticsController;
 
 // Language switching route
 Route::get('language/{locale}', function ($locale) {
@@ -111,6 +112,10 @@ Route::middleware(['auth', 'farmer'])->group(function () {
         'update' => 'farmer.inventory.update',
         'destroy' => 'farmer.inventory.destroy',
     ]);
+
+    // Farmer Analytics Routes
+    Route::get('/farmer/analytics', [FarmerAnalyticsController::class, 'index'])->name('farmer.analytics.index');
+    Route::get('/farmer/analytics/chart-data', [FarmerAnalyticsController::class, 'getChartData'])->name('farmer.analytics.chart-data');
 });
 
 //buyer Dashboard Route

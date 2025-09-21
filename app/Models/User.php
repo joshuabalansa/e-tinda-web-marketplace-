@@ -87,4 +87,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class, 'buyer_id');
     }
+
+    /**
+     * Get the products for the user (farmer).
+     */
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

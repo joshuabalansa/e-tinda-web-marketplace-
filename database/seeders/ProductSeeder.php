@@ -12,318 +12,389 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        $farmer = User::where('role', 'farmer')->first();
+        // Create multiple farmers for variety
+        $farmers = $this->createFarmers();
 
-        if (!$farmer) {
-            $farmer = User::create([
-                'name' => 'Sample Farmer',
-                'email' => 'farmer@example.com',
-                'password' => bcrypt('password'),
-                'role' => 'farmer',
-                'email_verified_at' => now(),
-            ]);
+        // Define Filipino vegetables
+        $vegetables = $this->getFilipinoVegetables();
+
+        $totalProducts = 0;
+
+        foreach ($vegetables as $vegetableData) {
+            // Assign random farmer to each product
+            $farmer = $farmers[array_rand($farmers)];
+            $vegetableData['user_id'] = $farmer->id;
+            $vegetableData['category'] = 'Vegetables';
+
+            Product::create($vegetableData);
+            $totalProducts++;
         }
 
-        $products = [
-            // Vegetables
+        $this->command->info("Created {$totalProducts} Filipino vegetables with " . count($farmers) . " farmers.");
+    }
+
+    private function createFarmers(): array
+    {
+        $farmers = [];
+
+        $farmerData = [
             [
-                'name' => 'Fresh Tomatoes',
-                'description' => 'Juicy, ripe tomatoes perfect for salads, cooking, and fresh eating.',
-                'price_per_unit' => 45.00,
-                'unit_type' => 'kg',
-                'stock_quantity' => 50,
-                'harvest_date' => Carbon::now()->subDays(2),
-                'image_url' => 'products/tomatoes.jpg',
-                'category' => 'Vegetables',
-                'status' => 'available'
+                'name' => 'Maria Santos',
+                'email' => 'maria.santos@farm.com',
+                'role' => 'farmer'
             ],
             [
-                'name' => 'Crisp Lettuce',
-                'description' => 'Fresh, crisp lettuce heads perfect for salads and sandwiches.',
-                'price_per_unit' => 35.00,
-                'unit_type' => 'piece',
-                'stock_quantity' => 30,
-                'harvest_date' => Carbon::now()->subDays(1),
-                'image_url' => 'products/lettuce.jpg',
-                'category' => 'Vegetables',
-                'status' => 'available'
+                'name' => 'Juan Dela Cruz',
+                'email' => 'juan.delacruz@farm.com',
+                'role' => 'farmer'
             ],
             [
-                'name' => 'Sweet Bell Peppers',
-                'description' => 'Colorful bell peppers in red, yellow, and green.',
-                'price_per_unit' => 60.00,
-                'unit_type' => 'kg',
-                'stock_quantity' => 25,
-                'harvest_date' => Carbon::now()->subDays(3),
-                'image_url' => 'products/bell-peppers.jpg',
-                'category' => 'Vegetables',
-                'status' => 'available'
+                'name' => 'Ana Rodriguez',
+                'email' => 'ana.rodriguez@farm.com',
+                'role' => 'farmer'
             ],
             [
-                'name' => 'Fresh Carrots',
-                'description' => 'Sweet, crunchy carrots rich in vitamins.',
-                'price_per_unit' => 40.00,
-                'unit_type' => 'kg',
-                'stock_quantity' => 40,
-                'harvest_date' => Carbon::now()->subDays(4),
-                'image_url' => 'products/carrots.jpg',
-                'category' => 'Vegetables',
-                'status' => 'available'
+                'name' => 'Carlos Mendoza',
+                'email' => 'carlos.mendoza@farm.com',
+                'role' => 'farmer'
             ],
             [
-                'name' => 'Organic Spinach',
-                'description' => 'Tender, organic spinach leaves packed with nutrients.',
-                'price_per_unit' => 55.00,
-                'unit_type' => 'bunch',
-                'stock_quantity' => 20,
-                'harvest_date' => Carbon::now()->subDays(1),
-                'image_url' => 'products/spinach.jpg',
-                'category' => 'Vegetables',
-                'status' => 'out_of_stock'
-            ],
-            // Fruits
-            [
-                'name' => 'Sweet Mangoes',
-                'description' => 'Juicy, sweet mangoes from our orchard.',
-                'price_per_unit' => 80.00,
-                'unit_type' => 'kg',
-                'stock_quantity' => 35,
-                'harvest_date' => Carbon::now()->subDays(5),
-                'image_url' => 'products/mangoes.jpg',
-                'category' => 'Fruits',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Fresh Bananas',
-                'description' => 'Naturally ripened bananas, rich in potassium.',
-                'price_per_unit' => 50.00,
-                'unit_type' => 'bunch',
-                'stock_quantity' => 15,
-                'harvest_date' => Carbon::now()->subDays(3),
-                'image_url' => 'products/bananas.jpg',
-                'category' => 'Fruits',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Juicy Oranges',
-                'description' => 'Sweet, juicy oranges packed with vitamin C.',
-                'price_per_unit' => 65.00,
-                'unit_type' => 'kg',
-                'stock_quantity' => 28,
-                'harvest_date' => Carbon::now()->subDays(4),
-                'image_url' => 'products/oranges.jpg',
-                'category' => 'Fruits',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Fresh Strawberries',
-                'description' => 'Sweet, red strawberries perfect for desserts.',
-                'price_per_unit' => 120.00,
-                'unit_type' => 'box',
-                'stock_quantity' => 12,
-                'harvest_date' => Carbon::now()->subDays(2),
-                'image_url' => 'products/strawberries.jpg',
-                'category' => 'Fruits',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Ripe Pineapples',
-                'description' => 'Sweet, tropical pineapples perfect for fresh eating.',
-                'price_per_unit' => 90.00,
-                'unit_type' => 'piece',
-                'stock_quantity' => 8,
-                'harvest_date' => Carbon::now()->subDays(6),
-                'image_url' => 'products/pineapples.jpg',
-                'category' => 'Fruits',
-                'status' => 'out_of_stock'
-            ],
-            // Grains
-            [
-                'name' => 'Premium Rice',
-                'description' => 'High-quality, locally grown rice.',
-                'price_per_unit' => 45.00,
-                'unit_type' => 'kg',
-                'stock_quantity' => 100,
-                'harvest_date' => Carbon::now()->subDays(30),
-                'image_url' => 'products/rice.jpg',
-                'category' => 'Grains',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Organic Quinoa',
-                'description' => 'Nutritious quinoa grains, perfect for healthy meals.',
-                'price_per_unit' => 180.00,
-                'unit_type' => 'kg',
-                'stock_quantity' => 15,
-                'harvest_date' => Carbon::now()->subDays(45),
-                'image_url' => 'products/quinoa.jpg',
-                'category' => 'Grains',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Whole Wheat Flour',
-                'description' => 'Freshly milled whole wheat flour perfect for baking.',
-                'price_per_unit' => 35.00,
-                'unit_type' => 'kg',
-                'stock_quantity' => 25,
-                'harvest_date' => Carbon::now()->subDays(15),
-                'image_url' => 'products/wheat-flour.jpg',
-                'category' => 'Grains',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Oats',
-                'description' => 'Rolled oats perfect for breakfast and baking.',
-                'price_per_unit' => 55.00,
-                'unit_type' => 'kg',
-                'stock_quantity' => 20,
-                'harvest_date' => Carbon::now()->subDays(20),
-                'image_url' => 'products/oats.jpg',
-                'category' => 'Grains',
-                'status' => 'available'
-            ],
-            // Dairy
-            [
-                'name' => 'Fresh Cow Milk',
-                'description' => 'Fresh, pasteurized cow milk from our dairy farm.',
-                'price_per_unit' => 65.00,
-                'unit_type' => 'liter',
-                'stock_quantity' => 40,
-                'harvest_date' => Carbon::now()->subDays(1),
-                'image_url' => 'products/milk.jpg',
-                'category' => 'Dairy',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Farm Fresh Eggs',
-                'description' => 'Fresh eggs from free-range chickens.',
-                'price_per_unit' => 8.00,
-                'unit_type' => 'piece',
-                'stock_quantity' => 60,
-                'harvest_date' => Carbon::now()->subDays(1),
-                'image_url' => 'products/eggs.jpg',
-                'category' => 'Dairy',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Artisan Cheese',
-                'description' => 'Handcrafted cheese made from our farm milk.',
-                'price_per_unit' => 150.00,
-                'unit_type' => 'kg',
-                'stock_quantity' => 10,
-                'harvest_date' => Carbon::now()->subDays(7),
-                'image_url' => 'products/cheese.jpg',
-                'category' => 'Dairy',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Fresh Yogurt',
-                'description' => 'Creamy, probiotic-rich yogurt made from our farm milk.',
-                'price_per_unit' => 45.00,
-                'unit_type' => 'container',
-                'stock_quantity' => 25,
-                'harvest_date' => Carbon::now()->subDays(2),
-                'image_url' => 'products/yogurt.jpg',
-                'category' => 'Dairy',
-                'status' => 'out_of_stock'
-            ],
-            // Meat
-            [
-                'name' => 'Grass-Fed Beef',
-                'description' => 'Premium grass-fed beef from our pasture-raised cattle.',
-                'price_per_unit' => 350.00,
-                'unit_type' => 'kg',
-                'stock_quantity' => 15,
-                'harvest_date' => Carbon::now()->subDays(3),
-                'image_url' => 'products/beef.jpg',
-                'category' => 'Meat',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Free-Range Chicken',
-                'description' => 'Fresh, free-range chicken from our farm.',
-                'price_per_unit' => 180.00,
-                'unit_type' => 'kg',
-                'stock_quantity' => 20,
-                'harvest_date' => Carbon::now()->subDays(2),
-                'image_url' => 'products/chicken.jpg',
-                'category' => 'Meat',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Fresh Pork',
-                'description' => 'Quality pork from our farm-raised pigs.',
-                'price_per_unit' => 220.00,
-                'unit_type' => 'kg',
-                'stock_quantity' => 12,
-                'harvest_date' => Carbon::now()->subDays(4),
-                'image_url' => 'products/pork.jpg',
-                'category' => 'Meat',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Fresh Fish',
-                'description' => 'Fresh fish from our local waters.',
-                'price_per_unit' => 280.00,
-                'unit_type' => 'kg',
-                'stock_quantity' => 8,
-                'harvest_date' => Carbon::now()->subDays(1),
-                'image_url' => 'products/fish.jpg',
-                'category' => 'Meat',
-                'status' => 'unavailable'
-            ],
-            // Other
-            [
-                'name' => 'Raw Honey',
-                'description' => 'Pure, raw honey from our beehives.',
-                'price_per_unit' => 200.00,
-                'unit_type' => 'bottle',
-                'stock_quantity' => 18,
-                'harvest_date' => Carbon::now()->subDays(10),
-                'image_url' => 'products/honey.jpg',
-                'category' => 'Other',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Herbal Tea Mix',
-                'description' => 'Dried herbs and flowers for making refreshing herbal teas.',
-                'price_per_unit' => 75.00,
-                'unit_type' => 'pack',
-                'stock_quantity' => 30,
-                'harvest_date' => Carbon::now()->subDays(5),
-                'image_url' => 'products/herbal-tea.jpg',
-                'category' => 'Other',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Dried Mushrooms',
-                'description' => 'Premium dried mushrooms perfect for soups and stir-fries.',
-                'price_per_unit' => 120.00,
-                'unit_type' => 'pack',
-                'stock_quantity' => 15,
-                'harvest_date' => Carbon::now()->subDays(7),
-                'image_url' => 'products/mushrooms.jpg',
-                'category' => 'Other',
-                'status' => 'available'
-            ],
-            [
-                'name' => 'Organic Seeds',
-                'description' => 'High-quality organic seeds for growing your own vegetables.',
-                'price_per_unit' => 25.00,
-                'unit_type' => 'packet',
-                'stock_quantity' => 50,
-                'harvest_date' => Carbon::now()->subDays(60),
-                'image_url' => 'products/seeds.jpg',
-                'category' => 'Other',
-                'status' => 'available'
+                'name' => 'Elena Garcia',
+                'email' => 'elena.garcia@farm.com',
+                'role' => 'farmer'
             ]
         ];
 
-        foreach ($products as $product) {
-            $product['user_id'] = $farmer->id;
-            Product::create($product);
+        foreach ($farmerData as $data) {
+            $farmer = User::where('email', $data['email'])->first();
+            if (!$farmer) {
+                $farmer = User::create([
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'password' => bcrypt('password'),
+                    'role' => $data['role'],
+                    'email_verified_at' => now(),
+                ]);
+            }
+            $farmers[] = $farmer;
         }
 
-        $this->command->info('Created ' . count($products) . ' products with realistic data and images for all categories.');
+        return $farmers;
+    }
+
+    private function getFilipinoVegetables(): array
+    {
+        return [
+            [
+                'name' => 'Kamote (Sweet Potato)',
+                'description' => 'Fresh kamote tubers, rich in fiber and vitamins. Perfect for boiling, roasting, or making desserts.',
+                'price_per_unit' => 35.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(20, 60),
+                'harvest_date' => Carbon::now()->subDays(rand(1, 5)),
+                'image_url' => 'products/kamote.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Talong (Eggplant)',
+                'description' => 'Fresh purple eggplants perfect for pinakbet, tortang talong, and other Filipino dishes.',
+                'price_per_unit' => 40.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(15, 45),
+                'harvest_date' => Carbon::now()->subDays(rand(1, 4)),
+                'image_url' => 'products/talong.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Okra',
+                'description' => 'Fresh okra pods perfect for sinigang, pinakbet, and other Filipino stews.',
+                'price_per_unit' => 45.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(10, 35),
+                'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
+                'image_url' => 'products/okra.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Ampalaya (Bitter Gourd)',
+                'description' => 'Fresh ampalaya perfect for ginataang ampalaya and other Filipino dishes.',
+                'price_per_unit' => 50.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(8, 25),
+                'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
+                'image_url' => 'products/ampalaya.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Kalabasa (Squash)',
+                'description' => 'Fresh kalabasa perfect for ginataang kalabasa and other Filipino recipes.',
+                'price_per_unit' => 30.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(12, 40),
+                'harvest_date' => Carbon::now()->subDays(rand(2, 6)),
+                'image_url' => 'products/kalabasa.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Sitaw (String Beans)',
+                'description' => 'Fresh sitaw perfect for pinakbet, adobong sitaw, and other Filipino dishes.',
+                'price_per_unit' => 35.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(15, 50),
+                'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
+                'image_url' => 'products/sitaw.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Kangkong (Water Spinach)',
+                'description' => 'Fresh kangkong leaves perfect for adobong kangkong and other Filipino recipes.',
+                'price_per_unit' => 25.00,
+                'unit_type' => 'bunch',
+                'stock_quantity' => rand(20, 60),
+                'harvest_date' => Carbon::now()->subDays(rand(1, 2)),
+                'image_url' => 'products/kangkong.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Pechay (Chinese Cabbage)',
+                'description' => 'Fresh pechay perfect for soups, stir-fries, and Filipino dishes.',
+                'price_per_unit' => 30.00,
+                'unit_type' => 'bunch',
+                'stock_quantity' => rand(18, 45),
+                'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
+                'image_url' => 'products/pechay.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Repolyo (Cabbage)',
+                'description' => 'Fresh cabbage perfect for lumpia, salads, and Filipino dishes.',
+                'price_per_unit' => 40.00,
+                'unit_type' => 'piece',
+                'stock_quantity' => rand(10, 30),
+                'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
+                'image_url' => 'products/repolyo.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Carrots',
+                'description' => 'Fresh carrots perfect for Filipino dishes, soups, and salads.',
+                'price_per_unit' => 45.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(15, 40),
+                'harvest_date' => Carbon::now()->subDays(rand(2, 6)),
+                'image_url' => 'products/carrots.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Patatas (Potatoes)',
+                'description' => 'Fresh potatoes perfect for Filipino dishes, fries, and various recipes.',
+                'price_per_unit' => 35.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(20, 55),
+                'harvest_date' => Carbon::now()->subDays(rand(3, 8)),
+                'image_url' => 'products/patatas.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Sibuyas (Onions)',
+                'description' => 'Fresh red onions essential for Filipino cooking and flavoring dishes.',
+                'price_per_unit' => 60.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(25, 70),
+                'harvest_date' => Carbon::now()->subDays(rand(5, 15)),
+                'image_url' => 'products/sibuyas.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Bawang (Garlic)',
+                'description' => 'Fresh garlic cloves essential for Filipino cooking and seasoning.',
+                'price_per_unit' => 80.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(15, 40),
+                'harvest_date' => Carbon::now()->subDays(rand(7, 20)),
+                'image_url' => 'products/bawang.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Kamatis (Tomatoes)',
+                'description' => 'Fresh red tomatoes perfect for Filipino dishes, salads, and sauces.',
+                'price_per_unit' => 50.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(12, 35),
+                'harvest_date' => Carbon::now()->subDays(rand(1, 4)),
+                'image_url' => 'products/kamatis.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Labanos (Radish)',
+                'description' => 'Fresh white radish perfect for Filipino dishes and pickling.',
+                'price_per_unit' => 25.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(10, 30),
+                'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
+                'image_url' => 'products/labanos.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Mustasa (Mustard Greens)',
+                'description' => 'Fresh mustard greens perfect for Filipino dishes and soups.',
+                'price_per_unit' => 20.00,
+                'unit_type' => 'bunch',
+                'stock_quantity' => rand(15, 40),
+                'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
+                'image_url' => 'products/mustasa.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Alugbati (Malabar Spinach)',
+                'description' => 'Fresh alugbati leaves perfect for Filipino dishes and soups.',
+                'price_per_unit' => 22.00,
+                'unit_type' => 'bunch',
+                'stock_quantity' => rand(12, 35),
+                'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
+                'image_url' => 'products/alugbati.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Talong (Eggplant) - Long Variety',
+                'description' => 'Long variety eggplant perfect for tortang talong and other Filipino dishes.',
+                'price_per_unit' => 45.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(8, 25),
+                'harvest_date' => Carbon::now()->subDays(rand(1, 4)),
+                'image_url' => 'products/talong-long.jpg',
+                'status' => rand(0, 1) ? 'available' : 'out_of_stock'
+            ],
+            [
+                'name' => 'Upo (Bottle Gourd)',
+                'description' => 'Fresh upo perfect for ginataang upo and other Filipino dishes.',
+                'price_per_unit' => 35.00,
+                'unit_type' => 'piece',
+                'stock_quantity' => rand(6, 20),
+                'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
+                'image_url' => 'products/upo.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Patola (Sponge Gourd)',
+                'description' => 'Fresh patola perfect for Filipino soups and dishes.',
+                'price_per_unit' => 30.00,
+                'unit_type' => 'piece',
+                'stock_quantity' => rand(8, 25),
+                'harvest_date' => Carbon::now()->subDays(rand(1, 4)),
+                'image_url' => 'products/patola.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Sayote (Chayote)',
+                'description' => 'Fresh sayote perfect for Filipino dishes and stir-fries.',
+                'price_per_unit' => 25.00,
+                'unit_type' => 'piece',
+                'stock_quantity' => rand(10, 30),
+                'harvest_date' => Carbon::now()->subDays(rand(2, 6)),
+                'image_url' => 'products/sayote.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Baguio Beans (Green Beans)',
+                'description' => 'Fresh Baguio beans perfect for Filipino dishes and stir-fries.',
+                'price_per_unit' => 40.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(12, 35),
+                'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
+                'image_url' => 'products/baguio-beans.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Lettuce',
+                'description' => 'Fresh lettuce perfect for Filipino salads and dishes.',
+                'price_per_unit' => 35.00,
+                'unit_type' => 'piece',
+                'stock_quantity' => rand(15, 40),
+                'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
+                'image_url' => 'products/lettuce.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Cucumber',
+                'description' => 'Fresh cucumber perfect for Filipino salads and dishes.',
+                'price_per_unit' => 30.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(10, 30),
+                'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
+                'image_url' => 'products/cucumber.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Bell Pepper (Red)',
+                'description' => 'Fresh red bell pepper perfect for Filipino dishes and stir-fries.',
+                'price_per_unit' => 80.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(8, 20),
+                'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
+                'image_url' => 'products/bell-pepper-red.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Bell Pepper (Green)',
+                'description' => 'Fresh green bell pepper perfect for Filipino dishes and stir-fries.',
+                'price_per_unit' => 70.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(10, 25),
+                'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
+                'image_url' => 'products/bell-pepper-green.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Broccoli',
+                'description' => 'Fresh broccoli perfect for Filipino dishes and stir-fries.',
+                'price_per_unit' => 60.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(8, 20),
+                'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
+                'image_url' => 'products/broccoli.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Cauliflower',
+                'description' => 'Fresh cauliflower perfect for Filipino dishes and stir-fries.',
+                'price_per_unit' => 55.00,
+                'unit_type' => 'piece',
+                'stock_quantity' => rand(6, 18),
+                'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
+                'image_url' => 'products/cauliflower.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Corn (Sweet Corn)',
+                'description' => 'Fresh sweet corn perfect for Filipino dishes and grilling.',
+                'price_per_unit' => 25.00,
+                'unit_type' => 'piece',
+                'stock_quantity' => rand(20, 50),
+                'harvest_date' => Carbon::now()->subDays(rand(1, 4)),
+                'image_url' => 'products/corn.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Ginger (Luya)',
+                'description' => 'Fresh ginger root essential for Filipino cooking and flavoring.',
+                'price_per_unit' => 120.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(10, 30),
+                'harvest_date' => Carbon::now()->subDays(rand(5, 15)),
+                'image_url' => 'products/ginger.jpg',
+                'status' => 'available'
+            ],
+            [
+                'name' => 'Turmeric (Luyang Dilaw)',
+                'description' => 'Fresh turmeric root perfect for Filipino dishes and health benefits.',
+                'price_per_unit' => 100.00,
+                'unit_type' => 'kg',
+                'stock_quantity' => rand(8, 25),
+                'harvest_date' => Carbon::now()->subDays(rand(5, 15)),
+                'image_url' => 'products/turmeric.jpg',
+                'status' => 'available'
+            ]
+        ];
     }
 }

@@ -135,9 +135,9 @@
                                                  data-image="{{ asset('storage/' . $product->image_url) }}"
                                                  data-name="{{ $product->name }}">
                                         @else
-                                            <div class="no-image-placeholder">
-                                                <i class="entypo-image"></i>
-                                            </div>
+                                            <img src="https://placehold.co/600x400?text={{ urlencode($product->name) }}"
+                                                 alt="{{ $product->name }}"
+                                                 class="img-responsive product-image">
                                         @endif
 
                                         <!-- Status Badge -->

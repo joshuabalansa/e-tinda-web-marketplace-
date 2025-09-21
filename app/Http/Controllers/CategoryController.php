@@ -61,7 +61,7 @@ class CategoryController extends Controller
                     'name' => $product->name,
                     'price' => $product->price_per_unit,
                     'unit' => $product->unit_type,
-                    'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://via.placeholder.com/300x200?text=No+Image',
+                    'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://placehold.co/600x400?text=' . urlencode($product->name),
                     'description' => $product->description,
                     'vendor' => $product->user->name,
                     'location' => $product->user->address ?? 'Location not specified',

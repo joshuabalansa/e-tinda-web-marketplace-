@@ -59,7 +59,7 @@ class FarmerOrderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $request->validate([
-            'status' => 'required|in:pending,processing,shipped,delivered,cancelled'
+            'status' => 'required|in:pending,processing,shipped,completed,cancelled'
         ]);
 
         $farmerId = Auth::id();
@@ -89,6 +89,7 @@ class FarmerOrderController extends Controller
             'processing_orders' => 0,
             'shipped_orders' => 0,
             'delivered_orders' => 0,
+            'completed_orders' => 0,
             'cancelled_orders' => 0,
             'total_revenue' => 0
         ];
@@ -100,7 +101,12 @@ class FarmerOrderController extends Controller
 
         foreach ($orders as $order) {
             $stats['total_orders']++;
-            $stats[$order->status . '_orders']++;
+
+            // Safely increment the status-specific counter
+            $statusKey = $order->status . '_orders';
+            if (isset($stats[$statusKey])) {
+                $stats[$statusKey]++;
+            }
 
             // Calculate revenue from this farmer's products in the order
             foreach ($order->items as $item) {
@@ -112,4 +118,5 @@ class FarmerOrderController extends Controller
 
         return $stats;
     }
+
 }

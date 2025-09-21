@@ -39,8 +39,8 @@
 <!-- Features Section -->
 <section class="py-5 bg-white">
   <div class="container">
-    <div class="row g-4">
-      <div class="col-md-3 text-center">
+    <div class="row g-4 justify-content-center">
+      <div class="col-lg-3 col-md-4 col-sm-6 text-center">
         <div class="feature-item p-3">
           <div class="feature-icon mb-3">
             <i class="fas fa-leaf fa-3x text-success"></i>
@@ -49,7 +49,7 @@
           <p class="text-muted mb-0">{{ __('welcome.fresh_organic_desc') }}</p>
         </div>
       </div>
-      <div class="col-md-3 text-center">
+      <div class="col-lg-3 col-md-4 col-sm-6 text-center">
         <div class="feature-item p-3">
           <div class="feature-icon mb-3">
             <i class="fas fa-handshake fa-3x text-success"></i>
@@ -58,7 +58,7 @@
           <p class="text-muted mb-0">{{ __('welcome.support_local_desc') }}</p>
         </div>
       </div>
-      <div class="col-md-3 text-center">
+      <div class="col-lg-3 col-md-4 col-sm-6 text-center">
         <div class="feature-item p-3">
           <div class="feature-icon mb-3">
             <i class="fas fa-shield-alt fa-3x text-success"></i>
@@ -78,10 +78,10 @@
       <h2 class="section-title display-6 fw-bold">{{ __('welcome.shop_by_category') }}</h2>
       <p class="lead text-muted">{{ __('welcome.categories_description') }}</p>
     </div>
-    <div class="row g-4">
+    <div class="row g-4 justify-content-center">
       @if($categories->count() > 0)
         @foreach($categories as $category)
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-4 col-md-6 col-sm-12">
           <div class="category-card card h-100 border-0 shadow-sm">
             <div class="position-relative">
               <img src="{{ $category['image'] }}" class="card-img-top" alt="{{ $category['name'] }}" style="height: 250px; object-fit: cover;">
@@ -130,10 +130,10 @@
       <h2 class="section-title display-6 fw-bold">{{ __('welcome.featured_products') }}</h2>
       <p class="lead text-muted">{{ __('welcome.featured_description') }}</p>
     </div>
-    <div class="row g-4">
+    <div class="row g-4 justify-content-center">
       @if($featuredProducts->count() > 0)
         @foreach($featuredProducts as $product)
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-3 col-md-6 col-sm-12">
           <div class="product-card card h-100 border-0 shadow-sm">
             <div class="position-relative">
               <img src="{{ $product['image'] }}" class="card-img-top" alt="{{ $product['name'] }}" style="height: 220px; object-fit: cover;">
