@@ -64,14 +64,14 @@ class FarmerAnalyticsController extends Controller
             ->where('products.user_id', $farmerId)
             ->whereRaw('orders.status != ?', ['cancelled'])
             ->select(
-                DB::raw('strftime("%m", orders.created_at) as month'),
-                DB::raw('strftime("%Y", orders.created_at) as year'),
+                DB::raw($this->getMonthExpression('orders.created_at') . ' as month'),
+                DB::raw($this->getYearExpression('orders.created_at') . ' as year'),
                 DB::raw('SUM(order_items.quantity) as total_quantity'),
                 DB::raw('SUM(order_items.price * order_items.quantity) as total_revenue')
             )
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
+            ->groupBy(DB::raw($this->getYearExpression('orders.created_at')), DB::raw($this->getMonthExpression('orders.created_at')))
+            ->orderBy(DB::raw($this->getYearExpression('orders.created_at')), 'desc')
+            ->orderBy(DB::raw($this->getMonthExpression('orders.created_at')), 'desc')
             ->limit(12)
             ->get();
 
@@ -80,10 +80,10 @@ class FarmerAnalyticsController extends Controller
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->where('products.user_id', $farmerId)
             ->whereRaw('orders.status != ?', ['cancelled'])
-            ->whereRaw('strftime("%m", orders.created_at) = ?', [str_pad(Carbon::now()->month, 2, '0', STR_PAD_LEFT)])
-            ->whereRaw('strftime("%Y", orders.created_at) = ?', [Carbon::now()->year])
+            ->whereRaw($this->getMonthExpression('orders.created_at') . ' = ?', [Carbon::now()->month])
+            ->whereRaw($this->getYearExpression('orders.created_at') . ' = ?', [Carbon::now()->year])
             ->select(
-                DB::raw('strftime("%d", orders.created_at) as day'),
+                DB::raw($this->getDayExpression('orders.created_at') . ' as day'),
                 DB::raw('SUM(order_items.quantity) as total_quantity'),
                 DB::raw('SUM(order_items.price * order_items.quantity) as total_revenue')
             )
@@ -189,14 +189,14 @@ class FarmerAnalyticsController extends Controller
             ->where('products.user_id', $farmerId)
             ->where('orders.created_at', '>=', Carbon::now()->subMonths(6))
             ->select(
-                DB::raw('strftime("%m", orders.created_at) as month'),
-                DB::raw('strftime("%Y", orders.created_at) as year'),
+                DB::raw($this->getMonthExpression('orders.created_at') . ' as month'),
+                DB::raw($this->getYearExpression('orders.created_at') . ' as year'),
                 DB::raw('COUNT(DISTINCT orders.id) as order_count'),
                 DB::raw('SUM(order_items.price * order_items.quantity) as total_revenue')
             )
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
+            ->groupBy(DB::raw($this->getYearExpression('orders.created_at')), DB::raw($this->getMonthExpression('orders.created_at')))
+            ->orderBy(DB::raw($this->getYearExpression('orders.created_at')), 'desc')
+            ->orderBy(DB::raw($this->getMonthExpression('orders.created_at')), 'desc')
             ->get();
 
         return [
@@ -214,17 +214,17 @@ class FarmerAnalyticsController extends Controller
             ->whereRaw('orders.status != ?', ['cancelled'])
             ->where('orders.created_at', '>=', Carbon::now()->subMonths(12))
             ->select(
-                DB::raw('strftime("%m", orders.created_at) as month'),
-                DB::raw('strftime("%Y", orders.created_at) as year'),
+                DB::raw($this->getMonthExpression('orders.created_at') . ' as month'),
+                DB::raw($this->getYearExpression('orders.created_at') . ' as year'),
                 DB::raw('SUM(order_items.price * order_items.quantity) as revenue')
             )
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
+            ->groupBy(DB::raw($this->getYearExpression('orders.created_at')), DB::raw($this->getMonthExpression('orders.created_at')))
+            ->orderBy(DB::raw($this->getYearExpression('orders.created_at')), 'desc')
+            ->orderBy(DB::raw($this->getMonthExpression('orders.created_at')), 'desc')
             ->get();
 
         // Revenue comparison (current vs previous month)
-        $currentMonth = str_pad(Carbon::now()->month, 2, '0', STR_PAD_LEFT);
+        $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
 
 
@@ -232,19 +232,19 @@ class FarmerAnalyticsController extends Controller
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->where('products.user_id', $farmerId)
             ->whereRaw('orders.status != ?', ['cancelled'])
-            ->whereRaw('strftime("%m", orders.created_at) = ?', [$currentMonth])
-            ->whereRaw('strftime("%Y", orders.created_at) = ?', [$currentYear])
+            ->whereRaw($this->getMonthExpression('orders.created_at') . ' = ?', [$currentMonth])
+            ->whereRaw($this->getYearExpression('orders.created_at') . ' = ?', [$currentYear])
             ->sum(DB::raw('order_items.price * order_items.quantity'));
 
-        $previousMonth = str_pad(Carbon::now()->subMonth()->month, 2, '0', STR_PAD_LEFT);
+        $previousMonth = Carbon::now()->subMonth()->month;
         $previousYear = Carbon::now()->subMonth()->year;
 
         $previousMonthRevenue = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->where('products.user_id', $farmerId)
             ->whereRaw('orders.status != ?', ['cancelled'])
-            ->whereRaw('strftime("%m", orders.created_at) = ?', [$previousMonth])
-            ->whereRaw('strftime("%Y", orders.created_at) = ?', [$previousYear])
+            ->whereRaw($this->getMonthExpression('orders.created_at') . ' = ?', [$previousMonth])
+            ->whereRaw($this->getYearExpression('orders.created_at') . ' = ?', [$previousYear])
             ->sum(DB::raw('order_items.price * order_items.quantity'));
 
         $revenueGrowth = $previousMonthRevenue > 0
@@ -268,13 +268,13 @@ class FarmerAnalyticsController extends Controller
             ->whereRaw('orders.status != ?', ['cancelled'])
             ->where('orders.created_at', '>=', Carbon::now()->subMonths(6))
             ->select(
-                DB::raw('strftime("%m", orders.created_at) as month'),
-                DB::raw('strftime("%Y", orders.created_at) as year'),
+                DB::raw($this->getMonthExpression('orders.created_at') . ' as month'),
+                DB::raw($this->getYearExpression('orders.created_at') . ' as year'),
                 DB::raw('COUNT(DISTINCT orders.user_id) as customer_count')
             )
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
+            ->groupBy(DB::raw($this->getYearExpression('orders.created_at')), DB::raw($this->getMonthExpression('orders.created_at')))
+            ->orderBy(DB::raw($this->getYearExpression('orders.created_at')), 'desc')
+            ->orderBy(DB::raw($this->getMonthExpression('orders.created_at')), 'desc')
             ->get();
 
         // Average order value
@@ -313,6 +313,78 @@ class FarmerAnalyticsController extends Controller
                 return response()->json($this->getCustomerAnalytics($farmerId));
             default:
                 return response()->json(['error' => 'Invalid chart type'], 400);
+        }
+    }
+
+    /**
+     * Get database-specific month extraction expression
+     */
+    private function getMonthExpression($column)
+    {
+        $driver = config('database.default');
+        switch ($driver) {
+            case 'mysql':
+                return "MONTH($column)";
+            case 'sqlite':
+                return "CAST(strftime('%m', $column) AS UNSIGNED)";
+            case 'pgsql':
+                return "EXTRACT(MONTH FROM $column)";
+            default:
+                return "MONTH($column)";
+        }
+    }
+
+    /**
+     * Get database-specific year extraction expression
+     */
+    private function getYearExpression($column)
+    {
+        $driver = config('database.default');
+        switch ($driver) {
+            case 'mysql':
+                return "YEAR($column)";
+            case 'sqlite':
+                return "CAST(strftime('%Y', $column) AS UNSIGNED)";
+            case 'pgsql':
+                return "EXTRACT(YEAR FROM $column)";
+            default:
+                return "YEAR($column)";
+        }
+    }
+
+    /**
+     * Get database-specific day extraction expression
+     */
+    private function getDayExpression($column)
+    {
+        $driver = config('database.default');
+        switch ($driver) {
+            case 'mysql':
+                return "DAY($column)";
+            case 'sqlite':
+                return "CAST(strftime('%d', $column) AS UNSIGNED)";
+            case 'pgsql':
+                return "EXTRACT(DAY FROM $column)";
+            default:
+                return "DAY($column)";
+        }
+    }
+
+    /**
+     * Get database-specific date difference expression
+     */
+    private function getDateDiffExpression($date1, $date2)
+    {
+        $driver = config('database.default');
+        switch ($driver) {
+            case 'mysql':
+                return "DATEDIFF($date1, $date2)";
+            case 'sqlite':
+                return "julianday($date1) - julianday($date2)";
+            case 'pgsql':
+                return "EXTRACT(DAY FROM ($date1 - $date2))";
+            default:
+                return "DATEDIFF($date1, $date2)";
         }
     }
 }

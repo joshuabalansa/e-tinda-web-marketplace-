@@ -255,7 +255,7 @@ class FarmerReportsController extends Controller
                 'name',
                 'stock_quantity',
                 'created_at',
-                DB::raw('julianday("now") - julianday(created_at) as days_in_stock')
+                DB::raw($this->getDateDiffExpression('NOW()', 'created_at') . ' as days_in_stock')
             )
             ->orderBy('days_in_stock', 'desc')
             ->limit(20)
@@ -340,14 +340,14 @@ class FarmerReportsController extends Controller
             ->whereRaw('orders.status != ?', ['cancelled'])
             ->where('orders.created_at', '>=', Carbon::now()->subMonths(12))
             ->select(
-                DB::raw('strftime("%m", orders.created_at) as month'),
-                DB::raw('strftime("%Y", orders.created_at) as year'),
+                DB::raw($this->getMonthExpression('orders.created_at') . ' as month'),
+                DB::raw($this->getYearExpression('orders.created_at') . ' as year'),
                 DB::raw('SUM(order_items.price * order_items.quantity) as revenue'),
                 DB::raw('COUNT(DISTINCT orders.id) as order_count')
             )
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
+            ->groupBy(DB::raw($this->getYearExpression('orders.created_at')), DB::raw($this->getMonthExpression('orders.created_at')))
+            ->orderBy(DB::raw($this->getYearExpression('orders.created_at')), 'desc')
+            ->orderBy(DB::raw($this->getMonthExpression('orders.created_at')), 'desc')
             ->get();
 
         // Revenue by day (last 30 days)
@@ -563,5 +563,77 @@ class FarmerReportsController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Get database-specific month extraction expression
+     */
+    private function getMonthExpression($column)
+    {
+        $driver = config('database.default');
+        switch ($driver) {
+            case 'mysql':
+                return "MONTH($column)";
+            case 'sqlite':
+                return "CAST(strftime('%m', $column) AS UNSIGNED)";
+            case 'pgsql':
+                return "EXTRACT(MONTH FROM $column)";
+            default:
+                return "MONTH($column)";
+        }
+    }
+
+    /**
+     * Get database-specific year extraction expression
+     */
+    private function getYearExpression($column)
+    {
+        $driver = config('database.default');
+        switch ($driver) {
+            case 'mysql':
+                return "YEAR($column)";
+            case 'sqlite':
+                return "CAST(strftime('%Y', $column) AS UNSIGNED)";
+            case 'pgsql':
+                return "EXTRACT(YEAR FROM $column)";
+            default:
+                return "YEAR($column)";
+        }
+    }
+
+    /**
+     * Get database-specific day extraction expression
+     */
+    private function getDayExpression($column)
+    {
+        $driver = config('database.default');
+        switch ($driver) {
+            case 'mysql':
+                return "DAY($column)";
+            case 'sqlite':
+                return "CAST(strftime('%d', $column) AS UNSIGNED)";
+            case 'pgsql':
+                return "EXTRACT(DAY FROM $column)";
+            default:
+                return "DAY($column)";
+        }
+    }
+
+    /**
+     * Get database-specific date difference expression
+     */
+    private function getDateDiffExpression($date1, $date2)
+    {
+        $driver = config('database.default');
+        switch ($driver) {
+            case 'mysql':
+                return "DATEDIFF($date1, $date2)";
+            case 'sqlite':
+                return "julianday($date1) - julianday($date2)";
+            case 'pgsql':
+                return "EXTRACT(DAY FROM ($date1 - $date2))";
+            default:
+                return "DATEDIFF($date1, $date2)";
+        }
     }
 }
