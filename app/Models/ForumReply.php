@@ -17,6 +17,11 @@ class ForumReply extends Model
         'video_path',
         'video_original_name',
         'helpful_votes',
+        'status',
+        'is_flagged',
+        'moderation_notes',
+        'moderated_by',
+        'moderated_at',
     ];
 
     /**
@@ -43,11 +48,35 @@ class ForumReply extends Model
     }
 
     /**
-     * Get the user that created the reply.
+     * Get the moderator who moderated this reply.
      */
-    public function user()
+    public function moderator()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'moderated_by');
+    }
+
+    /**
+     * Scope to get only active replies.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    /**
+     * Scope to get flagged replies.
+     */
+    public function scopeFlagged($query)
+    {
+        return $query->where('is_flagged', true);
+    }
+
+    /**
+     * Scope to get replies by status.
+     */
+    public function scopeByStatus($query, $status)
+    {
+        return $query->where('status', $status);
     }
 
     /**

@@ -18,6 +18,11 @@ class Forum extends Model
         'video_path',
         'video_original_name',
         'views',
+        'status',
+        'is_flagged',
+        'moderation_notes',
+        'moderated_by',
+        'moderated_at',
     ];
 
     /**
@@ -44,11 +49,43 @@ class Forum extends Model
     }
 
     /**
+     * Get the moderator who moderated this forum.
+     */
+    public function moderator()
+    {
+        return $this->belongsTo(User::class, 'moderated_by');
+    }
+
+    /**
      * Get the replies for the forum topic.
      */
     public function replies()
     {
         return $this->hasMany(ForumReply::class);
+    }
+
+    /**
+     * Scope to get only active forums.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    /**
+     * Scope to get flagged forums.
+     */
+    public function scopeFlagged($query)
+    {
+        return $query->where('is_flagged', true);
+    }
+
+    /**
+     * Scope to get forums by status.
+     */
+    public function scopeByStatus($query, $status)
+    {
+        return $query->where('status', $status);
     }
 
     /**

@@ -371,6 +371,24 @@ class FarmerAnalyticsController extends Controller
     }
 
     /**
+     * Get database-specific current date/time function
+     */
+    private function getCurrentDateTimeFunction()
+    {
+        $driver = config('database.default');
+        switch ($driver) {
+            case 'mysql':
+                return 'NOW()';
+            case 'sqlite':
+                return "datetime('now')";
+            case 'pgsql':
+                return 'NOW()';
+            default:
+                return 'NOW()';
+        }
+    }
+
+    /**
      * Get database-specific date difference expression
      */
     private function getDateDiffExpression($date1, $date2)
@@ -380,6 +398,8 @@ class FarmerAnalyticsController extends Controller
             case 'mysql':
                 return "DATEDIFF($date1, $date2)";
             case 'sqlite':
+                // Convert NOW() to datetime('now') for SQLite
+                $date1 = str_replace('NOW()', "datetime('now')", $date1);
                 return "julianday($date1) - julianday($date2)";
             case 'pgsql':
                 return "EXTRACT(DAY FROM ($date1 - $date2))";

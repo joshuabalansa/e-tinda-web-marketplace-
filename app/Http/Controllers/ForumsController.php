@@ -17,8 +17,8 @@ class ForumsController extends Controller
      */
     public function index()
     {
-        $forums = Forum::with('user')->latest()->paginate(10);
-        $categories = Forum::select('category')->distinct()->pluck('category');
+        $forums = Forum::active()->with('user')->latest()->paginate(10);
+        $categories = Forum::active()->select('category')->distinct()->pluck('category');
 
         return view('forums.index', compact('forums', 'categories'));
     }
@@ -90,7 +90,9 @@ class ForumsController extends Controller
      */
     public function show($id)
     {
-        $forum = Forum::with(['user', 'replies.user'])->findOrFail($id);
+        $forum = Forum::active()->with(['user', 'replies' => function($query) {
+            $query->active()->with('user');
+        }])->findOrFail($id);
 
         // Increment view count
         $forum->increment('views');

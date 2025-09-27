@@ -20,7 +20,9 @@ use App\Http\Controllers\Farmer\InventoryController;
 use App\Http\Controllers\FarmerAnalyticsController;
 use App\Http\Controllers\FarmerReportsController;
 use App\Http\Controllers\FarmerProfileController;
-use App\Http\Controllers\FarmerAccountController;
+use App\Http\Controllers\AdminForumController;
+use App\Http\Controllers\AdminAnalyticsController;
+use App\Http\Controllers\AdminReportsController;
 
 // Language switching route
 Route::get('language/{locale}', function ($locale) {
@@ -93,7 +95,39 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard.alt');
+
+    // User Management Routes
+    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users.index');
+    Route::get('/admin/users/{user}', [AdminController::class, 'showUser'])->name('admin.users.show');
+    Route::get('/admin/users/{user}/edit', [AdminController::class, 'editUser'])->name('admin.users.edit');
+    Route::put('/admin/users/{user}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+    Route::delete('/admin/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+    Route::post('/admin/users/{user}/toggle-status', [AdminController::class, 'toggleUserStatus'])->name('admin.users.toggle-status');
+
+    // Forum Moderation Routes
+    Route::get('/admin/forums', [AdminForumController::class, 'index'])->name('admin.forums.index');
+    Route::get('/admin/forums/{forum}', [AdminForumController::class, 'show'])->name('admin.forums.show');
+    Route::put('/admin/forums/{forum}/status', [AdminForumController::class, 'updateStatus'])->name('admin.forums.update-status');
+    Route::post('/admin/forums/{forum}/toggle-flag', [AdminForumController::class, 'toggleFlag'])->name('admin.forums.toggle-flag');
+    Route::delete('/admin/forums/{forum}', [AdminForumController::class, 'destroy'])->name('admin.forums.destroy');
+    Route::post('/admin/forums/bulk-action', [AdminForumController::class, 'bulkAction'])->name('admin.forums.bulk-action');
+
+    // Forum Replies Moderation Routes
+    Route::get('/admin/forums/replies', [AdminForumController::class, 'replies'])->name('admin.forums.replies');
+    Route::put('/admin/forums/replies/{reply}/status', [AdminForumController::class, 'updateReplyStatus'])->name('admin.forums.replies.update-status');
+    Route::post('/admin/forums/replies/{reply}/toggle-flag', [AdminForumController::class, 'toggleReplyFlag'])->name('admin.forums.replies.toggle-flag');
+    Route::delete('/admin/forums/replies/{reply}', [AdminForumController::class, 'destroyReply'])->name('admin.forums.replies.destroy');
+    Route::post('/admin/forums/replies/bulk-action', [AdminForumController::class, 'bulkReplyAction'])->name('admin.forums.replies.bulk-action');
+
+    // Analytics Routes
+    Route::get('/admin/analytics', [AdminAnalyticsController::class, 'index'])->name('admin.analytics.index');
+    Route::get('/admin/analytics/data', [AdminAnalyticsController::class, 'getData'])->name('admin.analytics.data');
+
+    // Reports Routes
+    Route::get('/admin/reports', [AdminReportsController::class, 'index'])->name('admin.reports.index');
+    Route::get('/admin/reports/export', [AdminReportsController::class, 'export'])->name('admin.reports.export');
 });
 
 //farmer Dashboard Route
@@ -132,12 +166,12 @@ Route::middleware(['auth', 'farmer'])->group(function () {
         Route::post('/farmer/profile-settings/notifications', [FarmerProfileController::class, 'updateNotifications'])->name('farmer.profile.update-notifications');
         Route::delete('/farmer/profile-settings/delete-account', [FarmerProfileController::class, 'deleteAccount'])->name('farmer.profile.delete-account');
 
-        Route::get('/farmer/account-settings', [FarmerAccountController::class, 'index'])->name('farmer.account.index');
-        Route::post('/farmer/account-settings/business-info', [FarmerAccountController::class, 'updateBusinessInfo'])->name('farmer.account.update-business');
-        Route::post('/farmer/account-settings/location', [FarmerAccountController::class, 'updateLocation'])->name('farmer.account.update-location');
-        Route::post('/farmer/account-settings/payment-methods', [FarmerAccountController::class, 'updatePaymentMethods'])->name('farmer.account.update-payment');
-        Route::post('/farmer/account-settings/privacy', [FarmerAccountController::class, 'updatePrivacySettings'])->name('farmer.account.update-privacy');
-        Route::get('/farmer/account-settings/export-data', [FarmerAccountController::class, 'exportData'])->name('farmer.account.export-data');
+        // Route::get('/farmer/account-settings', [FarmerAccountController::class, 'index'])->name('farmer.account.index');
+        // Route::post('/farmer/account-settings/business-info', [FarmerAccountController::class, 'updateBusinessInfo'])->name('farmer.account.update-business');
+        // Route::post('/farmer/account-settings/location', [FarmerAccountController::class, 'updateLocation'])->name('farmer.account.update-location');
+        // Route::post('/farmer/account-settings/payment-methods', [FarmerAccountController::class, 'updatePaymentMethods'])->name('farmer.account.update-payment');
+        // Route::post('/farmer/account-settings/privacy', [FarmerAccountController::class, 'updatePrivacySettings'])->name('farmer.account.update-privacy');
+        // Route::get('/farmer/account-settings/export-data', [FarmerAccountController::class, 'exportData'])->name('farmer.account.export-data');
 });
 
 //buyer Dashboard Route

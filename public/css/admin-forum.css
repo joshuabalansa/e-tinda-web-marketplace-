@@ -1,0 +1,140 @@
+/* Admin Forum Moderation Custom Styles */
+.main-content {
+    padding: 20px;
+}
+
+.panel-body {
+    padding: 20px;
+}
+
+/* Statistics Cards */
+.panel-primary .panel-body,
+.panel-success .panel-body,
+.panel-warning .panel-body,
+.panel-danger .panel-body,
+.panel-info .panel-body,
+.panel-default .panel-body {
+    padding: 15px;
+    min-height: 80px;
+}
+
+.panel-primary .panel-body h3,
+.panel-success .panel-body h3,
+.panel-warning .panel-body h3,
+.panel-danger .panel-body h3,
+.panel-info .panel-body h3,
+.panel-default .panel-body h3 {
+    margin: 0 0 5px 0;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.panel-primary .panel-body p,
+.panel-success .panel-body p,
+.panel-warning .panel-body p,
+.panel-danger .panel-body p,
+.panel-info .panel-body p,
+.panel-default .panel-body p {
+    margin: 0;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Form Layout Improvements */
+.form-horizontal .form-group {
+    margin-bottom: 15px;
+}
+
+.form-horizontal .control-label {
+    padding-top: 7px;
+    margin-bottom: 0;
+    text-align: left;
+    font-weight: 500;
+}
+
+/* Table Improvements */
+.table-responsive {
+    border: none;
+}
+
+.table > thead > tr > th {
+    border-bottom: 2px solid #ddd;
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+.table > tbody > tr > td {
+    vertical-align: middle;
+    padding: 12px 8px;
+}
+
+/* Button Improvements */
+.btn-group .btn {
+    margin-right: 5px;
+}
+
+.btn-xs {
+    padding: 2px 6px;
+    font-size: 11px;
+}
+
+/* Label Improvements */
+.label {
+    font-size: 11px;
+    padding: 3px 8px;
+}
+
+/* Forum Content */
+.forum-content .well {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+/* Reply Items */
+.reply-item {
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.reply-item.alert-danger {
+    border-left: 4px solid #d9534f;
+}
+
+/* Responsive Improvements */
+@media (min-width: 1200px) {
+    .container-fluid {
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .col-lg-2 {
+        margin-bottom: 15px;
+    }
+
+    .form-horizontal .control-label {
+        text-align: left;
+        margin-bottom: 5px;
+    }
+}
+
+/* Quick Stats */
+.text-muted, .text-success, .text-warning, .text-danger {
+    font-weight: 500;
+}
+
+/* Panel Headings */
+.panel-heading {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.panel-title {
+    font-weight: 600;
+    color: #495057;
+}
