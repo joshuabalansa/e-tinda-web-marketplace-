@@ -23,6 +23,7 @@ use App\Http\Controllers\FarmerProfileController;
 use App\Http\Controllers\AdminForumController;
 use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\AdminReportsController;
+use App\Http\Controllers\FarmerAccountController;
 
 // Language switching route
 Route::get('language/{locale}', function ($locale) {
@@ -166,12 +167,13 @@ Route::middleware(['auth', 'farmer'])->group(function () {
         Route::post('/farmer/profile-settings/notifications', [FarmerProfileController::class, 'updateNotifications'])->name('farmer.profile.update-notifications');
         Route::delete('/farmer/profile-settings/delete-account', [FarmerProfileController::class, 'deleteAccount'])->name('farmer.profile.delete-account');
 
-        // Route::get('/farmer/account-settings', [FarmerAccountController::class, 'index'])->name('farmer.account.index');
-        // Route::post('/farmer/account-settings/business-info', [FarmerAccountController::class, 'updateBusinessInfo'])->name('farmer.account.update-business');
-        // Route::post('/farmer/account-settings/location', [FarmerAccountController::class, 'updateLocation'])->name('farmer.account.update-location');
-        // Route::post('/farmer/account-settings/payment-methods', [FarmerAccountController::class, 'updatePaymentMethods'])->name('farmer.account.update-payment');
-        // Route::post('/farmer/account-settings/privacy', [FarmerAccountController::class, 'updatePrivacySettings'])->name('farmer.account.update-privacy');
-        // Route::get('/farmer/account-settings/export-data', [FarmerAccountController::class, 'exportData'])->name('farmer.account.export-data');
+        // Farmer Account Settings Routes
+        Route::get('/farmer/account-settings', [FarmerAccountController::class, 'index'])->name('farmer.account.index');
+        Route::post('/farmer/account-settings/business-info', [FarmerAccountController::class, 'updateBusinessInfo'])->name('farmer.account.update-business');
+        Route::post('/farmer/account-settings/location', [FarmerAccountController::class, 'updateLocation'])->name('farmer.account.update-location');
+        Route::post('/farmer/account-settings/payment-methods', [FarmerAccountController::class, 'updatePaymentMethods'])->name('farmer.account.update-payment');
+        Route::post('/farmer/account-settings/privacy', [FarmerAccountController::class, 'updatePrivacySettings'])->name('farmer.account.update-privacy');
+        Route::get('/farmer/account-settings/export-data', [FarmerAccountController::class, 'exportData'])->name('farmer.account.export-data');
 });
 
 //buyer Dashboard Route

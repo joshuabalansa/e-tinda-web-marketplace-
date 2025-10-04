@@ -362,40 +362,9 @@
   <footer class="bg-success text-white py-4">
     <div class="container">
       <div class="row">
-        <div class="col-md-4 mb-4 mb-md-0">
+        <div class="col-12 text-center">
           <h5><i class="fas fa-leaf me-2"></i>Etinda</h5>
           <p>Connecting local farmers with the community.</p>
-          <div class="social-icons">
-            <a href="#" class="text-white me-2"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="text-white me-2"><i class="fab fa-instagram"></i></a>
-          </div>
-        </div>
-        <div class="col-md-2 mb-4 mb-md-0">
-          <h5>Shop</h5>
-          <ul class="list-unstyled">
-            <li><a href="#" class="text-white">All Products</a></li>
-            {{-- <li><a href="#" class="text-white">Seasonal</a></li>
-            <li><a href="#" class="text-white">Organic</a></li>
-            <li><a href="#" class="text-white">Bundles</a></li> --}}
-          </ul>
-        </div>
-        <div class="col-md-2 mb-4 mb-md-0">
-          <h5>About</h5>
-          <ul class="list-unstyled">
-            {{-- <li><a href="#" class="text-white">Our Story</a></li>
-            <li><a href="#" class="text-white">Farmers</a></li>
-            <li><a href="#" class="text-white">Sustainability</a></li> --}}
-            <li><a href="#" class="text-white">Blog</a></li>
-          </ul>
-        </div>
-        <div class="col-md-4">
-          <h5>Newsletter</h5>
-          <p>Subscribe for updates and special offers</p>
-          <div class="input-group mb-3">
-            <input type="email" class="form-control" placeholder="Your email">
-            <button class="btn btn-light text-success" type="button">Subscribe</button>
-          </div>
         </div>
       </div>
       <hr class="my-4 bg-light">

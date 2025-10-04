@@ -16,8 +16,8 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <h6>{{ __('shop.shipping_information') }}</h6>
-                            <p class="mb-1">{{ $order->shipping_address }}</p>
-                            <p class="mb-1">{{ __('shop.contact') }}: {{ $order->contact_number }}</p>
+                            <p class="mb-1">{{ $order->address }}, {{ $order->city }}, {{ $order->state }} {{ $order->zip }}</p>
+                            <p class="mb-1">{{ __('shop.contact') }}: {{ $order->phone }}</p>
                         </div>
                         <div class="col-md-6">
                             <h6>{{ __('shop.payment_information') }}</h6>
@@ -47,13 +47,13 @@
                     <hr>
                     <div class="d-flex justify-content-between">
                         <strong>{{ __('shop.total_amount') }}</strong>
-                        <strong>₱{{ number_format($order->total_amount, 2) }}</strong>
+                        <strong>₱{{ number_format($order->total, 2) }}</strong>
                     </div>
                 </div>
             </div>
 
             <div class="text-center mt-4">
-                <a href="{{ route('shop.index') }}" class="btn btn-primary">
+                <a href="{{ route('shop.index') }}" class="btn btn-success">
                     {{ __('shop.continue_shopping') }}
                 </a>
             </div>

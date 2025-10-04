@@ -87,7 +87,13 @@
                                             </tr>
                                             <tr>
                                                 <td>Shipping:</td>
-                                                <td class="text-right">₱{{ number_format($order->shipping, 2) }}</td>
+                                                <td class="text-right">
+                                                    @if($order->delivery_option === 'pickup')
+                                                        <span class="text-success">Free (Pickup)</span>
+                                                    @else
+                                                        ₱{{ number_format($order->shipping, 2) }}
+                                                    @endif
+                                                </td>
                                             </tr>
                                             <tr class="active">
                                                 <td><strong>Order Total:</strong></td>
@@ -97,7 +103,8 @@
                                     </div>
                                     <div class="col-md-6">
                                         <h6><strong>Payment Information</strong></h6>
-                                        <p class="text-muted">Payment Method: <span class="text-dark">Cash on Delivery</span></p>
+                                        <p class="text-muted">Payment Method: <span class="text-dark">{{ ucfirst(str_replace('_', ' ', $order->payment_method)) }}</span></p>
+                                        <p class="text-muted">Delivery Option: <span class="text-dark">{{ ucfirst($order->delivery_option) }}</span></p>
                                         <p class="text-muted">Payment Status: <span class="badge badge-warning">Pending</span></p>
                                         <p class="text-muted">Order Date: {{ $order->created_at->format('M d, Y H:i') }}</p>
                                     </div>
@@ -131,10 +138,24 @@
                                 <div class="form-group">
                                     <label class="control-label"><strong>Shipping Address:</strong></label>
                                     <p>
-                                        {{ $order->address }}<br>
-                                        {{ $order->city }}, {{ $order->state }} {{ $order->zip }}
+                                        @if($order->delivery_option === 'pickup')
+                                            <span class="text-info"><i class="entypo-home"></i> Farm Pickup</span><br>
+                                            <small class="text-muted">Customer will pick up from farm location</small>
+                                        @else
+                                            {{ $order->address }}<br>
+                                            {{ $order->city }}, {{ $order->state }} {{ $order->zip }}
+                                        @endif
                                     </p>
                                 </div>
+
+                                @if($order->special_instructions)
+                                <div class="form-group">
+                                    <label class="control-label"><strong>Special Instructions:</strong></label>
+                                    <div class="well well-sm" style="background-color: #f8f9fa; border-left: 3px solid #28a745;">
+                                        <p class="mb-0"><i class="entypo-comment"></i> {{ $order->special_instructions }}</p>
+                                    </div>
+                                </div>
+                                @endif
                             </div>
                         </div>
 

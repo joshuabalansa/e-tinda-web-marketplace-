@@ -277,15 +277,6 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="payment-method-card" data-method="bank">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="payment_method" id="bank" value="bank_transfer">
-                                    <label class="form-check-label" for="bank">
-                                        <strong><i class="fas fa-university"></i> Bank Transfer</strong>
-                                        <br><small class="text-muted">Direct bank transfer</small>
-                                    </label>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Special Instructions -->

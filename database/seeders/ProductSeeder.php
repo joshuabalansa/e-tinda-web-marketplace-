@@ -92,7 +92,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(20, 60),
                 'harvest_date' => Carbon::now()->subDays(rand(1, 5)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -102,7 +102,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(15, 45),
                 'harvest_date' => Carbon::now()->subDays(rand(1, 4)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -112,7 +112,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(10, 35),
                 'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -122,7 +122,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(8, 25),
                 'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -132,7 +132,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(12, 40),
                 'harvest_date' => Carbon::now()->subDays(rand(2, 6)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -142,7 +142,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(15, 50),
                 'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -152,7 +152,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'bunch',
                 'stock_quantity' => rand(20, 60),
                 'harvest_date' => Carbon::now()->subDays(rand(1, 2)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -162,7 +162,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'bunch',
                 'stock_quantity' => rand(18, 45),
                 'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -172,7 +172,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'piece',
                 'stock_quantity' => rand(10, 30),
                 'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -182,7 +182,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(15, 40),
                 'harvest_date' => Carbon::now()->subDays(rand(2, 6)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -192,7 +192,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(20, 55),
                 'harvest_date' => Carbon::now()->subDays(rand(3, 8)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -202,7 +202,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(25, 70),
                 'harvest_date' => Carbon::now()->subDays(rand(5, 15)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -212,7 +212,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(15, 40),
                 'harvest_date' => Carbon::now()->subDays(rand(7, 20)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -222,7 +222,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(12, 35),
                 'harvest_date' => Carbon::now()->subDays(rand(1, 4)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -232,7 +232,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(10, 30),
                 'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -242,7 +242,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'bunch',
                 'stock_quantity' => rand(15, 40),
                 'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -252,7 +252,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'bunch',
                 'stock_quantity' => rand(12, 35),
                 'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -262,7 +262,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(8, 25),
                 'harvest_date' => Carbon::now()->subDays(rand(1, 4)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => rand(0, 1) ? 'available' : 'out_of_stock'
             ],
             [
@@ -272,7 +272,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'piece',
                 'stock_quantity' => rand(6, 20),
                 'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -282,7 +282,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'piece',
                 'stock_quantity' => rand(8, 25),
                 'harvest_date' => Carbon::now()->subDays(rand(1, 4)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -292,7 +292,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'piece',
                 'stock_quantity' => rand(10, 30),
                 'harvest_date' => Carbon::now()->subDays(rand(2, 6)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -302,7 +302,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(12, 35),
                 'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -312,7 +312,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'piece',
                 'stock_quantity' => rand(15, 40),
                 'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -322,7 +322,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(10, 30),
                 'harvest_date' => Carbon::now()->subDays(rand(1, 3)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -332,7 +332,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(8, 20),
                 'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -342,7 +342,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(10, 25),
                 'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -352,7 +352,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(8, 20),
                 'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -362,7 +362,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'piece',
                 'stock_quantity' => rand(6, 18),
                 'harvest_date' => Carbon::now()->subDays(rand(2, 5)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -372,7 +372,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'piece',
                 'stock_quantity' => rand(20, 50),
                 'harvest_date' => Carbon::now()->subDays(rand(1, 4)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -382,7 +382,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(10, 30),
                 'harvest_date' => Carbon::now()->subDays(rand(5, 15)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ],
             [
@@ -392,7 +392,7 @@ class ProductSeeder extends Seeder
                 'unit_type' => 'kg',
                 'stock_quantity' => rand(8, 25),
                 'harvest_date' => Carbon::now()->subDays(rand(5, 15)),
-                'image_url' => '',
+                'image_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'status' => 'available'
             ]
         ];

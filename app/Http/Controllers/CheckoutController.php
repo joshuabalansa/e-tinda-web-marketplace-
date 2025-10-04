@@ -54,7 +54,7 @@ class CheckoutController extends Controller
             'zip' => 'nullable|string|max:255',
             'shipping' => 'required|numeric|min:0',
             'delivery_option' => 'required|in:pickup,delivery',
-            'payment_method' => 'required|in:cash,gcash,bank_transfer',
+            'payment_method' => 'required|in:cash,gcash',
             'special_instructions' => 'nullable|string|max:1000'
         ]);
 
