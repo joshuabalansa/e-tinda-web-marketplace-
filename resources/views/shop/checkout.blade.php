@@ -200,10 +200,12 @@
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="delivery_option" id="delivery" value="delivery">
                             <label class="form-check-label" for="delivery">
-                                <strong>Home Delivery</strong> - Delivered to your address (₱{{ $shippingCost ?? 100 }})
+                                <strong>Home Delivery</strong> - Delivered to your address
+                                <span id="delivery-fee-display">(Calculating...)</span>
                                 @if($farmerCount > 1)
                                     <br><small class="text-muted">Items from all farmers will be delivered together</small>
                                 @endif
+                                <br><small class="text-info" id="delivery-info">Enter your address to calculate delivery fee</small>
                             </label>
                         </div>
                     </div>
@@ -466,8 +468,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const shippingInput = document.getElementById('shipping_input');
     const shippingDisplay = document.getElementById('shipping-display');
     const totalDisplay = document.getElementById('total-display');
+    const deliveryFeeDisplay = document.getElementById('delivery-fee-display');
+    const deliveryInfo = document.getElementById('delivery-info');
     const subtotal = {{ $total }};
     const shippingCost = {{ $shippingCost ?? 100 }};
+
+    // Address input fields for delivery fee calculation
+    const addressInputs = ['address', 'city', 'state'];
+    let deliveryFeeCalculationTimeout;
 
     // Payment method selection
     const paymentCards = document.querySelectorAll('.payment-method-card');
@@ -485,17 +493,103 @@ document.addEventListener('DOMContentLoaded', function() {
         option.addEventListener('change', function() {
             if (this.value === 'delivery') {
                 addressSection.style.display = 'block';
-                shippingInput.value = shippingCost;
-                shippingDisplay.textContent = '₱' + shippingCost.toFixed(2);
+                // Don't set shipping cost immediately - wait for calculation
+                deliveryFeeDisplay.textContent = '(Calculating...)';
+                deliveryInfo.textContent = 'Enter your address to calculate delivery fee';
                 updateTotal();
             } else {
                 addressSection.style.display = 'none';
                 shippingInput.value = 0;
                 shippingDisplay.textContent = 'Free';
+                deliveryFeeDisplay.textContent = '(Free)';
+                deliveryInfo.textContent = '';
                 updateTotal();
             }
         });
     });
+
+    // Add event listeners to address inputs for automatic delivery fee calculation
+    addressInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.addEventListener('input', function() {
+                // Clear previous timeout
+                if (deliveryFeeCalculationTimeout) {
+                    clearTimeout(deliveryFeeCalculationTimeout);
+                }
+
+                // Set new timeout to calculate delivery fee after user stops typing
+                deliveryFeeCalculationTimeout = setTimeout(() => {
+                    calculateDeliveryFee();
+                }, 1000); // Wait 1 second after user stops typing
+            });
+        }
+    });
+
+    function calculateDeliveryFee() {
+        const address = document.getElementById('address').value.trim();
+        const city = document.getElementById('city').value.trim();
+        const state = document.getElementById('state').value.trim();
+
+        // Check if delivery option is selected and all required fields are filled
+        const deliveryOption = document.querySelector('input[name="delivery_option"]:checked');
+        if (!deliveryOption || deliveryOption.value !== 'delivery') {
+            return;
+        }
+
+        if (!address || !city || !state) {
+            deliveryFeeDisplay.textContent = '(Enter address details)';
+            deliveryInfo.textContent = 'Please fill in address, city, and province';
+            return;
+        }
+
+        // Show loading state
+        deliveryFeeDisplay.textContent = '(Calculating...)';
+        deliveryInfo.textContent = 'Calculating delivery fee...';
+
+        // Get farmer location from the first item (if available)
+        const farmerLocation = '{{ !empty($items) ? ($items[0]["farmer_location"] ?? "Metro Manila, Philippines") : "Metro Manila, Philippines" }}';
+
+        // Make AJAX request to calculate delivery fee
+        fetch('{{ route("checkout.calculate-delivery-fee") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                address: address,
+                city: city,
+                province: state,
+                farmer_location: farmerLocation
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const deliveryFee = data.delivery_fee;
+                shippingInput.value = deliveryFee;
+                shippingDisplay.textContent = '₱' + deliveryFee.toFixed(2);
+                deliveryFeeDisplay.textContent = '(₱' + deliveryFee.toFixed(2) + ')';
+                deliveryInfo.textContent = `${data.distance} • ${data.estimated_delivery_time}`;
+                updateTotal();
+            } else {
+                deliveryFeeDisplay.textContent = '(Error calculating)';
+                deliveryInfo.textContent = 'Unable to calculate delivery fee. Using default rate.';
+                shippingInput.value = shippingCost;
+                shippingDisplay.textContent = '₱' + shippingCost.toFixed(2);
+                updateTotal();
+            }
+        })
+        .catch(error => {
+            console.error('Error calculating delivery fee:', error);
+            deliveryFeeDisplay.textContent = '(Error calculating)';
+            deliveryInfo.textContent = 'Unable to calculate delivery fee. Using default rate.';
+            shippingInput.value = shippingCost;
+            shippingDisplay.textContent = '₱' + shippingCost.toFixed(2);
+            updateTotal();
+        });
+    }
 
     function updateTotal() {
         const shipping = parseFloat(shippingInput.value) || 0;
