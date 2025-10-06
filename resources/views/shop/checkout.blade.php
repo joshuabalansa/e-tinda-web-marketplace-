@@ -56,6 +56,17 @@
         padding: 10px;
         margin-bottom: 10px;
     }
+    .farmer-section {
+        border-left: 4px solid #28a745;
+        background-color: #f8f9fa;
+    }
+    .vendor-summary {
+        border-left: 3px solid #17a2b8;
+        background-color: #f8f9fa;
+    }
+    .multi-vendor-alert {
+        border-left: 4px solid #17a2b8;
+    }
 </style>
 
 <header class="bg-light py-5">
@@ -87,29 +98,72 @@
                 <div class="card-body">
                     <h5 class="card-title mb-4">
                         <i class="fas fa-box"></i> Order Items
+                        @php
+                            $farmerCount = collect($items)->groupBy('farmer_id')->count();
+                        @endphp
+                        @if($farmerCount > 1)
+                            <span class="badge bg-info ms-2">{{ $farmerCount }} Vendors</span>
+                        @endif
                     </h5>
 
-                    @foreach($items as $item)
-                        <div class="product-farmer-info">
-                            <div class="row align-items-center">
+                    @php
+                        $groupedItems = collect($items)->groupBy('farmer_id');
+                    @endphp
+
+                    @foreach($groupedItems as $farmerId => $farmerItems)
+                        @php
+                            $firstItem = $farmerItems->first();
+                            $farmerSubtotal = $farmerItems->sum('subtotal');
+                        @endphp
+
+                        <!-- Farmer Section -->
+                        <div class="farmer-section mb-4 p-3 bg-light rounded">
+                            <div class="row align-items-center mb-3">
+                                <div class="col-md-8">
+                                    <h6 class="fw-bold text-success mb-1">
+                                        <i class="fas fa-store me-2"></i>
+                                        {{ $firstItem['farmer_name'] ?? 'Local Farmer' }}
+                                    </h6>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        {{ $firstItem['farmer_location'] ?? 'Philippines' }}
+                                    </p>
+                                    <p class="text-info small mb-0">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        {{ $farmerItems->count() }} item(s) from this farmer
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <span class="badge bg-success">{{ $farmerItems->count() }} item(s)</span>
+                                </div>
+                            </div>
+
+                            <!-- Items from this farmer -->
+                            @foreach($farmerItems as $item)
+                            <div class="row mb-2 pb-2 border-bottom border-light">
                                 <div class="col-md-2">
-                                    <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}" class="img-fluid rounded" style="max-height: 60px;">
+                                    <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}" class="img-fluid rounded" style="max-height: 50px;">
                                 </div>
                                 <div class="col-md-6">
-                                    <h6 class="mb-1">{{ $item['name'] }}</h6>
-                                    <small class="text-muted">
-                                        <i class="fas fa-user"></i> Farmer: {{ $item['farmer_name'] ?? 'Local Farmer' }}
-                                    </small>
-                                    <br>
-                                    <small class="text-muted">
-                                        <i class="fas fa-map-marker-alt"></i> {{ $item['farmer_location'] ?? 'Philippines' }}
-                                    </small>
+                                    <h6 class="mb-1" style="font-size: 0.9rem;">{{ $item['name'] }}</h6>
+                                    <p class="text-muted small mb-0">{{ $item['unit'] }}</p>
                                 </div>
                                 <div class="col-md-2 text-center">
-                                    <span class="badge badge-primary">{{ $item['quantity'] }} {{ $item['unit'] }}</span>
+                                    <span class="badge bg-success rounded-pill" style="font-size: 0.8rem;">{{ $item['quantity'] }}x</span>
                                 </div>
-                                <div class="col-md-2 text-right">
-                                    <strong>₱{{ number_format($item['subtotal'], 2) }}</strong>
+                                <div class="col-md-2 text-end">
+                                    <strong class="text-success" style="font-size: 0.9rem;">₱{{ number_format($item['subtotal'], 2) }}</strong>
+                                </div>
+                            </div>
+                            @endforeach
+
+                            <!-- Farmer subtotal -->
+                            <div class="row mt-2">
+                                <div class="col-md-10">
+                                    <small class="text-muted">Subtotal from {{ $firstItem['farmer_name'] ?? 'this farmer' }}:</small>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <strong class="text-success">₱{{ number_format($farmerSubtotal, 2) }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -126,16 +180,30 @@
 
                     <div class="delivery-options">
                         <h6><i class="fas fa-info-circle"></i> Delivery Options</h6>
+                        @if($farmerCount > 1)
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Multi-Vendor Order:</strong> Your order contains items from {{ $farmerCount }} different farmers.
+                                Choose your preferred delivery method below.
+                            </div>
+                        @endif
+
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="delivery_option" id="pickup" value="pickup" checked>
                             <label class="form-check-label" for="pickup">
-                                <strong>Farm Pickup</strong> - Pick up directly from the farm (Free)
+                                <strong>Farm Pickup</strong> - Pick up directly from each farmer's location (Free)
+                                @if($farmerCount > 1)
+                                    <br><small class="text-muted">You'll collect items from {{ $farmerCount }} different locations</small>
+                                @endif
                             </label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="delivery_option" id="delivery" value="delivery">
                             <label class="form-check-label" for="delivery">
                                 <strong>Home Delivery</strong> - Delivered to your address (₱{{ $shippingCost ?? 100 }})
+                                @if($farmerCount > 1)
+                                    <br><small class="text-muted">Items from all farmers will be delivered together</small>
+                                @endif
                             </label>
                         </div>
                     </div>
@@ -288,10 +356,6 @@
                                       rows="3"
                                       placeholder="Any special requests or instructions for the farmer...">{{ old('special_instructions') }}</textarea>
                         </div>
-
-                        <button type="submit" class="btn btn-success btn-lg">
-                            <i class="fas fa-check"></i> Place Order
-                        </button>
                     </form>
                 </div>
             </div>
@@ -303,17 +367,50 @@
                 <div class="card-body">
                     <h5 class="card-title mb-4">
                         <i class="fas fa-receipt"></i> Order Summary
+                        @if($farmerCount > 1)
+                            <span class="badge bg-info ms-2">{{ $farmerCount }} Vendors</span>
+                        @endif
                     </h5>
 
-                    @foreach($items as $item)
-                        <div class="d-flex justify-content-between mb-2">
-                            <div>
-                                <small>{{ $item['name'] }}</small>
-                                <br><small class="text-muted">{{ $item['quantity'] }} {{ $item['unit'] }}</small>
+                    @if($farmerCount > 1)
+                        <!-- Multi-vendor breakdown -->
+                        @foreach($groupedItems as $farmerId => $farmerItems)
+                            @php
+                                $firstItem = $farmerItems->first();
+                                $farmerSubtotal = $farmerItems->sum('subtotal');
+                            @endphp
+                            <div class="vendor-summary mb-3 p-2 bg-light rounded">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <small class="fw-bold text-success">{{ $firstItem['farmer_name'] ?? 'Farmer' }}</small>
+                                    <small class="text-muted">{{ $farmerItems->count() }} item(s)</small>
+                                </div>
+                                @foreach($farmerItems as $item)
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <div>
+                                            <small>{{ $item['name'] }}</small>
+                                            <br><small class="text-muted">{{ $item['quantity'] }} {{ $item['unit'] }}</small>
+                                        </div>
+                                        <span>₱{{ number_format($item['subtotal'], 2) }}</span>
+                                    </div>
+                                @endforeach
+                                <div class="d-flex justify-content-between border-top pt-1 mt-1">
+                                    <small class="fw-bold">Subtotal:</small>
+                                    <small class="fw-bold text-success">₱{{ number_format($farmerSubtotal, 2) }}</small>
+                                </div>
                             </div>
-                            <span>₱{{ number_format($item['subtotal'], 2) }}</span>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    @else
+                        <!-- Single vendor items -->
+                        @foreach($items as $item)
+                            <div class="d-flex justify-content-between mb-2">
+                                <div>
+                                    <small>{{ $item['name'] }}</small>
+                                    <br><small class="text-muted">{{ $item['quantity'] }} {{ $item['unit'] }}</small>
+                                </div>
+                                <span>₱{{ number_format($item['subtotal'], 2) }}</span>
+                            </div>
+                        @endforeach
+                    @endif
 
                     <hr>
                     <div class="d-flex justify-content-between mb-2">
@@ -330,11 +427,31 @@
                         <strong id="total-display">₱{{ number_format($total, 2) }}</strong>
                     </div>
 
+                    @if($farmerCount > 1)
+                        <!-- Multi-vendor info -->
+                        <div class="alert alert-info mt-3">
+                            <h6><i class="fas fa-info-circle me-2"></i> Multi-Vendor Order</h6>
+                            <small>
+                                Your order contains items from {{ $farmerCount }} different farmers.
+                                @if($farmerCount > 1)
+                                    You'll receive pickup details for each farmer after placing your order.
+                                @endif
+                            </small>
+                        </div>
+                    @endif
+
                     <!-- Farmer Contact Info -->
                     <div class="farmer-contact-info mt-3">
                         <h6><i class="fas fa-phone"></i> Need Help?</h6>
                         <p class="mb-1">Contact the farmers directly for questions about your order.</p>
                         <small class="text-muted">Supporting local agriculture since 2024</small>
+                    </div>
+
+                    <!-- Place Order Button -->
+                    <div class="mt-4">
+                        <button type="submit" form="checkoutForm" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-check me-2"></i> Place Order
+                        </button>
                     </div>
                 </div>
             </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Services\DeliveryFeeCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -142,12 +143,43 @@ class CheckoutController extends Controller
         }
     }
 
+    /**
+     * Calculate delivery fee based on address
+     */
+    public function calculateDeliveryFee(Request $request)
+    {
+        $request->validate([
+            'address' => 'required|string',
+            'city' => 'required|string',
+            'province' => 'required|string',
+            'farmer_location' => 'nullable|string'
+        ]);
+
+        $calculator = new DeliveryFeeCalculator();
+
+        $result = $calculator->calculateDeliveryFee(
+            $request->address,
+            $request->city,
+            $request->province,
+            $request->farmer_location
+        );
+
+        return response()->json([
+            'success' => true,
+            'delivery_fee' => $result['delivery_fee'],
+            'distance' => $result['distance'],
+            'method' => $result['method'],
+            'estimated_delivery_time' => $result['estimated_delivery_time']
+        ]);
+    }
+
+    /**
+     * Show success page after order completion
+     */
     public function success($orderId)
     {
-        $order = Order::with(['items.product', 'user'])
-                     ->where('user_id', auth()->id())
-                     ->findOrFail($orderId);
+        $order = Order::with(['items.product', 'user'])->findOrFail($orderId);
 
-        return view('shop.checkout-success', compact('order'));
+        return view('checkout.success', compact('order'));
     }
 }

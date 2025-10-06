@@ -50,6 +50,24 @@ class FarmerOrderController extends Controller
 
         $order->load(['user', 'items.product.user']);
 
+        // Debug: Verify order calculations
+        if (config('app.debug')) {
+            $calculatedSubtotal = $order->items->sum(function($item) {
+                return $item->price * $item->quantity;
+            });
+
+            \Log::info('Order Calculation Debug', [
+                'order_id' => $order->id,
+                'stored_subtotal' => $order->subtotal,
+                'calculated_subtotal' => $calculatedSubtotal,
+                'stored_shipping' => $order->shipping,
+                'stored_total' => $order->total,
+                'calculated_total' => $calculatedSubtotal + $order->shipping,
+                'farmer_items_count' => $farmerOrderItems->count(),
+                'total_items_count' => $order->items->count()
+            ]);
+        }
+
         return view('farmer.orders.show', compact('order', 'farmerOrderItems'));
     }
 

@@ -79,10 +79,10 @@
                                 <!-- Order Summary -->
                                 <div class="row" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
                                     <div class="col-md-6">
-                                        <h6><strong>Order Summary</strong></h6>
+                                        <h6><strong>Your Order Summary</strong></h6>
                                         <table class="table table-condensed">
                                             <tr>
-                                                <td>Subtotal (Your Products):</td>
+                                                <td>Your Products Subtotal:</td>
                                                 <td class="text-right">₱{{ number_format($farmerOrderItems->sum(function($item) { return $item->price * $item->quantity; }), 2) }}</td>
                                             </tr>
                                             <tr>
@@ -91,15 +91,22 @@
                                                     @if($order->delivery_option === 'pickup')
                                                         <span class="text-success">Free (Pickup)</span>
                                                     @else
-                                                        ₱{{ number_format($order->shipping, 2) }}
+                                                        <span class="text-muted">Included in total order</span>
                                                     @endif
                                                 </td>
                                             </tr>
                                             <tr class="active">
-                                                <td><strong>Order Total:</strong></td>
-                                                <td class="text-right"><strong>₱{{ number_format($order->total, 2) }}</strong></td>
+                                                <td><strong>Your Revenue:</strong></td>
+                                                <td class="text-right"><strong>₱{{ number_format($farmerOrderItems->sum(function($item) { return $item->price * $item->quantity; }), 2) }}</strong></td>
                                             </tr>
                                         </table>
+
+                                        @php
+                                            $totalOrderItems = $order->items->count();
+                                            $yourItems = $farmerOrderItems->count();
+                                            $isMultiVendor = $totalOrderItems > $yourItems;
+                                        @endphp
+
                                     </div>
                                     <div class="col-md-6">
                                         <h6><strong>Payment Information</strong></h6>

@@ -65,7 +65,7 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <h6 class="text-success fw-bold mb-3">Shipping Information</h6>
+                                <h6 class="text-success fw-bold mb-3">Delivery Information</h6>
                                 <div class="mb-3">
                                     <p class="text-muted mb-1">
                                         <i class="fas fa-user text-success me-2"></i>
@@ -79,10 +79,24 @@
                                         <i class="fas fa-phone text-success me-2"></i>
                                         <strong>Phone:</strong> {{ $order->phone }}
                                     </p>
-                                    <p class="text-muted mb-0">
-                                        <i class="fas fa-map-marker-alt text-success me-2"></i>
-                                        <strong>Address:</strong> {{ $order->address }}, {{ $order->city }}, {{ $order->state }} {{ $order->zip }}
+                                    <p class="text-muted mb-1">
+                                        <i class="fas fa-truck text-success me-2"></i>
+                                        <strong>Delivery Method:</strong>
+                                        <span class="badge bg-{{ $order->delivery_option === 'pickup' ? 'info' : 'success' }}">
+                                            {{ ucfirst($order->delivery_option) }}
+                                        </span>
                                     </p>
+                                    @if($order->delivery_option === 'delivery')
+                                        <p class="text-muted mb-0">
+                                            <i class="fas fa-map-marker-alt text-success me-2"></i>
+                                            <strong>Delivery Address:</strong> {{ $order->address }}, {{ $order->city }}, {{ $order->state }} {{ $order->zip }}
+                                        </p>
+                                    @else
+                                        <p class="text-info mb-0">
+                                            <i class="fas fa-info-circle text-success me-2"></i>
+                                            <strong>Pickup:</strong> You will collect items from each farmer's location (see details below)
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -97,36 +111,81 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    @foreach($order->items as $item)
-                    <div class="row mb-3 pb-3 border-bottom">
-                        <div class="col-md-2">
-                            @if($item->product && $item->product->image_url)
-                                <img src="{{ asset('storage/' . $item->product->image_url) }}"
-                                     alt="{{ $item->product->name }}"
-                                     class="img-fluid rounded"
-                                     style="max-width: 80px; height: auto;">
-                            @else
-                                <div class="bg-light text-center py-3 rounded" style="width: 80px; height: 60px;">
-                                    <i class="fas fa-image text-muted"></i>
+                    @php
+                        $groupedItems = $order->items->groupBy(function($item) {
+                            return $item->product ? $item->product->user_id : 'unknown';
+                        });
+                    @endphp
+
+                    @foreach($groupedItems as $farmerId => $items)
+                        @php
+                            $farmer = $items->first()->product->user ?? null;
+                        @endphp
+
+                        <!-- Farmer Section -->
+                        <div class="farmer-section mb-4 p-3 bg-light rounded">
+                            <div class="row align-items-center mb-3">
+                                <div class="col-md-8">
+                                    <h6 class="fw-bold text-success mb-1">
+                                        <i class="fas fa-store me-2"></i>
+                                        {{ $farmer ? $farmer->business_name ?? $farmer->name : 'Unknown Seller' }}
+                                    </h6>
+                                    @if($farmer)
+                                        <p class="text-muted small mb-0">
+                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                            {{ $farmer->city ?? 'Farm Location' }}, {{ $farmer->state ?? 'Farm Province' }}
+                                        </p>
+                                        @if($order->delivery_option === 'pickup')
+                                            <p class="text-info small mb-0">
+                                                <i class="fas fa-home me-1"></i>
+                                                Pickup from: {{ $farmer->farm_address ?? 'Farm Location' }}
+                                            </p>
+                                        @endif
+                                    @endif
                                 </div>
-                            @endif
+                                <div class="col-md-4 text-end">
+                                    <span class="badge bg-success">{{ $items->count() }} item(s)</span>
+                                </div>
+                            </div>
+
+                            <!-- Items from this farmer -->
+                            @foreach($items as $item)
+                            <div class="row mb-2 pb-2 border-bottom border-light">
+                                <div class="col-md-2">
+                                    @if($item->product && $item->product->image_url)
+                                        <img src="{{ asset('storage/' . $item->product->image_url) }}"
+                                             alt="{{ $item->product->name }}"
+                                             class="img-fluid rounded"
+                                             style="max-width: 60px; height: auto;">
+                                    @else
+                                        <div class="bg-light text-center py-2 rounded" style="width: 60px; height: 45px;">
+                                            <i class="fas fa-image text-muted" style="font-size: 0.8rem;"></i>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">{{ $item->product->name ?? 'Product Unavailable' }}</h6>
+                                    <p class="text-muted small mb-0">{{ $item->product->description ?? '' }}</p>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <span class="badge bg-success rounded-pill" style="font-size: 0.8rem;">{{ $item->quantity }}x</span>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <strong class="text-success" style="font-size: 0.9rem;">₱{{ number_format($item->price, 2) }}</strong>
+                                </div>
+                            </div>
+                            @endforeach
+
+                            <!-- Farmer subtotal -->
+                            <div class="row mt-2">
+                                <div class="col-md-10">
+                                    <small class="text-muted">Subtotal from this farmer:</small>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <strong class="text-success">₱{{ number_format($items->sum(function($item) { return $item->price * $item->quantity; }), 2) }}</strong>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <h6 class="fw-bold mb-1">{{ $item->product->name ?? 'Product Unavailable' }}</h6>
-                            <p class="text-muted small mb-0">
-                                @if($item->product)
-                                    <i class="fas fa-store text-success me-1"></i>
-                                    Sold by: {{ $item->product->user->name ?? 'Unknown Seller' }}
-                                @endif
-                            </p>
-                        </div>
-                        <div class="col-md-2 text-center">
-                            <span class="badge bg-success rounded-pill">{{ $item->quantity }}x</span>
-                        </div>
-                        <div class="col-md-2 text-end">
-                            <strong class="text-success">₱{{ number_format($item->price, 2) }}</strong>
-                        </div>
-                    </div>
                     @endforeach
                 </div>
             </div>
