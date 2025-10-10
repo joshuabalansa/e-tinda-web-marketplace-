@@ -1,15 +1,6 @@
-[phases.setup]
-nixPkgs = ["nodejs", "npm"]
-
 [phases.install]
 cmds = [
-    "composer install --no-dev --optimize-autoloader",
-    "npm ci --only=production"
-]
-
-[phases.build]
-cmds = [
-    "npm run build"
+    "composer install --no-dev --optimize-autoloader"
 ]
 
 [start]
