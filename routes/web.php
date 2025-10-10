@@ -67,6 +67,11 @@ Route::get('test-locale', function () {
     ]);
 });
 
+// Health check route for Railway
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok', 'timestamp' => now()]);
+});
+
 Route::get('/', [WelcomeController::class, 'index']);
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
