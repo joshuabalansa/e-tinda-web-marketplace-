@@ -1,0 +1,18 @@
+# Railway deployment configuration for Laravel
+# This file contains the build and deployment settings for Railway
+
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "php artisan serve --host=0.0.0.0 --port=$PORT"
+healthcheckPath = "/"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+# Environment variables will be set in Railway dashboard
+# Required variables:
+# - APP_KEY (generate with: php artisan key:generate --show)
+# - DB_PASSWORD (from your Railway MySQL service)
+# - APP_URL (your Railway app URL)
