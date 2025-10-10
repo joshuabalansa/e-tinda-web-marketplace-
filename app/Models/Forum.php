@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\DatabaseCompatibility;
 
 class Forum extends Model
 {
-    use HasFactory;
+    use HasFactory, DatabaseCompatibility;
 
     protected $fillable = [
         'user_id',
@@ -85,7 +86,55 @@ class Forum extends Model
      */
     public function scopeByStatus($query, $status)
     {
+        if (!$this->validateStatus($status)) {
+            throw new \InvalidArgumentException("Invalid status: {$status}");
+        }
         return $query->where('status', $status);
+    }
+
+    /**
+     * Set status with validation
+     */
+    public function setStatus(string $status): bool
+    {
+        if (!$this->validateStatus($status)) {
+            throw new \InvalidArgumentException("Invalid status: {$status}");
+        }
+
+        $this->status = $status;
+        return $this->save();
+    }
+
+    /**
+     * Check if forum is active
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
+    /**
+     * Check if forum is pending
+     */
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    /**
+     * Check if forum is hidden
+     */
+    public function isHidden(): bool
+    {
+        return $this->status === 'hidden';
+    }
+
+    /**
+     * Check if forum is deleted
+     */
+    public function isDeleted(): bool
+    {
+        return $this->status === 'deleted';
     }
 
     /**
