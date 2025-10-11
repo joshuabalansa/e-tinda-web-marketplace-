@@ -9,14 +9,20 @@ class WelcomeController extends Controller
 {
     public function index()
     {
-        // Get real categories from products in the database (limit to 3)
-        $categoryData = Product::where('status', 'available')
-            ->select('category')
-            ->selectRaw('COUNT(*) as product_count')
-            ->groupBy('category')
-            ->orderBy('product_count', 'desc')
-            ->limit(3)
-            ->get();
+        try {
+            // Get real categories from products in the database (limit to 3)
+            $categoryData = Product::where('status', 'available')
+                ->select('category')
+                ->selectRaw('COUNT(*) as product_count')
+                ->groupBy('category')
+                ->orderBy('product_count', 'desc')
+                ->limit(3)
+                ->get();
+        } catch (\Exception $e) {
+            // Fallback to empty collection if database connection fails
+            \Log::error('Database connection failed in WelcomeController: ' . $e->getMessage());
+            $categoryData = collect();
+        }
 
         // Map categories to include images and descriptions
         $categories = $categoryData->map(function ($item) {
@@ -47,24 +53,30 @@ class WelcomeController extends Controller
         });
 
         // Get featured products (limit to 4)
-        $featuredProducts = Product::with('user')
-            ->where('status', 'available')
-            ->latest()
-            ->limit(4)
-            ->get()
-            ->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => $product->price_per_unit,
-                    'unit' => $product->unit_type,
-                    'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://placehold.co/600x400?text=' . urlencode($product->name),
-                    'description' => $product->description,
-                    'vendor' => $product->user->name,
-                    'category' => $product->category,
-                    'stock' => $product->stock_quantity
-                ];
-            });
+        try {
+            $featuredProducts = Product::with('user')
+                ->where('status', 'available')
+                ->latest()
+                ->limit(4)
+                ->get()
+                ->map(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'price' => $product->price_per_unit,
+                        'unit' => $product->unit_type,
+                        'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://placehold.co/600x400?text=' . urlencode($product->name),
+                        'description' => $product->description,
+                        'vendor' => $product->user->name,
+                        'category' => $product->category,
+                        'stock' => $product->stock_quantity
+                    ];
+                });
+        } catch (\Exception $e) {
+            // Fallback to empty collection if database connection fails
+            \Log::error('Database connection failed for featured products: ' . $e->getMessage());
+            $featuredProducts = collect();
+        }
 
         return view('welcome', compact('categories', 'featuredProducts'));
     }
