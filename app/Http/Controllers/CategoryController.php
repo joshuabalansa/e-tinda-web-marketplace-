@@ -9,12 +9,18 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        // Get real categories from products in the database
-        $categoryData = Product::where('status', 'available')
-            ->select('category')
-            ->selectRaw('COUNT(*) as product_count')
-            ->groupBy('category')
-            ->get();
+        try {
+            // Get real categories from products in the database
+            $categoryData = Product::where('status', 'available')
+                ->select('category')
+                ->selectRaw('COUNT(*) as product_count')
+                ->groupBy('category')
+                ->get();
+        } catch (\Exception $e) {
+            // Fallback to empty collection if database connection fails
+            \Log::error('Database connection failed in CategoryController: ' . $e->getMessage());
+            $categoryData = collect();
+        }
 
         // Map categories to include images and descriptions
         $categories = $categoryData->map(function ($item) {
@@ -49,37 +55,44 @@ class CategoryController extends Controller
 
     public function show($category)
     {
-        // Get products for the specific category
-        $products = Product::with('user')
-            ->where('status', 'available')
-            ->where('category', $category)
-            ->latest()
-            ->paginate(9)
-            ->through(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => $product->price_per_unit,
-                    'unit' => $product->unit_type,
-                    'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://placehold.co/600x400?text=' . urlencode($product->name),
-                    'description' => $product->description,
-                    'vendor' => $product->user->name,
-                    'location' => $product->user->address ?? 'Location not specified',
-                    'category' => $product->category,
-                    'stock' => $product->stock_quantity,
-                    'harvest_date' => $product->harvest_date->format('Y-m-d'),
-                    'storage' => 'Store in a cool, dry place'
-                ];
-            });
+        try {
+            // Get products for the specific category
+            $products = Product::with('user')
+                ->where('status', 'available')
+                ->where('category', $category)
+                ->latest()
+                ->paginate(9)
+                ->through(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'price' => $product->price_per_unit,
+                        'unit' => $product->unit_type,
+                        'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://placehold.co/600x400?text=' . urlencode($product->name),
+                        'description' => $product->description,
+                        'vendor' => $product->user->name,
+                        'location' => $product->user->address ?? 'Location not specified',
+                        'category' => $product->category,
+                        'stock' => $product->stock_quantity,
+                        'harvest_date' => $product->harvest_date->format('Y-m-d'),
+                        'storage' => 'Store in a cool, dry place'
+                    ];
+                });
 
-        // Get unique categories for filter (for the shop layout)
-        $categories = Product::where('status', 'available')
-            ->select('category')
-            ->distinct()
-            ->pluck('category')
-            ->filter()
-            ->sort()
-            ->values();
+            // Get unique categories for filter (for the shop layout)
+            $categories = Product::where('status', 'available')
+                ->select('category')
+                ->distinct()
+                ->pluck('category')
+                ->filter()
+                ->sort()
+                ->values();
+        } catch (\Exception $e) {
+            // Fallback to empty collections if database connection fails
+            \Log::error('Database connection failed in CategoryController show method: ' . $e->getMessage());
+            $products = collect();
+            $categories = collect();
+        }
 
         return view('shop.index', compact('products', 'categories'))->with('currentCategory', $category);
     }
