@@ -7,8 +7,7 @@
     <meta name="description" content="E-Tinda Marketplace - Farm to Table" />
     <meta name="author" content="" />
 
-    <link rel="icon" href="{{ asset('template-assets/images/favicon.ico') }}">
-    <title>E-Tinda | Farmer Dashboard</title>
+    <title>Etinda</title>
 
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('template-assets/js/jquery-ui/css/no-theme/jquery-ui-1.10.3.custom.min.css') }}">
@@ -384,7 +383,7 @@
                 </li>
 
                 <!-- Product Management -->
-                <li class="{{ request()->routeIs('farmer.products.index') ? 'active' : '' }}">
+                <li class="{{ request()->routeIs('farmer.products.*') ? 'active' : '' }}">
                     <a href="{{ route('farmer.products.index') }}">
                         <i class="entypo-newspaper"></i>
                         <span class="title">Manage Products</span>
@@ -392,8 +391,8 @@
                 </li>
 
                 <!-- Order Management -->
-                <li class="{{ request()->routeIs('farmer.orders.index') ? 'active' : '' }}">
-                    <a href="{{ route('farmer.orders.index') }}">
+                <li class="{{ request()->routeIs('farmer.orders') ? 'active' : '' }}">
+                    <a href="{{ route('farmer.orders') }}">
                         <i class="entypo-mail"></i>
                         <span class="title">Order Management</span>
                         @if(isset($stats) && isset($stats['pending_orders']) && $stats['pending_orders'] > 0)
@@ -403,8 +402,8 @@
                 </li>
 
                 <!-- Inventory Management -->
-                <li class="{{ request()->routeIs('farmer.inventory.index') ? 'active' : '' }}">
-                    <a href="{{ route('farmer.inventory.index') }}">
+                <li class="{{ request()->routeIs('farmer.products.*') ? 'active' : '' }}">
+                    <a href="{{ route('farmer.products.index') }}">
                         <i class="entypo-box"></i>
                         <span class="title">View Inventory</span>
                     </a>
@@ -413,7 +412,7 @@
 
                 <!-- Analytics Dashboard -->
                 <li class="{{ request()->routeIs('farmer.analytics.*') ? 'active' : '' }}">
-                    <a href="{{ route('farmer.analytics.index') }}">
+                    <a href="{{ route('farmer.analytics') }}">
                         <i class="entypo-chart-bar"></i>
                         <span class="title">Analytics Dashboard</span>
                     </a>
@@ -428,15 +427,15 @@
                 </li>
 
                 <!-- Settings -->
-                <li class="{{ request()->routeIs('farmer.profile.index') ? 'active' : '' }}">
-                    <a href="{{ route('farmer.profile.index') }}">
+                <li class="{{ request()->routeIs('farmer.account.*') ? 'active' : '' }}">
+                    <a href="{{ route('farmer.account') }}">
                         <i class="entypo-cog"></i>
                         <span class="title">Profile Settings</span>
                     </a>
                 </li>
 
-                <li class="{{ request()->routeIs('farmer.account.index') ? 'active' : '' }}">
-                    <a href="{{ route('farmer.account.index') }}">
+                <li class="{{ request()->routeIs('farmer.account.*') ? 'active' : '' }}">
+                    <a href="{{ route('farmer.account') }}">
                         <i class="entypo-cog"></i>
                         <span class="title">Account Settings</span>
                     </a>

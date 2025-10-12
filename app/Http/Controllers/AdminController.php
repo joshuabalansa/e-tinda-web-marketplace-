@@ -236,4 +236,49 @@ class AdminController extends Controller
     {
         //
     }
+
+    /**
+     * Show user details (alias for showUser method).
+     */
+    public function userDetails(User $user)
+    {
+        return $this->showUser($user);
+    }
+
+    /**
+     * Display admin reports.
+     */
+    public function reports()
+    {
+        // Get comprehensive statistics for reports
+        $stats = [
+            'total_users' => User::count(),
+            'total_farmers' => User::where('role', UserRole::Farmer)->count(),
+            'total_buyers' => User::where('role', UserRole::Buyer)->count(),
+            'total_products' => Product::count(),
+            'total_orders' => Order::count(),
+            'total_forums' => Forum::count(),
+            'pending_orders' => Order::where('status', 'pending')->count(),
+            'completed_orders' => Order::where('status', 'completed')->count(),
+            'cancelled_orders' => Order::where('status', 'cancelled')->count(),
+        ];
+
+        // Get monthly data for charts
+        $monthly_orders = Order::selectRaw("strftime('%m', created_at) as month, COUNT(*) as count")
+            ->whereRaw("strftime('%Y', created_at) = ?", [date('Y')])
+            ->groupBy('month')
+            ->pluck('count', 'month')
+            ->toArray();
+
+        $monthly_data = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $monthly_data[$i] = $monthly_orders[(string)$i] ?? 0;
+        }
+
+        // Get recent activity
+        $recent_orders = Order::with('user')->latest()->take(10)->get();
+        $recent_users = User::latest()->take(10)->get();
+
+        return view('admin.reports.index', compact('stats', 'monthly_data', 'recent_orders', 'recent_users'));
+    }
 }

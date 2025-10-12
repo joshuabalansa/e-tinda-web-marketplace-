@@ -26,6 +26,9 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\DashboardController;
 
 // Database connection test route
 Route::get('/db-test', function () {
@@ -39,10 +42,10 @@ Route::get('/db-test', function () {
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             ]
         );
-        
+
         $stmt = $pdo->query("SELECT 1 as test");
         $result = $stmt->fetch();
-        
+
         return response()->json([
             'status' => 'success',
             'message' => 'Database connection successful',
@@ -73,9 +76,10 @@ Route::get('/db-test', function () {
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Language switching route
+Route::get('/language/{locale}', [LanguageController::class, 'switchLanguage'])->name('language.switch');
+
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -90,6 +94,13 @@ Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/search', [ShopController::class, 'search'])->name('shop.search');
 Route::get('/shop/product/{id}', [ShopController::class, 'show'])->name('shop.product.show');
 
+// Cart routes
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
 // Categories routes
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
@@ -98,22 +109,33 @@ Route::get('/categories/{category}', [CategoryController::class, 'show'])->name(
 Route::middleware(['auth', 'role:buyer'])->group(function () {
     Route::get('/buyer', [BuyerDashboardController::class, 'index'])->name('buyer.dashboard');
     Route::get('/buyer/wishlist', [BuyerWishlistController::class, 'index'])->name('buyer.wishlist');
+    Route::post('/buyer/wishlist/add', [BuyerWishlistController::class, 'add'])->name('buyer.wishlist.add');
     Route::post('/buyer/wishlist/{product}', [BuyerWishlistController::class, 'store'])->name('buyer.wishlist.store');
     Route::delete('/buyer/wishlist/{product}', [BuyerWishlistController::class, 'destroy'])->name('buyer.wishlist.destroy');
+    Route::delete('/buyer/wishlist/remove-product/{productId}', [BuyerWishlistController::class, 'removeByProduct'])->name('buyer.wishlist.remove-product');
+    Route::delete('/buyer/wishlist/remove/{id}', [BuyerWishlistController::class, 'remove'])->name('buyer.wishlist.remove');
     Route::get('/buyer/orders', [BuyerDashboardController::class, 'orders'])->name('buyer.orders');
+    Route::get('/buyer/orders/{order}', [BuyerDashboardController::class, 'showOrder'])->name('buyer.orders.show');
     Route::get('/buyer/history', [BuyerDashboardController::class, 'history'])->name('buyer.history');
 });
 
-// Checkout routes
-Route::middleware(['auth', 'role:buyer'])->group(function () {
+// Checkout routes - Allow both buyers and farmers to checkout
+Route::middleware(['auth'])->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-    Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
+    Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.store');
+    Route::post('/checkout/calculate-delivery-fee', [CheckoutController::class, 'calculateDeliveryFee'])->name('checkout.calculate-delivery-fee');
+    Route::get('/checkout/success/{orderId}', [CheckoutController::class, 'success'])->name('checkout.success');
 });
 
 // Forums routes
 Route::get('/forums', [ForumsController::class, 'index'])->name('forums.index');
+Route::get('/forums/create', [ForumsController::class, 'create'])->name('forums.create')->middleware('auth');
+Route::post('/forums', [ForumsController::class, 'store'])->name('forums.store')->middleware('auth');
 Route::get('/forums/{forum}', [ForumsController::class, 'show'])->name('forums.show');
+Route::get('/forums/topic/{forum}', [ForumsController::class, 'show'])->name('forums.topic');
+Route::get('/forums/{forum}/edit', [ForumsController::class, 'edit'])->name('forums.edit')->middleware('auth');
+Route::put('/forums/{forum}', [ForumsController::class, 'update'])->name('forums.update')->middleware('auth');
+Route::delete('/forums/{forum}', [ForumsController::class, 'destroy'])->name('forums.destroy')->middleware('auth');
 Route::post('/forums/{forum}/reply', [ForumsController::class, 'reply'])->name('forums.reply')->middleware('auth');
 
 // Admin routes
@@ -131,7 +153,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 // Farmer routes
 Route::middleware(['auth', 'role:farmer'])->group(function () {
     Route::get('/farmer', [FarmerDashboardController::class, 'index'])->name('farmer.dashboard');
-    Route::get('/farmer/products', [FarmerProductsController::class, 'index'])->name('farmer.products');
+    Route::get('/farmer/products', [FarmerProductsController::class, 'index'])->name('farmer.products.index');
     Route::get('/farmer/products/create', [FarmerProductsController::class, 'create'])->name('farmer.products.create');
     Route::post('/farmer/products', [FarmerProductsController::class, 'store'])->name('farmer.products.store');
     Route::get('/farmer/products/{product}', [FarmerProductsController::class, 'show'])->name('farmer.products.show');
@@ -142,12 +164,13 @@ Route::middleware(['auth', 'role:farmer'])->group(function () {
     Route::get('/farmer/orders/{order}', [FarmerOrdersController::class, 'show'])->name('farmer.orders.show');
     Route::put('/farmer/orders/{order}/status', [FarmerOrdersController::class, 'updateStatus'])->name('farmer.orders.update-status');
     Route::get('/farmer/analytics', [FarmerAnalyticsController::class, 'index'])->name('farmer.analytics');
-    Route::get('/farmer/reports', [FarmerReportsController::class, 'index'])->name('farmer.reports');
+    Route::get('/farmer/reports', [FarmerReportsController::class, 'index'])->name('farmer.reports.index');
     Route::get('/farmer/forums', [FarmerForumsController::class, 'index'])->name('farmer.forums');
     Route::get('/farmer/forums/{forum}', [FarmerForumsController::class, 'show'])->name('farmer.forums.show');
     Route::post('/farmer/forums/{forum}/reply', [FarmerForumsController::class, 'reply'])->name('farmer.forums.reply');
     Route::get('/farmer/account', [FarmerAccountController::class, 'index'])->name('farmer.account');
-    Route::put('/farmer/account', [FarmerAccountController::class, 'update'])->name('farmer.account.update');
+    Route::post('/farmer/account', [FarmerAccountController::class, 'update'])->name('farmer.account.update');
+    Route::get('/farmer/account/export', [FarmerAccountController::class, 'exportData'])->name('farmer.account.export-data');
 });
 
 // Health check route for Railway

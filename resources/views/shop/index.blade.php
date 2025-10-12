@@ -180,7 +180,7 @@
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
           @forelse($products as $product)
             <div class="col">
-              <a href="{{ route('shop.product', ['id' => $product['id']]) }}" class="product-link">
+              <a href="{{ route('shop.product.show', $product['id']) }}" class="product-link">
                 <div class="card h-100 product-card">
                   @if(isset($product['certification']) && $product['certification'] === 'Organic Certified')
                     <div class="badge bg-success position-absolute" style="top: 10px; right: 10px;">{{ __('shop.organic') }}</div>

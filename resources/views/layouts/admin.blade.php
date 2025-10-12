@@ -7,8 +7,7 @@
     <meta name="description" content="E-Tinda Marketplace - Admin Panel" />
     <meta name="author" content="" />
 
-    <link rel="icon" href="{{ asset('template-assets/images/favicon.ico') }}">
-    <title>E-Tinda | Admin Dashboard</title>
+    <title>Etinda</title>
 
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('template-assets/js/jquery-ui/css/no-theme/jquery-ui-1.10.3.custom.min.css') }}">
@@ -386,7 +385,7 @@
 
                 <!-- User Management -->
                 <li class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.users.index') }}">
+                    <a href="{{ route('admin.users') }}">
                         <i class="entypo-users"></i>
                         <span class="title">User Management</span>
                     </a>
@@ -394,7 +393,7 @@
 
                 <!-- Forum Moderation -->
                 <li class="{{ request()->routeIs('admin.forums.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.forums.index') }}">
+                    <a href="{{ route('admin.forums') }}">
                         <i class="entypo-chat"></i>
                         <span class="title">Forum Moderation</span>
                     </a>
@@ -402,7 +401,7 @@
 
                 <!-- Analytics -->
                 <li class="{{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.analytics.index') }}">
+                    <a href="{{ route('admin.analytics') }}">
                         <i class="entypo-chart-bar"></i>
                         <span class="title">Analytics</span>
                     </a>
@@ -410,7 +409,7 @@
 
                 <!-- Reports -->
                 <li class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.reports.index') }}">
+                    <a href="{{ route('admin.reports') }}">
                         <i class="entypo-doc-text"></i>
                         <span class="title">Reports</span>
                     </a>

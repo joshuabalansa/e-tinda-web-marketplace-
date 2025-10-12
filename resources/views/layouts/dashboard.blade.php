@@ -8,8 +8,7 @@
     <meta name="description" content="E-Tinda Marketplace - Farm to Table" />
     <meta name="author" content="" />
 
-    <link rel="icon" href="{{ asset('assets/images/favicon.ico') }}">
-    <title>E-Tinda Marketplace | Dashboard</title>
+    <title>Etinda</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -322,7 +321,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('farmer.orders.index') }}" class="{{ request()->routeIs('farmer.orders.*') ? 'active' : '' }}">
+                                <a href="{{ route('farmer.orders') }}" class="{{ request()->routeIs('farmer.orders.*') ? 'active' : '' }}">
                                     <i class="fas fa-shopping-cart"></i>
                                     <span>{{ __('dashboard.orders') }}</span>
                                 </a>

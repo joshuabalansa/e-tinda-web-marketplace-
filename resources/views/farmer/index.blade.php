@@ -50,7 +50,7 @@
                     </div>
                     <div class="col-md-3 col-sm-6 mb-3">
                         <div class="text-center">
-                            <a href="{{ route('farmer.orders.index') }}" class="btn btn-success btn-lg btn-block">
+                            <a href="{{ route('farmer.orders') }}" class="btn btn-success btn-lg btn-block">
                                 <i class="entypo-mail" style="font-size: 2rem;"></i>
                                 <br>View Orders
                             </a>

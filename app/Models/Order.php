@@ -40,4 +40,10 @@ class Order extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    // Accessor for total_amount compatibility
+    public function getTotalAmountAttribute()
+    {
+        return $this->total;
+    }
 }

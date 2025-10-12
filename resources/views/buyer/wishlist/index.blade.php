@@ -71,28 +71,13 @@
                                     </div>
 
                                     <div class="mt-auto">
-                                        <div class="row g-2">
-                                            <div class="col-6">
-                                                <a href="{{ route('shop.product', $item->product->id) }}" class="btn btn-success w-100">
-                                                    <i class="fas fa-eye"></i> View
-                                                </a>
-                                            </div>
-                                            <div class="col-6">
-                                                <button class="btn btn-outline-danger w-100 remove-wishlist"
-                                                        data-id="{{ $item->id }}"
-                                                        data-product="{{ $item->product->name }}">
-                                                    <i class="fas fa-trash"></i> Remove
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <a href="{{ route('shop.product.show', $item->product->id) }}" class="btn btn-success w-100">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
                                     </div>
                                 @else
                                     <div class="mt-auto">
                                         <p class="text-muted text-center">This product is no longer available</p>
-                                        <button class="btn btn-outline-danger w-100 remove-wishlist"
-                                                data-id="{{ $item->id }}">
-                                            <i class="fas fa-trash"></i> Remove
-                                        </button>
                                     </div>
                                 @endif
                             </div>
@@ -121,62 +106,5 @@
     </div>
 </div>
 
-<!-- Remove Wishlist Item Modal -->
-<div class="modal fade" id="removeWishlistModal" tabindex="-1" aria-labelledby="removeWishlistModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="removeWishlistModalLabel">Remove from Wishlist</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to remove <strong id="productName"></strong> from your wishlist?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmRemove">Remove</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 @endsection
-
-@push('scripts')
-<script>
-$(document).ready(function() {
-    $('.remove-wishlist').click(function() {
-        var id = $(this).data('id');
-        var productName = $(this).data('product') || 'this item';
-
-        $('#productName').text(productName);
-        $('#confirmRemove').data('id', id);
-        $('#removeWishlistModal').modal('show');
-    });
-
-    $('#confirmRemove').click(function() {
-        var id = $(this).data('id');
-
-        $.ajax({
-            url: '/buyer/wishlist/remove/' + id,
-            type: 'DELETE',
-            data: {
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                if (response.success) {
-                    location.reload();
-                } else {
-                    alert('Error: ' + response.message);
-                }
-            },
-            error: function() {
-                alert('An error occurred while removing the item.');
-            }
-        });
-
-        $('#removeWishlistModal').modal('hide');
-    });
-});
-</script>
-@endpush

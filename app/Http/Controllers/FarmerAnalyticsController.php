@@ -2,409 +2,188 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\Product;
-use App\Models\Inventory;
-use App\Models\Review;
+use App\Models\Order;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class FarmerAnalyticsController extends Controller
 {
+    /**
+     * Display farmer analytics dashboard.
+     */
     public function index()
     {
-        $farmerId = auth()->id();
+        $user = Auth::user();
 
-        // Get analytics data
-        $analyticsData = $this->getAnalyticsData($farmerId);
+        // Get farmer's products
+        $products = $user->products();
+
+        // Get orders for farmer's products
+        $orders = Order::whereHas('items.product', function($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->with(['items.product'])->get();
+
+        // Prepare analytics data structure
+        $analyticsData = [
+            'revenue' => [
+                'current_month' => $orders->where('created_at', '>=', now()->startOfMonth())->sum('total_amount'),
+                'growth_percentage' => $this->calculateGrowthPercentage($orders),
+                'monthly_revenue' => $this->getMonthlyRevenue($orders),
+            ],
+            'orders' => [
+                'monthly_orders' => $this->getMonthlyOrders($orders),
+                'status_distribution' => $this->getOrderStatusDistribution($orders),
+            ],
+            'products' => [
+                'top_products' => $this->getTopProducts($products),
+                'category_performance' => $this->getCategoryPerformance($products),
+            ],
+            'inventory' => [
+                'low_stock' => $products->where('stock_quantity', '<=', 10)->get(),
+                'stock_levels' => $products->take(10)->get(),
+            ],
+            'sales' => [
+                'monthly' => $this->getMonthlySales($orders),
+                'daily' => $this->getDailySales($orders),
+            ],
+            'customers' => [
+                'monthly_customers' => $this->getMonthlyCustomers($orders),
+            ],
+        ];
 
         return view('farmer.analytics.index', compact('analyticsData'));
     }
 
-    public function getAnalyticsData($farmerId)
+    /**
+     * Calculate growth percentage for revenue.
+     */
+    private function calculateGrowthPercentage($orders)
     {
-        $currentMonth = Carbon::now()->month;
-        $currentYear = Carbon::now()->year;
+        $currentMonth = $orders->where('created_at', '>=', now()->startOfMonth())->sum('total_amount');
+        $lastMonth = $orders->whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])->sum('total_amount');
 
-        // Sales Analytics
-        $salesData = $this->getSalesAnalytics($farmerId);
+        if ($lastMonth == 0) return 0;
 
-        // Product Performance
-        $productData = $this->getProductAnalytics($farmerId);
-
-        // Inventory Analytics
-        $inventoryData = $this->getInventoryAnalytics($farmerId);
-
-        // Order Analytics
-        $orderData = $this->getOrderAnalytics($farmerId);
-
-        // Revenue Analytics
-        $revenueData = $this->getRevenueAnalytics($farmerId);
-
-        // Customer Analytics
-        $customerData = $this->getCustomerAnalytics($farmerId);
-
-        return [
-            'sales' => $salesData,
-            'products' => $productData,
-            'inventory' => $inventoryData,
-            'orders' => $orderData,
-            'revenue' => $revenueData,
-            'customers' => $customerData,
-        ];
-    }
-
-    private function getSalesAnalytics($farmerId)
-    {
-        // Monthly sales for the last 12 months
-        $monthlySales = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->where('products.user_id', $farmerId)
-            ->whereRaw('orders.status != ?', ['cancelled'])
-            ->select(
-                DB::raw($this->getMonthExpression('orders.created_at') . ' as month'),
-                DB::raw($this->getYearExpression('orders.created_at') . ' as year'),
-                DB::raw('SUM(order_items.quantity) as total_quantity'),
-                DB::raw('SUM(order_items.price * order_items.quantity) as total_revenue')
-            )
-            ->groupBy(DB::raw($this->getYearExpression('orders.created_at')), DB::raw($this->getMonthExpression('orders.created_at')))
-            ->orderBy(DB::raw($this->getYearExpression('orders.created_at')), 'desc')
-            ->orderBy(DB::raw($this->getMonthExpression('orders.created_at')), 'desc')
-            ->limit(12)
-            ->get();
-
-        // Daily sales for current month
-        $dailySales = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->where('products.user_id', $farmerId)
-            ->whereRaw('orders.status != ?', ['cancelled'])
-            ->whereRaw($this->getMonthExpression('orders.created_at') . ' = ?', [Carbon::now()->month])
-            ->whereRaw($this->getYearExpression('orders.created_at') . ' = ?', [Carbon::now()->year])
-            ->select(
-                DB::raw($this->getDayExpression('orders.created_at') . ' as day'),
-                DB::raw('SUM(order_items.quantity) as total_quantity'),
-                DB::raw('SUM(order_items.price * order_items.quantity) as total_revenue')
-            )
-            ->groupBy('day')
-            ->orderBy('day')
-            ->get();
-
-        return [
-            'monthly' => $monthlySales,
-            'daily' => $dailySales,
-        ];
-    }
-
-    private function getProductAnalytics($farmerId)
-    {
-        // Top selling products
-        $topProducts = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->where('products.user_id', $farmerId)
-            ->whereRaw('orders.status != ?', ['cancelled'])
-            ->select(
-                'products.name',
-                'products.id',
-                DB::raw('SUM(order_items.quantity) as total_sold'),
-                DB::raw('SUM(order_items.price * order_items.quantity) as total_revenue'),
-                DB::raw('AVG(order_items.price) as avg_price')
-            )
-            ->groupBy('products.id', 'products.name')
-            ->orderBy('total_sold', 'desc')
-            ->limit(10)
-            ->get();
-
-        // Product categories performance
-        $categoryPerformance = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->where('products.user_id', $farmerId)
-            ->whereRaw('orders.status != ?', ['cancelled'])
-            ->select(
-                'products.category',
-                DB::raw('SUM(order_items.quantity) as total_sold'),
-                DB::raw('SUM(order_items.price * order_items.quantity) as total_revenue')
-            )
-            ->groupBy('products.category')
-            ->orderBy('total_revenue', 'desc')
-            ->get();
-
-        return [
-            'top_products' => $topProducts,
-            'category_performance' => $categoryPerformance,
-        ];
-    }
-
-    private function getInventoryAnalytics($farmerId)
-    {
-        // Current stock levels
-        $stockLevels = Product::where('user_id', $farmerId)
-            ->select('id', 'name', 'stock_quantity', 'category')
-            ->orderBy('stock_quantity', 'asc')
-            ->get();
-
-        // Inventory movements (last 30 days)
-        $inventoryMovements = Inventory::where('farmer_id', $farmerId)
-            ->where('transaction_date', '>=', Carbon::now()->subDays(30))
-            ->select(
-                'transaction_type',
-                DB::raw('SUM(quantity_in) as total_in'),
-                DB::raw('SUM(quantity_out) as total_out'),
-                DB::raw('SUM(total_value) as total_value')
-            )
-            ->groupBy('transaction_type')
-            ->get();
-
-        // Low stock products
-        $lowStockProducts = Product::where('user_id', $farmerId)
-            ->where('stock_quantity', '<=', 10)
-            ->select('id', 'name', 'stock_quantity', 'category')
-            ->get();
-
-        return [
-            'stock_levels' => $stockLevels,
-            'movements' => $inventoryMovements,
-            'low_stock' => $lowStockProducts,
-        ];
-    }
-
-    private function getOrderAnalytics($farmerId)
-    {
-        // Order status distribution
-        $orderStatus = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->where('products.user_id', $farmerId)
-            ->select(
-                'orders.status',
-                DB::raw('COUNT(DISTINCT orders.id) as order_count'),
-                DB::raw('SUM(order_items.price * order_items.quantity) as total_value')
-            )
-            ->groupBy('orders.status')
-            ->get();
-
-        // Orders by month (last 6 months)
-        $monthlyOrders = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->where('products.user_id', $farmerId)
-            ->where('orders.created_at', '>=', Carbon::now()->subMonths(6))
-            ->select(
-                DB::raw($this->getMonthExpression('orders.created_at') . ' as month'),
-                DB::raw($this->getYearExpression('orders.created_at') . ' as year'),
-                DB::raw('COUNT(DISTINCT orders.id) as order_count'),
-                DB::raw('SUM(order_items.price * order_items.quantity) as total_revenue')
-            )
-            ->groupBy(DB::raw($this->getYearExpression('orders.created_at')), DB::raw($this->getMonthExpression('orders.created_at')))
-            ->orderBy(DB::raw($this->getYearExpression('orders.created_at')), 'desc')
-            ->orderBy(DB::raw($this->getMonthExpression('orders.created_at')), 'desc')
-            ->get();
-
-        return [
-            'status_distribution' => $orderStatus,
-            'monthly_orders' => $monthlyOrders,
-        ];
-    }
-
-    private function getRevenueAnalytics($farmerId)
-    {
-        // Revenue by month (last 12 months)
-        $monthlyRevenue = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->where('products.user_id', $farmerId)
-            ->whereRaw('orders.status != ?', ['cancelled'])
-            ->where('orders.created_at', '>=', Carbon::now()->subMonths(12))
-            ->select(
-                DB::raw($this->getMonthExpression('orders.created_at') . ' as month'),
-                DB::raw($this->getYearExpression('orders.created_at') . ' as year'),
-                DB::raw('SUM(order_items.price * order_items.quantity) as revenue')
-            )
-            ->groupBy(DB::raw($this->getYearExpression('orders.created_at')), DB::raw($this->getMonthExpression('orders.created_at')))
-            ->orderBy(DB::raw($this->getYearExpression('orders.created_at')), 'desc')
-            ->orderBy(DB::raw($this->getMonthExpression('orders.created_at')), 'desc')
-            ->get();
-
-        // Revenue comparison (current vs previous month)
-        $currentMonth = Carbon::now()->month;
-        $currentYear = Carbon::now()->year;
-
-
-        $currentMonthRevenue = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->where('products.user_id', $farmerId)
-            ->whereRaw('orders.status != ?', ['cancelled'])
-            ->whereRaw($this->getMonthExpression('orders.created_at') . ' = ?', [$currentMonth])
-            ->whereRaw($this->getYearExpression('orders.created_at') . ' = ?', [$currentYear])
-            ->sum(DB::raw('order_items.price * order_items.quantity'));
-
-        $previousMonth = Carbon::now()->subMonth()->month;
-        $previousYear = Carbon::now()->subMonth()->year;
-
-        $previousMonthRevenue = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->where('products.user_id', $farmerId)
-            ->whereRaw('orders.status != ?', ['cancelled'])
-            ->whereRaw($this->getMonthExpression('orders.created_at') . ' = ?', [$previousMonth])
-            ->whereRaw($this->getYearExpression('orders.created_at') . ' = ?', [$previousYear])
-            ->sum(DB::raw('order_items.price * order_items.quantity'));
-
-        $revenueGrowth = $previousMonthRevenue > 0
-            ? (($currentMonthRevenue - $previousMonthRevenue) / $previousMonthRevenue) * 100
-            : 0;
-
-        return [
-            'monthly_revenue' => $monthlyRevenue,
-            'current_month' => $currentMonthRevenue,
-            'previous_month' => $previousMonthRevenue,
-            'growth_percentage' => round($revenueGrowth, 2),
-        ];
-    }
-
-    private function getCustomerAnalytics($farmerId)
-    {
-        // Customer count by month
-        $monthlyCustomers = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->where('products.user_id', $farmerId)
-            ->whereRaw('orders.status != ?', ['cancelled'])
-            ->where('orders.created_at', '>=', Carbon::now()->subMonths(6))
-            ->select(
-                DB::raw($this->getMonthExpression('orders.created_at') . ' as month'),
-                DB::raw($this->getYearExpression('orders.created_at') . ' as year'),
-                DB::raw('COUNT(DISTINCT orders.user_id) as customer_count')
-            )
-            ->groupBy(DB::raw($this->getYearExpression('orders.created_at')), DB::raw($this->getMonthExpression('orders.created_at')))
-            ->orderBy(DB::raw($this->getYearExpression('orders.created_at')), 'desc')
-            ->orderBy(DB::raw($this->getMonthExpression('orders.created_at')), 'desc')
-            ->get();
-
-        // Average order value
-        $avgOrderValue = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->where('products.user_id', $farmerId)
-            ->whereRaw('orders.status != ?', ['cancelled'])
-            ->select(DB::raw('AVG(order_items.price * order_items.quantity) as avg_value'))
-            ->first();
-
-        return [
-            'monthly_customers' => $monthlyCustomers,
-            'avg_order_value' => $avgOrderValue->avg_value ?? 0,
-        ];
-    }
-
-
-    // API endpoint for AJAX requests
-    public function getChartData(Request $request)
-    {
-        $farmerId = auth()->id();
-        $type = $request->get('type', 'sales');
-
-        switch ($type) {
-            case 'sales':
-                return response()->json($this->getSalesAnalytics($farmerId));
-            case 'products':
-                return response()->json($this->getProductAnalytics($farmerId));
-            case 'inventory':
-                return response()->json($this->getInventoryAnalytics($farmerId));
-            case 'orders':
-                return response()->json($this->getOrderAnalytics($farmerId));
-            case 'revenue':
-                return response()->json($this->getRevenueAnalytics($farmerId));
-            case 'customers':
-                return response()->json($this->getCustomerAnalytics($farmerId));
-            default:
-                return response()->json(['error' => 'Invalid chart type'], 400);
-        }
+        return round((($currentMonth - $lastMonth) / $lastMonth) * 100, 1);
     }
 
     /**
-     * Get database-specific month extraction expression
+     * Get monthly revenue data.
      */
-    private function getMonthExpression($column)
+    private function getMonthlyRevenue($orders)
     {
-        $driver = config('database.default');
-        switch ($driver) {
-            case 'mysql':
-                return "MONTH($column)";
-            case 'sqlite':
-                return "CAST(strftime('%m', $column) AS UNSIGNED)";
-            case 'pgsql':
-                return "EXTRACT(MONTH FROM $column)";
-            default:
-                return "MONTH($column)";
-        }
+        return $orders->groupBy(function($order) {
+            return $order->created_at->format('Y-m');
+        })->map(function($orders, $month) {
+            return [
+                'month' => (int) substr($month, 5),
+                'year' => (int) substr($month, 0, 4),
+                'revenue' => $orders->sum('total_amount')
+            ];
+        })->values();
     }
 
     /**
-     * Get database-specific year extraction expression
+     * Get monthly orders data.
      */
-    private function getYearExpression($column)
+    private function getMonthlyOrders($orders)
     {
-        $driver = config('database.default');
-        switch ($driver) {
-            case 'mysql':
-                return "YEAR($column)";
-            case 'sqlite':
-                return "CAST(strftime('%Y', $column) AS UNSIGNED)";
-            case 'pgsql':
-                return "EXTRACT(YEAR FROM $column)";
-            default:
-                return "YEAR($column)";
-        }
+        return $orders->groupBy(function($order) {
+            return $order->created_at->format('Y-m');
+        })->map(function($orders, $month) {
+            return [
+                'month' => (int) substr($month, 5),
+                'year' => (int) substr($month, 0, 4),
+                'order_count' => $orders->count()
+            ];
+        })->values();
     }
 
     /**
-     * Get database-specific day extraction expression
+     * Get order status distribution.
      */
-    private function getDayExpression($column)
+    private function getOrderStatusDistribution($orders)
     {
-        $driver = config('database.default');
-        switch ($driver) {
-            case 'mysql':
-                return "DAY($column)";
-            case 'sqlite':
-                return "CAST(strftime('%d', $column) AS UNSIGNED)";
-            case 'pgsql':
-                return "EXTRACT(DAY FROM $column)";
-            default:
-                return "DAY($column)";
-        }
+        return $orders->groupBy('status')->map(function($orders, $status) {
+            return [
+                'status' => $status,
+                'order_count' => $orders->count()
+            ];
+        })->values();
     }
 
     /**
-     * Get database-specific current date/time function
+     * Get top products.
      */
-    private function getCurrentDateTimeFunction()
+    private function getTopProducts($products)
     {
-        $driver = config('database.default');
-        switch ($driver) {
-            case 'mysql':
-                return 'NOW()';
-            case 'sqlite':
-                return "datetime('now')";
-            case 'pgsql':
-                return 'NOW()';
-            default:
-                return 'NOW()';
-        }
+        return $products->withCount('orderItems')->orderBy('order_items_count', 'desc')->take(10)->get()->map(function($product) {
+            return [
+                'name' => $product->name,
+                'total_sold' => $product->order_items_count ?? 0
+            ];
+        });
     }
 
     /**
-     * Get database-specific date difference expression
+     * Get category performance.
      */
-    private function getDateDiffExpression($date1, $date2)
+    private function getCategoryPerformance($products)
     {
-        $driver = config('database.default');
-        switch ($driver) {
-            case 'mysql':
-                return "DATEDIFF($date1, $date2)";
-            case 'sqlite':
-                // Convert NOW() to datetime('now') for SQLite
-                $date1 = str_replace('NOW()', "datetime('now')", $date1);
-                return "julianday($date1) - julianday($date2)";
-            case 'pgsql':
-                return "EXTRACT(DAY FROM ($date1 - $date2))";
-            default:
-                return "DATEDIFF($date1, $date2)";
-        }
+        return $products->get()->groupBy('category')->map(function($products, $category) {
+            return [
+                'category' => $category,
+                'total_revenue' => $products->sum(function($product) {
+                    return $product->orderItems()->sum('price');
+                })
+            ];
+        })->values();
+    }
+
+    /**
+     * Get monthly sales data.
+     */
+    private function getMonthlySales($orders)
+    {
+        return $orders->groupBy(function($order) {
+            return $order->created_at->format('Y-m');
+        })->map(function($orders, $month) {
+            return [
+                'month' => (int) substr($month, 5),
+                'year' => (int) substr($month, 0, 4),
+                'total_quantity' => $orders->sum(function($order) {
+                    return $order->items->sum('quantity');
+                })
+            ];
+        })->values();
+    }
+
+    /**
+     * Get daily sales data.
+     */
+    private function getDailySales($orders)
+    {
+        return $orders->where('created_at', '>=', now()->startOfDay())->map(function($order) {
+            return [
+                'total_quantity' => $order->items->sum('quantity')
+            ];
+        });
+    }
+
+    /**
+     * Get monthly customers data.
+     */
+    private function getMonthlyCustomers($orders)
+    {
+        return $orders->groupBy(function($order) {
+            return $order->created_at->format('Y-m');
+        })->map(function($orders, $month) {
+            return [
+                'month' => (int) substr($month, 5),
+                'year' => (int) substr($month, 0, 4),
+                'customer_count' => $orders->unique('user_id')->count()
+            ];
+        })->values();
     }
 }

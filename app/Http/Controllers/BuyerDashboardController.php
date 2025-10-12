@@ -76,4 +76,37 @@ class BuyerDashboardController extends Controller
     {
         //
     }
+
+    /**
+     * Display buyer's orders.
+     */
+    public function orders()
+    {
+        $user = auth()->user();
+        $orders = $user->orders()->with(['items.product'])->latest()->paginate(10);
+
+        return view('buyer.orders.index', compact('orders'));
+    }
+
+    /**
+     * Display buyer's order history.
+     */
+    public function history()
+    {
+        $user = auth()->user();
+        $orders = $user->orders()->with(['items.product'])->latest()->get();
+
+        return view('buyer.history.index', compact('orders'));
+    }
+
+    /**
+     * Display a specific order.
+     */
+    public function showOrder($orderId)
+    {
+        $user = auth()->user();
+        $order = $user->orders()->with(['items.product'])->findOrFail($orderId);
+
+        return view('buyer.orders.show', compact('order'));
+    }
 }

@@ -222,7 +222,7 @@
             </div>
             <form id="statusUpdateForm" method="POST">
                 @csrf
-                @method('PATCH')
+                @method('PUT')
                 <div class="modal-body">
                     <p>Are you sure you want to update the order status?</p>
                     <input type="hidden" id="newStatus" name="status">

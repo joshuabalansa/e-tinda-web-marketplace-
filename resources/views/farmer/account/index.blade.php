@@ -24,7 +24,7 @@
                                             <h4><i class="entypo-shop"></i> Business Information</h4>
                                         </div>
                                         <div class="panel-body">
-                                            <form action="{{ route('farmer.account.update-business') }}" method="POST">
+                                            <form action="{{ route('farmer.account.update') }}" method="POST">
                                                 @csrf
                                                 <div class="row">
                                                     <div class="col-md-6">
@@ -92,7 +92,7 @@
                                             <h4><i class="entypo-location"></i> Location Settings</h4>
                                         </div>
                                         <div class="panel-body">
-                                            <form action="{{ route('farmer.account.update-location') }}" method="POST">
+                                            <form action="{{ route('farmer.account.update') }}" method="POST">
                                                 @csrf
                                                 <div class="row">
                                                     <div class="col-md-12">
@@ -158,7 +158,7 @@
                                 </div>
                             </div>
 
-                            <!-- Payment Methods Form -->
+                            {{-- Payment Methods Form - HIDDEN
                             <div class="row mt-4">
                                 <div class="col-md-12">
                                     <div class="panel panel-default">
@@ -166,7 +166,7 @@
                                             <h4><i class="entypo-credit-card"></i> Payment Methods</h4>
                                         </div>
                                         <div class="panel-body">
-                                            <form action="{{ route('farmer.account.update-payment') }}" method="POST">
+                                            <form action="{{ route('farmer.account.update') }}" method="POST">
                                                 @csrf
                                                 <div class="row">
                                                     <div class="col-md-6">
@@ -222,8 +222,9 @@
                                     </div>
                                 </div>
                             </div>
+                            --}}
 
-                            <!-- Privacy Settings Form -->
+                            {{-- Privacy Settings Form - HIDDEN
                             <div class="row mt-4">
                                 <div class="col-md-12">
                                     <div class="panel panel-default">
@@ -231,7 +232,7 @@
                                             <h4><i class="entypo-shield"></i> Privacy Settings</h4>
                                         </div>
                                         <div class="panel-body">
-                                            <form action="{{ route('farmer.account.update-privacy') }}" method="POST">
+                                            <form action="{{ route('farmer.account.update') }}" method="POST">
                                                 @csrf
                                                 <div class="row">
                                                     <div class="col-md-6">
@@ -286,8 +287,9 @@
                                     </div>
                                 </div>
                             </div>
+                            --}}
 
-                            <!-- Data Export -->
+                            {{-- Data Export - HIDDEN
                             <div class="row mt-4">
                                 <div class="col-md-12">
                                     <div class="panel panel-default">
@@ -304,6 +306,7 @@
                                     </div>
                                 </div>
                             </div>
+                            --}}
                         </div>
                     </div>
                 </div>

@@ -134,7 +134,7 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            return redirect()->route('checkout.success', ['orderId' => $order->id])
+            return redirect()->route('checkout.success', $order->id)
                            ->with('success', 'Order placed successfully!');
 
         } catch (\Exception $e) {

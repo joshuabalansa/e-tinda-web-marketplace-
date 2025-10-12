@@ -14,15 +14,15 @@
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <h1 class="mb-0">{{ $productData['name'] }}</h1>
                 @auth
-                    <button 
-                        type="button" 
-                        class="btn btn-outline-danger btn-sm wishlist-btn" 
+                    <button
+                        type="button"
+                        class="btn btn-sm wishlist-btn {{ $isInWishlist ? 'btn-danger' : 'btn-outline-danger' }}"
                         data-product-id="{{ $productData['id'] }}"
                         data-in-wishlist="{{ $isInWishlist ? 'true' : 'false' }}"
                         onclick="toggleWishlist(this)"
                         title="{{ $isInWishlist ? 'Remove from favorites' : 'Add to favorites' }}"
                     >
-                        <i class="fas fa-heart {{ $isInWishlist ? 'text-danger' : '' }}"></i>
+                        <i class="fas fa-heart"></i>
                     </button>
                 @endauth
             </div>
@@ -84,7 +84,7 @@
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
             @foreach($relatedProducts as $relatedProduct)
             <div class="col">
-                <a href="{{ route('shop.product', ['id' => $relatedProduct['id']]) }}" class="product-link">
+                <a href="{{ route('shop.product.show', $relatedProduct['id']) }}" class="product-link">
                     <div class="card h-100 product-card">
                         <img src="{{ $relatedProduct['image'] }}" class="card-img-top" alt="{{ $relatedProduct['name'] }}">
                         <div class="card-body">
@@ -122,7 +122,7 @@ function toggleWishlist(button) {
     const isInWishlist = button.getAttribute('data-in-wishlist') === 'true';
     const icon = button.querySelector('i');
     const title = button.getAttribute('title');
-    
+
     if (isInWishlist) {
         // Remove from wishlist
         fetch(`/buyer/wishlist/remove-product/${productId}`, {
@@ -138,7 +138,9 @@ function toggleWishlist(button) {
             if (data.success) {
                 button.setAttribute('data-in-wishlist', 'false');
                 button.setAttribute('title', 'Add to favorites');
-                icon.classList.remove('text-danger');
+                // Change button styling to outline
+                button.classList.remove('btn-danger');
+                button.classList.add('btn-outline-danger');
                 showToast('Product removed from favorites', 'success');
             } else {
                 showToast(data.message || 'Error removing from favorites', 'error');
@@ -166,7 +168,9 @@ function toggleWishlist(button) {
             if (data.success) {
                 button.setAttribute('data-in-wishlist', 'true');
                 button.setAttribute('title', 'Remove from favorites');
-                icon.classList.add('text-danger');
+                // Change button styling to filled
+                button.classList.remove('btn-outline-danger');
+                button.classList.add('btn-danger');
                 showToast('Product added to favorites', 'success');
             } else {
                 showToast(data.message || 'Error adding to favorites', 'error');
@@ -187,7 +191,7 @@ function showToast(message, type) {
     toast.setAttribute('role', 'alert');
     toast.setAttribute('aria-live', 'assertive');
     toast.setAttribute('aria-atomic', 'true');
-    
+
     toast.innerHTML = `
         <div class="d-flex">
             <div class="toast-body">
@@ -196,17 +200,45 @@ function showToast(message, type) {
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
     `;
-    
+
     document.body.appendChild(toast);
-    
+
     // Initialize and show toast
     const bsToast = new bootstrap.Toast(toast);
     bsToast.show();
-    
+
     // Remove toast element after it's hidden
     toast.addEventListener('hidden.bs.toast', () => {
         document.body.removeChild(toast);
     });
 }
+
+// Smooth transition for wishlist button
+document.addEventListener('DOMContentLoaded', function() {
+    const wishlistBtn = document.querySelector('.wishlist-btn');
+    if (wishlistBtn) {
+        wishlistBtn.style.transition = 'all 0.3s ease';
+    }
+});
 </script>
+
+<style>
+.wishlist-btn {
+    transition: all 0.3s ease !important;
+    border-radius: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.wishlist-btn:hover {
+    transform: scale(1.1);
+}
+
+.wishlist-btn i {
+    font-size: 16px;
+}
+</style>
 @endsection

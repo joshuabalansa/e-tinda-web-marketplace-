@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'farmer' => \App\Http\Middleware\FarmerMiddleware::class,
             'buyer' => \App\Http\Middleware\BuyerMiddleware::class,
+            'role' => \App\Http\Middleware\CheckRole::class,
         ]);
 
         // Ensure locale is set for every web request

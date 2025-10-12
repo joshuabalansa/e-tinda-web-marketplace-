@@ -36,4 +36,10 @@ class Product extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    // Accessor for price compatibility
+    public function getPriceAttribute()
+    {
+        return $this->price_per_unit;
+    }
 }

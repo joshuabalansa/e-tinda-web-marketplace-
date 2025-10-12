@@ -164,7 +164,7 @@
               </div>
               <div class="mt-auto">
                 <div class="d-grid gap-2">
-                  <a href="{{ route('shop.product', $product['id']) }}" class="btn btn-outline-success">
+                  <a href="{{ route('shop.product.show', $product['id']) }}" class="btn btn-outline-success">
                     <i class="fas fa-eye me-2"></i>{{ __('welcome.view_details') }}
                   </a>
                   @if($product['stock'] > 0)

@@ -24,6 +24,36 @@ class BuyerWishlistController extends Controller
     /**
      * Add a product to the buyer's wishlist.
      *
+     * @param  \App\Models\Product  $product
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function store(Product $product)
+    {
+        $userId = Auth::id();
+
+        // Check if already in wishlist
+        $existing = Wishlist::where('user_id', $userId)
+                           ->where('product_id', $product->id)
+                           ->first();
+
+        if ($existing) {
+            return redirect()->back()
+                ->with('error', 'Product is already in your wishlist');
+        }
+
+        // Add to wishlist
+        Wishlist::create([
+            'user_id' => $userId,
+            'product_id' => $product->id
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Product added to wishlist successfully');
+    }
+
+    /**
+     * Add a product to the buyer's wishlist (AJAX version).
+     *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -62,6 +92,29 @@ class BuyerWishlistController extends Controller
 
     /**
      * Remove a product from the buyer's wishlist.
+     *
+     * @param  \App\Models\Product  $product
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(Product $product)
+    {
+        $wishlistItem = Wishlist::where('product_id', $product->id)
+                                ->where('user_id', Auth::id())
+                                ->first();
+
+        if (!$wishlistItem) {
+            return redirect()->back()
+                ->with('error', 'Product not found in wishlist');
+        }
+
+        $wishlistItem->delete();
+
+        return redirect()->back()
+            ->with('success', 'Product removed from wishlist successfully');
+    }
+
+    /**
+     * Remove a product from the buyer's wishlist by ID.
      *
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse

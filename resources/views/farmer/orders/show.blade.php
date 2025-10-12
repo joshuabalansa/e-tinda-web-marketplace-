@@ -12,7 +12,7 @@
                     <span class="badge badge-{{ getStatusBadgeClass($order->status) }}">
                         {{ ucfirst($order->status) }}
                     </span>
-                    <a href="{{ route('farmer.orders.index') }}">
+                    <a href="{{ route('farmer.orders') }}">
                         <i class="entypo-left-open"></i> Back to Orders
                     </a>
                 </div>
@@ -174,9 +174,9 @@
                                 </div>
                             </div>
                             <div class="panel-body">
-                                <form action="{{ route('farmer.orders.updateStatus', $order) }}" method="POST">
+                                <form action="{{ route('farmer.orders.update-status', $order) }}" method="POST">
                                     @csrf
-                                    @method('PATCH')
+                                    @method('PUT')
                                     <div class="form-group">
                                         <label for="status" class="control-label"><strong>Update Status:</strong></label>
                                         <select name="status" id="status" class="form-control" onchange="this.form.submit()">

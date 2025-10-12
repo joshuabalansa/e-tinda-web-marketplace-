@@ -210,7 +210,7 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('checkout.process') }}" method="POST" id="checkoutForm">
+                    <form action="{{ route('checkout.store') }}" method="POST" id="checkoutForm">
                         @csrf
                         <input type="hidden" name="delivery_option" id="delivery_option_input" value="pickup">
                         <input type="hidden" name="shipping" id="shipping_input" value="0">

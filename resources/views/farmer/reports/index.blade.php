@@ -1,6 +1,6 @@
 @extends('layouts.farmer')
 
-@section('title', 'Reports Dashboard')
+@section('title', 'Etinda')
 
 @section('content')
 <div class="container-fluid">

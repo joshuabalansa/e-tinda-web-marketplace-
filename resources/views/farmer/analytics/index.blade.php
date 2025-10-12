@@ -1,6 +1,6 @@
 @extends('layouts.farmer')
 
-@section('title', 'Analytics Dashboard')
+@section('title', 'Etinda')
 
 @section('content')
 <div class="container-fluid">
@@ -147,7 +147,7 @@
                     <div class="text-center">
                         @foreach($analyticsData['orders']['status_distribution'] as $status)
                             <span class="label label-default" style="margin-right: 5px;">
-                                {{ ucfirst($status->status) }}
+                                {{ ucfirst($status['status']) }}
                             </span>
                         @endforeach
                     </div>
