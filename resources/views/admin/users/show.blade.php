@@ -182,7 +182,7 @@
                             </button>
                         </form>
 
-                        <form method="POST" action="{{ route('admin.users.delete', $user) }}" style="display: inline;">
+                        <form method="POST" action="{{ route('admin.users.destroy', $user) }}" style="display: inline;">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger"

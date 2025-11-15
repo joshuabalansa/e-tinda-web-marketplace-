@@ -37,9 +37,9 @@ class AdminController extends Controller
         // Get recent products
         $recent_products = Product::with('user')->latest()->take(5)->get();
 
-        // Get monthly order data for charts (SQLite compatible)
-        $monthly_orders = Order::selectRaw("strftime('%m', created_at) as month, COUNT(*) as count")
-            ->whereRaw("strftime('%Y', created_at) = ?", [date('Y')])
+        // Get monthly order data for charts (MySQL compatible)
+        $monthly_orders = Order::selectRaw("DATE_FORMAT(created_at, '%m') as month, COUNT(*) as count")
+            ->whereRaw("YEAR(created_at) = ?", [date('Y')])
             ->groupBy('month')
             ->pluck('count', 'month')
             ->toArray();
@@ -264,8 +264,8 @@ class AdminController extends Controller
         ];
 
         // Get monthly data for charts
-        $monthly_orders = Order::selectRaw("strftime('%m', created_at) as month, COUNT(*) as count")
-            ->whereRaw("strftime('%Y', created_at) = ?", [date('Y')])
+        $monthly_orders = Order::selectRaw("DATE_FORMAT(created_at, '%m') as month, COUNT(*) as count")
+            ->whereRaw("YEAR(created_at) = ?", [date('Y')])
             ->groupBy('month')
             ->pluck('count', 'month')
             ->toArray();

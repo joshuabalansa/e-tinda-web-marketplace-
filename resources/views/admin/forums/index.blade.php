@@ -11,9 +11,7 @@
                     <p class="page-description">Manage forum topics and replies</p>
                 </div>
                 <div class="col-md-6 text-right">
-                    <a href="{{ route('admin.forums.replies') }}" class="btn btn-primary">
-                        <i class="entypo-chat"></i> Manage Replies
-                    </a>
+                    <!-- Manage Replies button - feature coming soon -->
                 </div>
             </div>
         </div>

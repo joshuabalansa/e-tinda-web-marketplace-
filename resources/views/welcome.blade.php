@@ -93,9 +93,15 @@
               <h4 class="card-title fw-bold mb-3">{{ $category['name'] }}</h4>
               <p class="card-text text-muted flex-grow-1">{{ $category['description'] }}</p>
               <div class="mt-auto">
+                @if(!empty($category['name']))
                 <a href="{{ route('categories.show', $category['name']) }}" class="btn btn-outline-success w-100 py-2">
                   <i class="fas fa-arrow-right me-2"></i>{{ __('welcome.browse_category') }} {{ $category['name'] }}
                 </a>
+                @else
+                <button class="btn btn-outline-secondary w-100 py-2" disabled>
+                  <i class="fas fa-exclamation-triangle me-2"></i>Category Unavailable
+                </button>
+                @endif
               </div>
             </div>
           </div>

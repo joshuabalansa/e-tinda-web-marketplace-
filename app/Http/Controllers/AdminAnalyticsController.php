@@ -66,8 +66,8 @@ class AdminAnalyticsController extends Controller
     private function getChartData()
     {
         // Monthly orders data
-        $monthlyOrders = Order::selectRaw("strftime('%m', created_at) as month, COUNT(*) as count")
-            ->whereRaw("strftime('%Y', created_at) = ?", [date('Y')])
+        $monthlyOrders = Order::selectRaw("DATE_FORMAT(created_at, '%m') as month, COUNT(*) as count")
+            ->whereRaw("YEAR(created_at) = ?", [date('Y')])
             ->groupBy('month')
             ->pluck('count', 'month')
             ->toArray();
@@ -79,8 +79,8 @@ class AdminAnalyticsController extends Controller
         }
 
         // Monthly revenue data
-        $monthlyRevenue = Order::selectRaw("strftime('%m', created_at) as month, SUM(total) as revenue")
-            ->whereRaw("strftime('%Y', created_at) = ?", [date('Y')])
+        $monthlyRevenue = Order::selectRaw("DATE_FORMAT(created_at, '%m') as month, SUM(total) as revenue")
+            ->whereRaw("YEAR(created_at) = ?", [date('Y')])
             ->where('status', 'completed')
             ->groupBy('month')
             ->pluck('revenue', 'month')
@@ -92,8 +92,8 @@ class AdminAnalyticsController extends Controller
         }
 
         // User registration trends
-        $userRegistrations = User::selectRaw("strftime('%m', created_at) as month, COUNT(*) as count")
-            ->whereRaw("strftime('%Y', created_at) = ?", [date('Y')])
+        $userRegistrations = User::selectRaw("DATE_FORMAT(created_at, '%m') as month, COUNT(*) as count")
+            ->whereRaw("YEAR(created_at) = ?", [date('Y')])
             ->groupBy('month')
             ->pluck('count', 'month')
             ->toArray();
@@ -197,14 +197,14 @@ class AdminAnalyticsController extends Controller
         $period = $request->get('period', 'monthly');
 
         if ($period === 'daily') {
-            $data = Order::selectRaw("strftime('%d', created_at) as day, COUNT(*) as count")
-                ->whereRaw("strftime('%Y-%m', created_at) = ?", [date('Y-m')])
+            $data = Order::selectRaw("DATE_FORMAT(created_at, '%d') as day, COUNT(*) as count")
+                ->whereRaw("DATE_FORMAT(created_at, '%Y-%m') = ?", [date('Y-m')])
                 ->groupBy('day')
                 ->pluck('count', 'day')
                 ->toArray();
         } else {
-            $data = Order::selectRaw("strftime('%m', created_at) as month, COUNT(*) as count")
-                ->whereRaw("strftime('%Y', created_at) = ?", [date('Y')])
+            $data = Order::selectRaw("DATE_FORMAT(created_at, '%m') as month, COUNT(*) as count")
+                ->whereRaw("YEAR(created_at) = ?", [date('Y')])
                 ->groupBy('month')
                 ->pluck('count', 'month')
                 ->toArray();
@@ -221,15 +221,15 @@ class AdminAnalyticsController extends Controller
         $period = $request->get('period', 'monthly');
 
         if ($period === 'daily') {
-            $data = Order::selectRaw("strftime('%d', created_at) as day, SUM(total) as revenue")
-                ->whereRaw("strftime('%Y-%m', created_at) = ?", [date('Y-m')])
+            $data = Order::selectRaw("DATE_FORMAT(created_at, '%d') as day, SUM(total) as revenue")
+                ->whereRaw("DATE_FORMAT(created_at, '%Y-%m') = ?", [date('Y-m')])
                 ->where('status', 'completed')
                 ->groupBy('day')
                 ->pluck('revenue', 'day')
                 ->toArray();
         } else {
-            $data = Order::selectRaw("strftime('%m', created_at) as month, SUM(total) as revenue")
-                ->whereRaw("strftime('%Y', created_at) = ?", [date('Y')])
+            $data = Order::selectRaw("DATE_FORMAT(created_at, '%m') as month, SUM(total) as revenue")
+                ->whereRaw("YEAR(created_at) = ?", [date('Y')])
                 ->where('status', 'completed')
                 ->groupBy('month')
                 ->pluck('revenue', 'month')
@@ -247,14 +247,14 @@ class AdminAnalyticsController extends Controller
         $period = $request->get('period', 'monthly');
 
         if ($period === 'daily') {
-            $data = User::selectRaw("strftime('%d', created_at) as day, COUNT(*) as count")
-                ->whereRaw("strftime('%Y-%m', created_at) = ?", [date('Y-m')])
+            $data = User::selectRaw("DATE_FORMAT(created_at, '%d') as day, COUNT(*) as count")
+                ->whereRaw("DATE_FORMAT(created_at, '%Y-%m') = ?", [date('Y-m')])
                 ->groupBy('day')
                 ->pluck('count', 'day')
                 ->toArray();
         } else {
-            $data = User::selectRaw("strftime('%m', created_at) as month, COUNT(*) as count")
-                ->whereRaw("strftime('%Y', created_at) = ?", [date('Y')])
+            $data = User::selectRaw("DATE_FORMAT(created_at, '%m') as month, COUNT(*) as count")
+                ->whereRaw("YEAR(created_at) = ?", [date('Y')])
                 ->groupBy('month')
                 ->pluck('count', 'month')
                 ->toArray();

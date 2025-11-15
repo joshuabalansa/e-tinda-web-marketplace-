@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Ensure locale is set for every web request
         $middleware->appendToGroup('web', \App\Http\Middleware\SetLocale::class);
+
+        // Force HTTPS in production
+        // if (app()->environment('production')) {
+        //     $middleware->appendToGroup('web', \App\Http\Middleware\ForceHttps::class);
+        // }
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

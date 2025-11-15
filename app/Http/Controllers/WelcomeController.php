@@ -12,6 +12,8 @@ class WelcomeController extends Controller
         try {
             // Get real categories from products in the database (limit to 3)
             $categoryData = Product::where('status', 'available')
+                ->whereNotNull('category')
+                ->where('category', '!=', '')
                 ->select('category')
                 ->selectRaw('COUNT(*) as product_count')
                 ->groupBy('category')

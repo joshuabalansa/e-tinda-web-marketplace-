@@ -57,7 +57,7 @@ class AdminReportsController extends Controller
                 ->whereBetween('created_at', [$dateFrom, $dateTo])
                 ->sum('total'),
             'total_products' => Product::count(),
-            'active_products' => Product::where('is_active', true)->count(),
+            'active_products' => Product::where('status', 'available')->count(),
             'total_forums' => Forum::count(),
             'active_forums' => Forum::where('status', 'active')->count(),
         ];
@@ -71,9 +71,9 @@ class AdminReportsController extends Controller
                 ->groupBy('role')
                 ->pluck('count', 'role')
                 ->toArray(),
-            'monthly_revenue' => Order::selectRaw("strftime('%m', created_at) as month, SUM(total) as revenue")
+            'monthly_revenue' => Order::selectRaw("DATE_FORMAT(created_at, '%m') as month, SUM(total) as revenue")
                 ->where('status', 'completed')
-                ->whereRaw("strftime('%Y', created_at) = ?", [date('Y')])
+                ->whereRaw("YEAR(created_at) = ?", [date('Y')])
                 ->groupBy('month')
                 ->pluck('revenue', 'month')
                 ->toArray(),
@@ -143,7 +143,7 @@ class AdminReportsController extends Controller
 
         $stats = [
             'total_products' => Product::count(),
-            'active_products' => Product::where('is_active', true)->count(),
+            'active_products' => Product::where('status', 'available')->count(),
             'total_categories' => Product::distinct('category')->count('category'),
         ];
 
@@ -307,7 +307,7 @@ class AdminReportsController extends Controller
 
             $callback = function() use ($products) {
                 $file = fopen('php://output', 'w');
-                fputcsv($file, ['ID', 'Name', 'Category', 'Price', 'Stock', 'Farmer', 'Active', 'Created At']);
+                fputcsv($file, ['ID', 'Name', 'Category', 'Price', 'Stock', 'Farmer', 'Status', 'Created At']);
 
                 foreach ($products as $product) {
                     fputcsv($file, [
@@ -317,7 +317,7 @@ class AdminReportsController extends Controller
                         $product->price,
                         $product->stock_quantity,
                         $product->user->name,
-                        $product->is_active ? 'Yes' : 'No',
+                        ucfirst($product->status),
                         $product->created_at->format('Y-m-d H:i:s')
                     ]);
                 }

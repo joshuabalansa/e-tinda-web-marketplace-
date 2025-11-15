@@ -10,6 +10,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ForumsController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminAnalyticsController;
+use App\Http\Controllers\AdminReportsController;
 use App\Http\Controllers\AdminForumController;
 use App\Http\Controllers\FarmerDashboardController;
 use App\Http\Controllers\FarmerProductsController;
@@ -136,18 +137,43 @@ Route::get('/forums/topic/{forum}', [ForumsController::class, 'show'])->name('fo
 Route::get('/forums/{forum}/edit', [ForumsController::class, 'edit'])->name('forums.edit')->middleware('auth');
 Route::put('/forums/{forum}', [ForumsController::class, 'update'])->name('forums.update')->middleware('auth');
 Route::delete('/forums/{forum}', [ForumsController::class, 'destroy'])->name('forums.destroy')->middleware('auth');
-Route::post('/forums/{forum}/reply', [ForumsController::class, 'reply'])->name('forums.reply')->middleware('auth');
+Route::post('/forums/{forum}/reply', [ForumsController::class, 'storeReply'])->name('forums.reply')->middleware('auth');
+Route::post('/forums/replies/{reply}/helpful', [ForumsController::class, 'markHelpful'])->name('forums.helpful')->middleware('auth');
+Route::delete('/forums/replies/{reply}', [ForumsController::class, 'deleteReply'])->name('forums.reply.delete')->middleware('auth');
 
 // Admin routes
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
-    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
-    Route::get('/admin/users/{user}', [AdminController::class, 'userDetails'])->name('admin.users.show');
-    Route::get('/admin/analytics', [AdminAnalyticsController::class, 'index'])->name('admin.analytics');
-    Route::get('/admin/reports', [AdminController::class, 'reports'])->name('admin.reports');
-    Route::get('/admin/forums', [AdminForumController::class, 'index'])->name('admin.forums');
+
+    // User management routes
+    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users.index');
+    Route::get('/admin/users/{user}', [AdminController::class, 'showUser'])->name('admin.users.show');
+    Route::get('/admin/users/{user}/edit', [AdminController::class, 'editUser'])->name('admin.users.edit');
+    Route::put('/admin/users/{user}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+    Route::delete('/admin/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.users.destroy');
+    Route::post('/admin/users/{user}/toggle-status', [AdminController::class, 'toggleUserStatus'])->name('admin.users.toggle-status');
+
+    // Analytics and reports
+    Route::get('/admin/analytics', [AdminAnalyticsController::class, 'index'])->name('admin.analytics.index');
+    Route::get('/admin/analytics/data', [AdminAnalyticsController::class, 'getData'])->name('admin.analytics.data');
+    Route::get('/admin/reports', [AdminReportsController::class, 'index'])->name('admin.reports.index');
+    Route::get('/admin/reports/export', [AdminReportsController::class, 'export'])->name('admin.reports.export');
+
+    // Forum management
+    Route::get('/admin/forums', [AdminForumController::class, 'index'])->name('admin.forums.index');
     Route::get('/admin/forums/{forum}', [AdminForumController::class, 'show'])->name('admin.forums.show');
+    Route::post('/admin/forums/{forum}/update-status', [AdminForumController::class, 'updateStatus'])->name('admin.forums.update-status');
+    Route::post('/admin/forums/{forum}/toggle-flag', [AdminForumController::class, 'toggleFlag'])->name('admin.forums.toggle-flag');
+    Route::delete('/admin/forums/{forum}', [AdminForumController::class, 'destroy'])->name('admin.forums.destroy');
     Route::post('/admin/forums/{forum}/reply', [AdminForumController::class, 'reply'])->name('admin.forums.reply');
+    Route::post('/admin/forums/bulk-action', [AdminForumController::class, 'bulkAction'])->name('admin.forums.bulk-action');
+
+    // Forum replies management
+    Route::get('/admin/forums/replies', [AdminForumController::class, 'replies'])->name('admin.forums.replies.index');
+    Route::post('/admin/forums/replies/{reply}/update-status', [AdminForumController::class, 'updateReplyStatus'])->name('admin.forums.replies.update-status');
+    Route::post('/admin/forums/replies/{reply}/toggle-flag', [AdminForumController::class, 'toggleReplyFlag'])->name('admin.forums.replies.toggle-flag');
+    Route::delete('/admin/forums/replies/{reply}', [AdminForumController::class, 'destroyReply'])->name('admin.forums.replies.destroy');
+    Route::post('/admin/forums/replies/bulk-action', [AdminForumController::class, 'bulkReplyAction'])->name('admin.forums.replies.bulk-action');
 });
 
 // Farmer routes

@@ -26,6 +26,17 @@ class ForumReply extends Model
     ];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'moderated_at' => 'datetime',
+        'is_flagged' => 'boolean',
+        'helpful_votes' => 'integer',
+    ];
+
+    /**
      * Boot method to handle model events
      */
     protected static function boot()
@@ -46,6 +57,14 @@ class ForumReply extends Model
     public function forum()
     {
         return $this->belongsTo(Forum::class);
+    }
+
+    /**
+     * Get the user that created the reply.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     /**

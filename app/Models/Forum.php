@@ -27,6 +27,17 @@ class Forum extends Model
     ];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'moderated_at' => 'datetime',
+        'is_flagged' => 'boolean',
+        'views' => 'integer',
+    ];
+
+    /**
      * Boot method to handle model events
      */
     protected static function boot()

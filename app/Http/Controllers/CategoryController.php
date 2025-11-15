@@ -12,6 +12,8 @@ class CategoryController extends Controller
         try {
             // Get real categories from products in the database
             $categoryData = Product::where('status', 'available')
+                ->whereNotNull('category')
+                ->where('category', '!=', '')
                 ->select('category')
                 ->selectRaw('COUNT(*) as product_count')
                 ->groupBy('category')
@@ -81,6 +83,8 @@ class CategoryController extends Controller
 
             // Get unique categories for filter (for the shop layout)
             $categories = Product::where('status', 'available')
+                ->whereNotNull('category')
+                ->where('category', '!=', '')
                 ->select('category')
                 ->distinct()
                 ->pluck('category')

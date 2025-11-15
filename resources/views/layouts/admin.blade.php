@@ -385,7 +385,7 @@
 
                 <!-- User Management -->
                 <li class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.users') }}">
+                    <a href="{{ route('admin.users.index') }}">
                         <i class="entypo-users"></i>
                         <span class="title">User Management</span>
                     </a>
@@ -393,7 +393,7 @@
 
                 <!-- Forum Moderation -->
                 <li class="{{ request()->routeIs('admin.forums.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.forums') }}">
+                    <a href="{{ route('admin.forums.index') }}">
                         <i class="entypo-chat"></i>
                         <span class="title">Forum Moderation</span>
                     </a>
@@ -401,7 +401,7 @@
 
                 <!-- Analytics -->
                 <li class="{{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.analytics') }}">
+                    <a href="{{ route('admin.analytics.index') }}">
                         <i class="entypo-chart-bar"></i>
                         <span class="title">Analytics</span>
                     </a>
@@ -409,7 +409,7 @@
 
                 <!-- Reports -->
                 <li class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.reports') }}">
+                    <a href="{{ route('admin.reports.index') }}">
                         <i class="entypo-doc-text"></i>
                         <span class="title">Reports</span>
                     </a>

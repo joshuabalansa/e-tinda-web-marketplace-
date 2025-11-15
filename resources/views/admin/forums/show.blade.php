@@ -218,7 +218,6 @@
                         <!-- Status Update -->
                         <form method="POST" action="{{ route('admin.forums.update-status', $forum) }}">
                             @csrf
-                            @method('PUT')
                             <div class="form-group">
                                 <label for="status">Update Status:</label>
                                 <select name="status" id="status" class="form-control" required>
