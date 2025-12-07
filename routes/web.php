@@ -63,21 +63,39 @@ Route::get('/storage/{path}', function ($path) {
         // Fallback MIME types based on extension
         $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
         $mimeTypes = [
+            // Images
             'jpg' => 'image/jpeg',
             'jpeg' => 'image/jpeg',
             'png' => 'image/png',
             'gif' => 'image/gif',
             'webp' => 'image/webp',
             'svg' => 'image/svg+xml',
+            // Videos
+            'mp4' => 'video/mp4',
+            'avi' => 'video/x-msvideo',
+            'mov' => 'video/quicktime',
+            'wmv' => 'video/x-ms-wmv',
+            'flv' => 'video/x-flv',
+            'webm' => 'video/webm',
+            'mkv' => 'video/x-matroska',
         ];
         $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
     }
 
-    return response()->file($fullPath, [
+    // For video files, ensure proper headers for streaming
+    $isVideo = strpos($mimeType, 'video/') === 0;
+    $headers = [
         'Content-Type' => $mimeType,
         'Cache-Control' => 'public, max-age=31536000',
         'X-Content-Type-Options' => 'nosniff',
-    ]);
+    ];
+
+    // Add Accept-Ranges header for video streaming support
+    if ($isVideo) {
+        $headers['Accept-Ranges'] = 'bytes';
+    }
+
+    return response()->file($fullPath, $headers);
 })->where('path', '.*')->name('storage.file');
 
 // Database connection test route

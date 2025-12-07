@@ -7,6 +7,8 @@ cmds = [
 cmds = [
     "echo 'Skipping frontend build - using Laravel without Vite'",
     "mkdir -p storage/app/public/products",
+    "mkdir -p storage/app/public/forums/videos",
+    "mkdir -p storage/app/public/forums/videos/replies",
     "chmod -R 775 storage",
     "echo 'Storage files will be served via route - no symlink needed'",
     "php artisan route:clear || true",

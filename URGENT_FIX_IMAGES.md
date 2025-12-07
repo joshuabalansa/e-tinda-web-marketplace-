@@ -1,9 +1,10 @@
-# URGENT: Fix Images Not Showing on Production
+# URGENT: Fix Images and Videos Not Showing on Production
 
 ## The Problem
 
-Images are uploaded successfully but return 404 errors when accessed at:
+Images and videos are uploaded successfully but return 404 errors when accessed at:
 `https://e-tinda-a-web-based-marketplace.com/storage/products/...`
+`https://e-tinda-a-web-based-marketplace.com/storage/forums/videos/...`
 
 ## Root Cause
 
@@ -34,19 +35,28 @@ After deployment, check if your uploaded files are in the correct location:
 ```bash
 # SSH into your Laravel Cloud instance or use the terminal
 ls -la storage/app/public/products/
+ls -la storage/app/public/forums/videos/
 ```
 
-You should see your uploaded images like:
-- `jLKgkQmflnb1IuTBsBcndNXJkeiPqzwBsSnsyJh0.jpg`
+You should see your uploaded files like:
+- Images: `jLKgkQmflnb1IuTBsBcndNXJkeiPqzwBsSnsyJh0.jpg`
+- Videos: `1234567890_video.mp4`
 
-### 4. Test the Image URL
+### 4. Test the URLs
 
-Try accessing your image directly:
+Try accessing your files directly:
+
+**Image:**
 ```
 https://e-tinda-a-web-based-marketplace.com/storage/products/jLKgkQmflnb1IuTBsBcndNXJkeiPqzwBsSnsyJh0.jpg
 ```
 
-It should now display the image instead of a 404 error.
+**Video:**
+```
+https://e-tinda-a-web-based-marketplace.com/storage/forums/videos/1234567890_video.mp4
+```
+
+They should now display/play instead of a 404 error.
 
 ### 5. Clear Caches
 
@@ -91,10 +101,13 @@ Image displays correctly
 - [ ] Code committed and pushed
 - [ ] Deployed to Laravel Cloud
 - [ ] Files exist in `storage/app/public/products/`
+- [ ] Files exist in `storage/app/public/forums/videos/`
 - [ ] Direct image URL works (no 404)
+- [ ] Direct video URL works (no 404)
 - [ ] Images display on shop page
 - [ ] Images display on product detail pages
-- [ ] New uploads work correctly
+- [ ] Videos play on forum pages
+- [ ] New uploads work correctly (both images and videos)
 
 ## Testing
 
@@ -112,6 +125,11 @@ Image displays correctly
    - Visit: `https://e-tinda-a-web-based-marketplace.com/shop`
    - All product images should display
 
+4. **Test forum videos**:
+   - Visit: `https://e-tinda-a-web-based-marketplace.com/forums`
+   - Create or view a forum topic with a video
+   - Video should play correctly (no loading spinner stuck)
+
 ## Troubleshooting
 
 ### Still Getting 404?
@@ -128,6 +146,7 @@ GET|HEAD  storage/{path} ............ storage.file
 **Check 2: Files exist**
 ```bash
 ls -la storage/app/public/products/
+ls -la storage/app/public/forums/videos/
 ```
 
 **Check 3: File permissions**
@@ -143,7 +162,7 @@ php artisan route:cache
 
 ### Images Still Broken After Fix?
 
-The route serves files from `storage/app/public/{path}`. 
+The route serves files from `storage/app/public/{path}`.
 
 Check the database to see what's stored in the `image_url` column:
 ```bash
@@ -193,6 +212,15 @@ This eliminates the need for local storage and routes entirely.
 
 ---
 
-**Expected Result**: After deployment, all images should display correctly on your site.
+**Expected Result**: After deployment, all images and videos should display/play correctly on your site.
 
 **Timeline**: Changes take effect immediately after deployment and cache clearing.
+
+## Video-Specific Notes
+
+The storage route now includes:
+- Proper video MIME type detection (mp4, avi, mov, wmv, flv, webm, mkv)
+- `Accept-Ranges: bytes` header for video streaming support
+- Support for partial content requests (video seeking)
+
+This ensures videos can be streamed and seeked properly in HTML5 video players.
