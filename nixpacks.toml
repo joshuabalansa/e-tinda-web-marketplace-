@@ -6,7 +6,9 @@ cmds = [
 [phases.build]
 cmds = [
     "echo 'Skipping frontend build - using Laravel without Vite'",
-    "php artisan storage:link || true"
+    "php artisan storage:link || true",
+    "mkdir -p storage/app/public/products",
+    "chmod -R 775 storage"
 ]
 
 [start]

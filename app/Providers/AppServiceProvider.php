@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,6 +31,22 @@ class AppServiceProvider extends ServiceProvider
 
 		if (in_array($locale, config('app.available_locales', ['en']))) {
 			App::setLocale($locale);
+		}
+
+		// Force HTTPS in production for Laravel Cloud
+		if ($this->app->environment('production')) {
+			URL::forceScheme('https');
+		}
+
+		// Configure storage URL for Laravel Cloud
+		// This ensures Storage::url() generates correct URLs in production
+		if ($this->app->environment('production')) {
+			$appUrl = config('app.url');
+			if ($appUrl) {
+				Storage::disk('public')->buildTemporaryUrlsUsing(function ($path, $expiration, $options) use ($appUrl) {
+					return $appUrl . '/storage/' . $path;
+				});
+			}
 		}
 	}
 }

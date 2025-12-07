@@ -65,8 +65,13 @@ class Product extends Model
             return $imagePath;
         }
 
-        // Use asset() helper which respects the current domain and port
-        // This works better in local development with different ports
-        return asset('storage/' . ltrim($imagePath, '/'));
+        // Use Storage::url() for proper URL generation
+        // This respects the filesystem configuration and works in both local and production
+        try {
+            return Storage::disk('public')->url($imagePath);
+        } catch (\Exception $e) {
+            // Fallback to asset() if Storage fails
+            return asset('storage/' . ltrim($imagePath, '/'));
+        }
     }
 }
