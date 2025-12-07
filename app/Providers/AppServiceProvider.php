@@ -37,8 +37,18 @@ class AppServiceProvider extends ServiceProvider
 			if ($appUrl) {
 				// Force public disk to use 'local' driver to avoid S3 class errors
 				// Laravel Cloud buckets are mounted as local filesystem, not S3
-				config(['filesystems.disks.public.driver' => 'local']);
-				config(['filesystems.disks.public.url' => $appUrl . '/storage']);
+				// Merge config to preserve existing keys like 'root'
+				$publicDiskConfig = config('filesystems.disks.public', []);
+				config([
+					'filesystems.disks.public' => array_merge($publicDiskConfig, [
+						'driver' => 'local',
+						'root' => $publicDiskConfig['root'] ?? storage_path('app/public'),
+						'url' => $appUrl . '/storage',
+						'visibility' => $publicDiskConfig['visibility'] ?? 'public',
+						'throw' => $publicDiskConfig['throw'] ?? false,
+						'report' => $publicDiskConfig['report'] ?? false,
+					])
+				]);
 			}
 		}
 	}
