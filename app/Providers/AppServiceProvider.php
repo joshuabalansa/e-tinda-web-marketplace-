@@ -2,10 +2,6 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,14 +20,8 @@ class AppServiceProvider extends ServiceProvider
 	 */
 	public function boot(): void
 	{
-		// Ensure locale is set early using session or cookie, fallback to config('app.locale')
-		$locale = Session::get('locale')
-			?: request()->cookie('locale')
-			?: config('app.locale');
-
-		if (in_array($locale, config('app.available_locales', ['en']))) {
-			App::setLocale($locale);
-		}
+		// Locale is handled by SetLocale middleware (see bootstrap/app.php)
+		// No need to set it here during boot to avoid session/request access issues
 
 		// Force HTTPS in production for Laravel Cloud
 		if ($this->app->environment('production')) {
