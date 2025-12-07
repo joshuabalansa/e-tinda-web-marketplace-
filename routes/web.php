@@ -36,52 +36,59 @@ Route::get('/storage/{path}', function ($path) {
     $path = str_replace('..', '', $path);
     $path = ltrim($path, '/');
 
+    // Try using Storage facade (works with Laravel Cloud buckets)
+    // Wrap in try-catch to handle cases where S3 classes aren't available
     try {
-        // First, try using Storage facade (works with Laravel Cloud buckets)
-        $disk = Storage::disk('public');
+        // Check if the public disk is configured as 'local' to avoid S3 initialization
+        $publicDiskDriver = config('filesystems.disks.public.driver', 'local');
 
-        if ($disk->exists($path)) {
-            // Get the file content
-            $fileContent = $disk->get($path);
+        if ($publicDiskDriver === 'local') {
+            $disk = Storage::disk('public');
 
-            // Determine MIME type
-            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-            $mimeTypes = [
-                // Images
-                'jpg' => 'image/jpeg',
-                'jpeg' => 'image/jpeg',
-                'png' => 'image/png',
-                'gif' => 'image/gif',
-                'webp' => 'image/webp',
-                'svg' => 'image/svg+xml',
-                // Videos
-                'mp4' => 'video/mp4',
-                'avi' => 'video/x-msvideo',
-                'mov' => 'video/quicktime',
-                'wmv' => 'video/x-ms-wmv',
-                'flv' => 'video/x-flv',
-                'webm' => 'video/webm',
-                'mkv' => 'video/x-matroska',
-            ];
-            $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
+            if ($disk->exists($path)) {
+                // Get the file content
+                $fileContent = $disk->get($path);
 
-            // For video files, ensure proper headers for streaming
-            $isVideo = strpos($mimeType, 'video/') === 0;
-            $headers = [
-                'Content-Type' => $mimeType,
-                'Cache-Control' => 'public, max-age=31536000',
-                'X-Content-Type-Options' => 'nosniff',
-            ];
+                // Determine MIME type
+                $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                $mimeTypes = [
+                    // Images
+                    'jpg' => 'image/jpeg',
+                    'jpeg' => 'image/jpeg',
+                    'png' => 'image/png',
+                    'gif' => 'image/gif',
+                    'webp' => 'image/webp',
+                    'svg' => 'image/svg+xml',
+                    // Videos
+                    'mp4' => 'video/mp4',
+                    'avi' => 'video/x-msvideo',
+                    'mov' => 'video/quicktime',
+                    'wmv' => 'video/x-ms-wmv',
+                    'flv' => 'video/x-flv',
+                    'webm' => 'video/webm',
+                    'mkv' => 'video/x-matroska',
+                ];
+                $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
 
-            // Add Accept-Ranges header for video streaming support
-            if ($isVideo) {
-                $headers['Accept-Ranges'] = 'bytes';
+                // For video files, ensure proper headers for streaming
+                $isVideo = strpos($mimeType, 'video/') === 0;
+                $headers = [
+                    'Content-Type' => $mimeType,
+                    'Cache-Control' => 'public, max-age=31536000',
+                    'X-Content-Type-Options' => 'nosniff',
+                ];
+
+                // Add Accept-Ranges header for video streaming support
+                if ($isVideo) {
+                    $headers['Accept-Ranges'] = 'bytes';
+                }
+
+                return response($fileContent, 200, $headers);
             }
-
-            return response($fileContent, 200, $headers);
         }
     } catch (\Exception $e) {
-        // If Storage fails, fall through to file system approach
+        // If Storage fails or S3 classes aren't available, fall through to file system approach
+        // This prevents the "Class not found" error from breaking the application
     }
 
     // Fallback to file system approach for local development or if Storage fails
