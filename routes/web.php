@@ -40,77 +40,21 @@ Route::get('/storage/{path}', function ($path) {
         // First, try using Storage facade (works with Laravel Cloud buckets)
         $disk = Storage::disk('public');
 
-        if (!$disk->exists($path)) {
-            abort(404, 'File not found');
-        }
+        if ($disk->exists($path)) {
+            // Get the file content
+            $fileContent = $disk->get($path);
 
-        // Get the file content
-        $fileContent = $disk->get($path);
-
-        // Determine MIME type
-        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-        $mimeTypes = [
-            // Images
-            'jpg' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'png' => 'image/png',
-            'gif' => 'image/gif',
-            'webp' => 'image/webp',
-            'svg' => 'image/svg+xml',
-            // Videos
-            'mp4' => 'video/mp4',
-            'avi' => 'video/x-msvideo',
-            'mov' => 'video/quicktime',
-            'wmv' => 'video/x-ms-wmv',
-            'flv' => 'video/x-flv',
-            'webm' => 'video/webm',
-            'mkv' => 'video/x-matroska',
-        ];
-        $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
-
-        // For video files, ensure proper headers for streaming
-        $isVideo = strpos($mimeType, 'video/') === 0;
-        $headers = [
-            'Content-Type' => $mimeType,
-            'Cache-Control' => 'public, max-age=31536000',
-            'X-Content-Type-Options' => 'nosniff',
-        ];
-
-        // Add Accept-Ranges header for video streaming support
-        if ($isVideo) {
-            $headers['Accept-Ranges'] = 'bytes';
-        }
-
-        return response($fileContent, 200, $headers);
-    } catch (\Exception $e) {
-        // Fallback to file system approach for local development
-        $fullPath = storage_path('app/public/' . $path);
-
-        // Security: Ensure the file is within the storage/app/public directory
-        $publicPath = storage_path('app/public');
-        $realPath = realpath($fullPath);
-        $realPublicPath = realpath($publicPath);
-
-        if (!$realPath || !$realPublicPath || strpos($realPath, $realPublicPath) !== 0) {
-            abort(404, 'File not found');
-        }
-
-        // Check if file exists
-        if (!file_exists($fullPath) || !is_file($fullPath)) {
-            abort(404, 'File not found');
-        }
-
-        // Determine MIME type
-        $mimeType = mime_content_type($fullPath);
-        if (!$mimeType) {
-            $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+            // Determine MIME type
+            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
             $mimeTypes = [
+                // Images
                 'jpg' => 'image/jpeg',
                 'jpeg' => 'image/jpeg',
                 'png' => 'image/png',
                 'gif' => 'image/gif',
                 'webp' => 'image/webp',
                 'svg' => 'image/svg+xml',
+                // Videos
                 'mp4' => 'video/mp4',
                 'avi' => 'video/x-msvideo',
                 'mov' => 'video/quicktime',
@@ -120,21 +64,77 @@ Route::get('/storage/{path}', function ($path) {
                 'mkv' => 'video/x-matroska',
             ];
             $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
+
+            // For video files, ensure proper headers for streaming
+            $isVideo = strpos($mimeType, 'video/') === 0;
+            $headers = [
+                'Content-Type' => $mimeType,
+                'Cache-Control' => 'public, max-age=31536000',
+                'X-Content-Type-Options' => 'nosniff',
+            ];
+
+            // Add Accept-Ranges header for video streaming support
+            if ($isVideo) {
+                $headers['Accept-Ranges'] = 'bytes';
+            }
+
+            return response($fileContent, 200, $headers);
         }
-
-        $isVideo = strpos($mimeType, 'video/') === 0;
-        $headers = [
-            'Content-Type' => $mimeType,
-            'Cache-Control' => 'public, max-age=31536000',
-            'X-Content-Type-Options' => 'nosniff',
-        ];
-
-        if ($isVideo) {
-            $headers['Accept-Ranges'] = 'bytes';
-        }
-
-        return response()->file($fullPath, $headers);
+    } catch (\Exception $e) {
+        // If Storage fails, fall through to file system approach
     }
+
+    // Fallback to file system approach for local development or if Storage fails
+    $fullPath = storage_path('app/public/' . $path);
+
+    // Security: Ensure the file is within the storage/app/public directory
+    $publicPath = storage_path('app/public');
+    $realPath = realpath($fullPath);
+    $realPublicPath = realpath($publicPath);
+
+    if (!$realPath || !$realPublicPath || strpos($realPath, $realPublicPath) !== 0) {
+        abort(404, 'File not found');
+    }
+
+    // Check if file exists
+    if (!file_exists($fullPath) || !is_file($fullPath)) {
+        abort(404, 'File not found');
+    }
+
+    // Determine MIME type
+    $mimeType = mime_content_type($fullPath);
+    if (!$mimeType) {
+        $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml',
+            'mp4' => 'video/mp4',
+            'avi' => 'video/x-msvideo',
+            'mov' => 'video/quicktime',
+            'wmv' => 'video/x-ms-wmv',
+            'flv' => 'video/x-flv',
+            'webm' => 'video/webm',
+            'mkv' => 'video/x-matroska',
+        ];
+        $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
+    }
+
+    $isVideo = strpos($mimeType, 'video/') === 0;
+    $headers = [
+        'Content-Type' => $mimeType,
+        'Cache-Control' => 'public, max-age=31536000',
+        'X-Content-Type-Options' => 'nosniff',
+    ];
+
+    if ($isVideo) {
+        $headers['Accept-Ranges'] = 'bytes';
+    }
+
+    return response()->file($fullPath, $headers);
 })->where('path', '.*')->name('storage.file');
 
 // Database connection test route
