@@ -12,7 +12,30 @@ This guide addresses the image storage issues when deploying to Laravel Cloud.
 
 ## Changes Made
 
-### 1. Environment Configuration (`.env`)
+### 1. Storage Route (CRITICAL for Laravel Cloud)
+
+Added a route in `routes/web.php` to serve storage files directly through Laravel:
+
+```php
+Route::get('/storage/{path}', function ($path) {
+    $fullPath = storage_path('app/public/' . $path);
+    
+    if (!file_exists($fullPath)) {
+        abort(404);
+    }
+    
+    $mimeType = mime_content_type($fullPath);
+    
+    return response()->file($fullPath, [
+        'Content-Type' => $mimeType,
+        'Cache-Control' => 'public, max-age=31536000',
+    ]);
+})->where('path', '.*');
+```
+
+**Why this is needed**: Laravel Cloud doesn't support traditional symbolic links (`php artisan storage:link`). Files must be served through Laravel routes instead.
+
+### 2. Environment Configuration (`.env`)
 
 Update your production `.env` file with these settings:
 
@@ -53,15 +76,11 @@ In your Laravel Cloud dashboard:
    FILESYSTEM_DISK=public
    ```
 
-### Step 2: Ensure Storage Link Exists
+### Step 2: ~~Ensure Storage Link Exists~~ (NOT NEEDED)
 
-Laravel Cloud should automatically create the storage link, but verify by running:
+**IMPORTANT**: Do NOT run `php artisan storage:link` on Laravel Cloud. The storage route in `routes/web.php` handles file serving instead.
 
-```bash
-php artisan storage:link
-```
-
-This creates a symlink from `public/storage` to `storage/app/public`.
+Traditional symlinks don't work reliably on Laravel Cloud's infrastructure. The route-based approach is the correct solution.
 
 ### Step 3: Verify File Permissions
 
