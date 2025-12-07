@@ -1,6 +1,6 @@
 @extends('layouts.farmer')
 
-@section('title', 'Etinda')
+@section('title', 'E-tinda')
 
 @section('content')
 <div class="container-fluid">

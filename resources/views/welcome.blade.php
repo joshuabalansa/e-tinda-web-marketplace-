@@ -2,6 +2,293 @@
 
 @section('content')
 
+<style>
+  /* Homepage Responsive Styles */
+  
+  /* Hero Section Responsive Text */
+  .hero-content h1 {
+    font-size: clamp(1.75rem, 5vw, 3.5rem) !important;
+    line-height: 1.2 !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .hero-content h1 .d-block {
+    font-size: clamp(1rem, 2.5vw, 1.5rem) !important;
+    line-height: 1.4 !important;
+    margin-top: 0.5rem !important;
+  }
+
+  .hero-content p.lead {
+    font-size: clamp(0.9rem, 2vw, 1.25rem) !important;
+    line-height: 1.6 !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Features Section */
+  .feature-item h5 {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+  }
+
+  .feature-item p {
+    font-size: clamp(0.875rem, 1.5vw, 1rem);
+  }
+
+  .feature-icon i {
+    font-size: clamp(2rem, 4vw, 3rem) !important;
+  }
+
+  /* Section Titles */
+  .section-title {
+    font-size: clamp(1.5rem, 4vw, 2.5rem) !important;
+  }
+
+  .section-title + p.lead {
+    font-size: clamp(0.9rem, 2vw, 1.125rem) !important;
+  }
+
+  /* Category Cards */
+  .category-card .card-title {
+    font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+  }
+
+  .category-card .card-text {
+    font-size: clamp(0.875rem, 1.5vw, 1rem);
+  }
+
+  .category-card .badge {
+    font-size: clamp(0.75rem, 1.5vw, 1rem) !important;
+  }
+
+  /* Product Cards */
+  .product-card .card-title {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+  }
+
+  .product-card .card-text {
+    font-size: clamp(0.8rem, 1.5vw, 0.875rem);
+  }
+
+  .product-card .h5 {
+    font-size: clamp(1.125rem, 2vw, 1.5rem) !important;
+  }
+
+  /* Buttons Responsive */
+  .btn-lg {
+    font-size: clamp(0.9rem, 1.5vw, 1.125rem) !important;
+    padding: clamp(0.625rem, 2vw, 0.75rem) clamp(1.25rem, 3vw, 1.5rem) !important;
+  }
+
+  /* Tablet Styles */
+  @media (max-width: 992px) {
+    .hero {
+      padding: 2rem 0 !important;
+    }
+
+    .hero-content {
+      padding: 1rem;
+    }
+
+    .feature-item {
+      margin-bottom: 1rem;
+    }
+
+    .category-card .card-body,
+    .product-card .card-body {
+      padding: 1.25rem !important;
+    }
+  }
+
+  /* Mobile Styles */
+  @media (max-width: 768px) {
+    .hero {
+      padding: 1.5rem 0 !important;
+      min-height: 350px !important;
+    }
+
+    .hero-content {
+      text-align: center;
+      padding: 0.5rem;
+    }
+
+    .hero-content h1 {
+      margin-bottom: 1rem !important;
+    }
+
+    .hero-content p.lead {
+      margin-bottom: 1rem !important;
+    }
+
+    .hero-content .d-flex {
+      justify-content: center;
+      flex-direction: column;
+      gap: 0.75rem !important;
+    }
+
+    .hero-content .btn {
+      width: 100%;
+    }
+
+    .feature-item {
+      padding: 1.5rem 0.5rem !important;
+    }
+
+    .category-card .card-body,
+    .product-card .card-body {
+      padding: 1rem !important;
+    }
+
+    .category-card img,
+    .product-card img {
+      height: 200px !important;
+    }
+
+    section.py-5 {
+      padding: 2rem 0 !important;
+    }
+  }
+
+  /* Small Mobile Styles */
+  @media (max-width: 576px) {
+    .hero {
+      min-height: 300px !important;
+      padding: 1.5rem 0 !important;
+    }
+
+    .hero-content {
+      padding: 0.5rem;
+    }
+
+    .hero-content h1 {
+      font-size: 1.75rem !important;
+      margin-bottom: 0.75rem !important;
+    }
+
+    .hero-content h1 .d-block {
+      font-size: 1rem !important;
+    }
+
+    .hero-content p.lead {
+      font-size: 0.95rem !important;
+      margin-bottom: 1rem !important;
+    }
+
+    .hero-content .btn {
+      padding: 0.625rem 1rem !important;
+      font-size: 0.9rem !important;
+    }
+
+    .feature-icon i {
+      font-size: 2rem !important;
+    }
+
+    .feature-item h5 {
+      font-size: 1rem !important;
+    }
+
+    .feature-item p {
+      font-size: 0.875rem !important;
+    }
+
+    .section-title {
+      font-size: 1.5rem !important;
+      margin-bottom: 1rem !important;
+    }
+
+    .section-title + p.lead {
+      font-size: 0.9rem !important;
+    }
+
+    .category-card .card-title,
+    .product-card .card-title {
+      font-size: 1.125rem !important;
+    }
+
+    .category-card img,
+    .product-card img {
+      height: 180px !important;
+    }
+
+    .btn-lg {
+      font-size: 0.9rem !important;
+      padding: 0.625rem 1rem !important;
+    }
+
+    section.py-5 {
+      padding: 1.5rem 0 !important;
+    }
+
+    .text-center.mb-5 {
+      margin-bottom: 2rem !important;
+    }
+
+    .text-center.mt-5 {
+      margin-top: 2rem !important;
+    }
+  }
+
+  /* Extra Small Mobile */
+  @media (max-width: 375px) {
+    .hero {
+      min-height: 280px !important;
+    }
+
+    .hero-content h1 {
+      font-size: 1.5rem !important;
+    }
+
+    .hero-content h1 .d-block {
+      font-size: 0.9rem !important;
+    }
+
+    .hero-content p.lead {
+      font-size: 0.85rem !important;
+    }
+
+    .hero-content .btn {
+      padding: 0.5rem 0.875rem !important;
+      font-size: 0.85rem !important;
+    }
+
+    .feature-item {
+      padding: 1rem 0.25rem !important;
+    }
+
+    .category-card .card-body,
+    .product-card .card-body {
+      padding: 0.75rem !important;
+    }
+
+    .category-card .badge,
+    .product-card .badge {
+      font-size: 0.7rem !important;
+      padding: 0.25rem 0.5rem !important;
+    }
+  }
+
+  /* Landscape Mobile */
+  @media (max-width: 768px) and (orientation: landscape) {
+    .hero {
+      min-height: 250px !important;
+      padding: 1rem 0 !important;
+    }
+
+    .hero-content h1 {
+      font-size: 1.5rem !important;
+      margin-bottom: 0.5rem !important;
+    }
+
+    .hero-content p.lead {
+      font-size: 0.9rem !important;
+      margin-bottom: 0.75rem !important;
+    }
+
+    .hero-content .d-flex {
+      gap: 0.5rem !important;
+    }
+  }
+</style>
 
 <!-- Enhanced Hero Section -->
 <section class="hero d-flex align-items-center position-relative">

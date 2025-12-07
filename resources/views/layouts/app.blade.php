@@ -118,7 +118,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-success sticky-top">
       <div class="container">
         <a class="navbar-brand" href="/">
-          <i class="fas fa-leaf me-2"></i>Etinda
+          <i class="fas fa-leaf me-2"></i>E-tinda
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
@@ -183,13 +183,13 @@
     <div class="container">
       <div class="row">
         <div class="col-12 text-center">
-          <h5><i class="fas fa-leaf me-2"></i>Etinda</h5>
+          <h5><i class="fas fa-leaf me-2"></i>E-tinda</h5>
           <p>Connecting local farmers with the community.</p>
         </div>
       </div>
       <hr class="my-4 bg-light">
       <div class="text-center">
-        <p class="mb-0">&copy; 2025 Etinda Farmers' Market. All rights reserved.</p>
+        <p class="mb-0">&copy; 2025 E-tinda Farmers' Market. All rights reserved.</p>
       </div>
     </div>
   </footer>

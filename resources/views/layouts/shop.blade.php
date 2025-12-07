@@ -239,19 +239,74 @@
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
 
+    /* Hero text responsive sizing */
+    .hero-content h1 {
+      font-size: clamp(1.75rem, 5vw, 3.5rem);
+      line-height: 1.2;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .hero-content h1 .d-block {
+      font-size: clamp(1rem, 2.5vw, 1.5rem);
+      line-height: 1.4;
+    }
+
+    .hero-content p {
+      font-size: clamp(0.9rem, 2vw, 1.25rem);
+      line-height: 1.6;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .hero-content .btn {
+      font-size: clamp(0.875rem, 1.5vw, 1rem);
+      padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.5rem);
+    }
+
     /* Responsive improvements */
-    @media (max-width: 768px) {
+    @media (max-width: 992px) {
       .hero {
-        height: 60vh;
-        min-height: 300px;
+        height: 70vh;
+        min-height: 400px;
+        padding: 2rem 0;
+      }
+
+      .hero-content {
+        padding: 1rem;
       }
 
       .hero-content h1 {
-        font-size: 2.5rem !important;
+        margin-bottom: 1.5rem !important;
       }
 
       .hero-content p {
-        font-size: 1rem !important;
+        margin-bottom: 1.5rem !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        height: 60vh;
+        min-height: 350px;
+        padding: 1.5rem 0;
+      }
+
+      .hero-content {
+        text-align: center;
+        padding: 0.5rem;
+      }
+
+      .hero-content h1 {
+        margin-bottom: 1rem !important;
+      }
+
+      .hero-content p {
+        margin-bottom: 1rem !important;
+      }
+
+      .hero-content .d-flex {
+        justify-content: center;
       }
 
       .section-title {
@@ -280,12 +335,36 @@
 
     @media (max-width: 576px) {
       .hero {
-        height: 50vh;
-        min-height: 250px;
+        height: auto;
+        min-height: 300px;
+        padding: 2rem 0;
+      }
+
+      .hero-content {
+        padding: 0.5rem;
       }
 
       .hero-content h1 {
-        font-size: 2rem !important;
+        margin-bottom: 1rem !important;
+      }
+
+      .hero-content p {
+        margin-bottom: 1rem !important;
+        font-size: 0.95rem !important;
+      }
+
+      .hero-content .btn {
+        padding: 0.625rem 1.25rem !important;
+        font-size: 0.9rem !important;
+      }
+
+      .hero-content .d-flex {
+        flex-direction: column;
+        gap: 0.75rem !important;
+      }
+
+      .hero-content .d-flex .btn {
+        width: 100%;
       }
 
       .hero .d-flex.align-items-center {
@@ -297,6 +376,30 @@
         margin-bottom: 1rem;
       }
     }
+
+    @media (max-width: 375px) {
+      .hero {
+        min-height: 280px;
+        padding: 1.5rem 0;
+      }
+
+      .hero-content h1 {
+        font-size: 1.5rem !important;
+      }
+
+      .hero-content h1 .d-block {
+        font-size: 0.9rem !important;
+      }
+
+      .hero-content p {
+        font-size: 0.85rem !important;
+      }
+
+      .hero-content .btn {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.85rem !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -306,7 +409,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-success sticky-top">
       <div class="container">
         <a class="navbar-brand" href="/">
-          <i class="fas fa-leaf me-2"></i>Etinda
+          <i class="fas fa-leaf me-2"></i>E-tinda
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
@@ -363,13 +466,13 @@
     <div class="container">
       <div class="row">
         <div class="col-12 text-center">
-          <h5><i class="fas fa-leaf me-2"></i>Etinda</h5>
+          <h5><i class="fas fa-leaf me-2"></i>E-tinda</h5>
           <p>Connecting local farmers with the community.</p>
         </div>
       </div>
       <hr class="my-4 bg-light">
       <div class="text-center">
-        <p class="mb-0">&copy; 2025 Etinda Farmers' Market. All rights reserved.</p>
+        <p class="mb-0">&copy; 2025 E-tinda Farmers' Market. All rights reserved.</p>
       </div>
     </div>
   </footer>
