@@ -4,19 +4,29 @@
 
 <style>
   /* Homepage Responsive Styles */
-  
+
   /* Hero Section Responsive Text */
+  .hero-content {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
   .hero-content h1 {
     font-size: clamp(1.75rem, 5vw, 3.5rem) !important;
     line-height: 1.2 !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    hyphens: auto;
+    max-width: 100%;
   }
 
   .hero-content h1 .d-block {
     font-size: clamp(1rem, 2.5vw, 1.5rem) !important;
     line-height: 1.4 !important;
     margin-top: 0.5rem !important;
+    display: block;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   .hero-content p.lead {
@@ -24,6 +34,9 @@
     line-height: 1.6 !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    hyphens: auto;
+    max-width: 100%;
+    margin-bottom: 1.5rem !important;
   }
 
   /* Features Section */
@@ -109,25 +122,36 @@
 
     .hero-content {
       text-align: center;
-      padding: 0.5rem;
+      padding: 0.5rem 1rem;
     }
 
     .hero-content h1 {
       margin-bottom: 1rem !important;
+      font-size: clamp(1.5rem, 6vw, 2rem) !important;
+    }
+
+    .hero-content h1 .d-block {
+      font-size: clamp(0.9rem, 3vw, 1.1rem) !important;
+      margin-top: 0.5rem !important;
     }
 
     .hero-content p.lead {
       margin-bottom: 1rem !important;
+      font-size: clamp(0.85rem, 2.5vw, 1rem) !important;
+      padding: 0 0.5rem;
     }
 
     .hero-content .d-flex {
       justify-content: center;
       flex-direction: column;
       gap: 0.75rem !important;
+      padding: 0 0.5rem;
     }
 
     .hero-content .btn {
       width: 100%;
+      font-size: 0.9rem !important;
+      padding: 0.625rem 1rem !important;
     }
 
     .feature-item {
@@ -157,26 +181,31 @@
     }
 
     .hero-content {
-      padding: 0.5rem;
+      padding: 0.5rem 0.75rem;
     }
 
     .hero-content h1 {
-      font-size: 1.75rem !important;
+      font-size: clamp(1.4rem, 7vw, 1.75rem) !important;
       margin-bottom: 0.75rem !important;
+      line-height: 1.3 !important;
     }
 
     .hero-content h1 .d-block {
-      font-size: 1rem !important;
+      font-size: clamp(0.85rem, 3.5vw, 1rem) !important;
+      line-height: 1.4 !important;
     }
 
     .hero-content p.lead {
-      font-size: 0.95rem !important;
+      font-size: clamp(0.8rem, 3vw, 0.95rem) !important;
       margin-bottom: 1rem !important;
+      line-height: 1.5 !important;
+      padding: 0;
     }
 
     .hero-content .btn {
       padding: 0.625rem 1rem !important;
-      font-size: 0.9rem !important;
+      font-size: 0.85rem !important;
+      white-space: nowrap;
     }
 
     .feature-icon i {
@@ -295,17 +324,17 @@
   <div class="container">
     <div class="row align-items-center">
       <div class="col-lg-6">
-        <div class="hero-content">
-          <h1 class="display-3 fw-bold mb-4 text-white">
+        <div class="hero-content px-2 px-md-3">
+          <h1 class="display-3 fw-bold mb-3 mb-md-4 text-white">
             {{ __('welcome.hero_title') }}
             <span class="d-block fs-4 fw-normal mt-2">{{ __('welcome.hero_subtitle') }}</span>
           </h1>
-          <p class="lead mb-4 text-white-50">{{ __('welcome.hero_description') }}</p>
-          <div class="d-flex flex-wrap gap-3">
-            <a href="/shop" class="btn btn-success btn-lg px-4 py-3">
+          <p class="lead mb-3 mb-md-4 text-white-50">{{ __('welcome.hero_description') }}</p>
+          <div class="d-flex flex-wrap gap-2 gap-md-3">
+            <a href="/shop" class="btn btn-success btn-lg px-3 px-md-4 py-2 py-md-3">
               <i class="fas fa-shopping-basket me-2"></i>{{ __('welcome.shop_now') }}
             </a>
-            <a href="/categories" class="btn btn-outline-light btn-lg px-4 py-3">
+            <a href="/categories" class="btn btn-outline-light btn-lg px-3 px-md-4 py-2 py-md-3">
               <i class="fas fa-th-large me-2"></i>{{ __('welcome.browse_categories') }}
             </a>
           </div>

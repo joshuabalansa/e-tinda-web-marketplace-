@@ -3,8 +3,8 @@
 return [
     // Hero Section
     'hero_title' => 'Presko gikan sa Local nga mga Farmer',
-    'hero_subtitle' => 'Gina-support ang Community, Isa ka Harvest kada Adlaw',
-    'hero_description' => 'Mag-connect direkta sa local nga mga farmer kag makakuha sang fresh, organic nga produce nga i-deliver sa imo doorstep. I-support ang sustainable farming samtang gin-enjoy ang pinakamaayo nga quality nga pagkaon.',
+    'hero_subtitle' => 'I-support ang Community, Isa ka Harvest kada Adlaw',
+    'hero_description' => 'Direkta gikan sa local nga mga farmer. Fresh, organic nga produce nga i-deliver sa imo doorstep.',
     'shop_now' => 'Mag-shopping Karon',
     'browse_categories' => 'Tan-awon ang mga Kategorya',
     'hero_image_alt' => 'Presko nga Farm Produce',

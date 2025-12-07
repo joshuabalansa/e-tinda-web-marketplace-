@@ -4,7 +4,7 @@ return [
     // Hero Section
     'hero_title' => 'Fresh from Local Farmers',
     'hero_subtitle' => 'Supporting Community, One Harvest at a Time',
-    'hero_description' => 'Connect directly with local farmers and get fresh, organic produce delivered to your doorstep. Support sustainable farming while enjoying the best quality food.',
+    'hero_description' => 'Direct from local farmers. Fresh, organic produce delivered to your doorstep.',
     'shop_now' => 'Shop Now',
     'browse_categories' => 'Browse Categories',
     'hero_image_alt' => 'Fresh Farm Produce',
