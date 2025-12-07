@@ -32,6 +32,54 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\DashboardController;
 
+// Storage route for serving uploaded files (Laravel Cloud compatible)
+// This route MUST be placed early to catch /storage/* requests before other routes
+// IMPORTANT: After deployment, run: php artisan route:clear && php artisan route:cache
+Route::get('/storage/{path}', function ($path) {
+    // Security: Prevent directory traversal attacks
+    $path = str_replace('..', '', $path);
+    $path = ltrim($path, '/');
+
+    // Build the full path
+    $fullPath = storage_path('app/public/' . $path);
+
+    // Security: Ensure the file is within the storage/app/public directory
+    $publicPath = storage_path('app/public');
+    $realPath = realpath($fullPath);
+    $realPublicPath = realpath($publicPath);
+
+    if (!$realPath || !$realPublicPath || strpos($realPath, $realPublicPath) !== 0) {
+        abort(404, 'File not found');
+    }
+
+    // Check if file exists
+    if (!file_exists($fullPath) || !is_file($fullPath)) {
+        abort(404, 'File not found');
+    }
+
+    // Determine MIME type
+    $mimeType = mime_content_type($fullPath);
+    if (!$mimeType) {
+        // Fallback MIME types based on extension
+        $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml',
+        ];
+        $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
+    }
+
+    return response()->file($fullPath, [
+        'Content-Type' => $mimeType,
+        'Cache-Control' => 'public, max-age=31536000',
+        'X-Content-Type-Options' => 'nosniff',
+    ]);
+})->where('path', '.*')->name('storage.file');
+
 // Database connection test route
 Route::get('/db-test', function () {
     try {
@@ -75,22 +123,6 @@ Route::get('/db-test', function () {
         ], 500);
     }
 });
-
-// Storage route for serving uploaded files (Laravel Cloud compatible)
-Route::get('/storage/{path}', function ($path) {
-    $fullPath = storage_path('app/public/' . $path);
-    
-    if (!file_exists($fullPath)) {
-        abort(404);
-    }
-    
-    $mimeType = mime_content_type($fullPath);
-    
-    return response()->file($fullPath, [
-        'Content-Type' => $mimeType,
-        'Cache-Control' => 'public, max-age=31536000',
-    ]);
-})->where('path', '.*')->name('storage.file');
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
@@ -162,7 +194,7 @@ Route::delete('/forums/replies/{reply}', [ForumsController::class, 'deleteReply'
 // Admin routes
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
-    
+
     // Admin settings
     Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');
 
@@ -225,3 +257,31 @@ Route::middleware(['auth', 'role:farmer'])->group(function () {
 Route::get('/health', function () {
     return response()->json(['status' => 'ok', 'timestamp' => now()]);
 });
+
+// Debug route for storage (remove in production or protect with auth)
+Route::get('/debug/storage', function () {
+    $storagePath = storage_path('app/public');
+    $productsPath = storage_path('app/public/products');
+
+    $info = [
+        'storage_path' => $storagePath,
+        'storage_exists' => file_exists($storagePath),
+        'storage_writable' => is_writable($storagePath),
+        'products_path' => $productsPath,
+        'products_exists' => file_exists($productsPath),
+        'products_writable' => is_writable($productsPath),
+        'sample_files' => [],
+    ];
+
+    if (file_exists($productsPath)) {
+        $files = glob($productsPath . '/*');
+        $info['sample_files'] = array_slice(array_map('basename', $files), 0, 5);
+        $info['total_files'] = count($files);
+    }
+
+    $info['route_registered'] = Route::has('storage.file');
+    $info['app_url'] = config('app.url');
+    $info['filesystem_disk'] = config('filesystems.default');
+
+    return response()->json($info);
+})->name('debug.storage');
