@@ -94,53 +94,6 @@
     </div>
 </div>
 
-<!-- Quick Actions -->
-<div class="row">
-    <div class="col-sm-12">
-        <div class="panel panel-default" data-collapsed="0">
-            <div class="panel-heading">
-                <div class="panel-title">Quick Actions</div>
-            </div>
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-md-3 col-sm-6 mb-3">
-                        <div class="text-center">
-                            <a href="{{ route('admin.users.index') }}" class="btn btn-primary btn-lg btn-block">
-                                <i class="entypo-users" style="font-size: 2rem;"></i>
-                                <br>Manage Users
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6 mb-3">
-                        <div class="text-center">
-                            <a href="#" class="btn btn-info btn-lg btn-block">
-                                <i class="entypo-newspaper" style="font-size: 2rem;"></i>
-                                <br>View Products
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6 mb-3">
-                        <div class="text-center">
-                            <a href="#" class="btn btn-success btn-lg btn-block">
-                                <i class="entypo-mail" style="font-size: 2rem;"></i>
-                                <br>Order Management
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-6 mb-3">
-                        <div class="text-center">
-                            <a href="#" class="btn btn-warning btn-lg btn-block">
-                                <i class="entypo-chat" style="font-size: 2rem;"></i>
-                                <br>Forum Moderation
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Recent Activity -->
 <div class="row">
     <div class="col-sm-8">

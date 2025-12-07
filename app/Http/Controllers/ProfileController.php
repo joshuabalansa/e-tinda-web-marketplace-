@@ -34,6 +34,13 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
+        // Redirect based on user role
+        if ($request->user()->isAdmin()) {
+            return Redirect::route('admin.settings')->with('status', 'profile-updated');
+        } elseif ($request->user()->isFarmer()) {
+            return Redirect::route('farmer.account')->with('status', 'profile-updated');
+        }
+
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 

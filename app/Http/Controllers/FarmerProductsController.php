@@ -35,12 +35,14 @@ class FarmerProductsController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'price_per_unit' => 'required|numeric|min:0',
             'unit_type' => 'required|string|max:50',
             'stock_quantity' => 'required|integer|min:0',
             'harvest_date' => 'nullable|date',
-            'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'category' => 'required|string|in:Vegetables,Fruits,Grains,Dairy,Meat,Other',
+            'status' => 'required|string|in:available,unavailable,out_of_stock',
+            'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
         ]);
 
         $product = new Product();
@@ -102,12 +104,14 @@ class FarmerProductsController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'price_per_unit' => 'required|numeric|min:0',
             'unit_type' => 'required|string|max:50',
             'stock_quantity' => 'required|integer|min:0',
             'harvest_date' => 'nullable|date',
-            'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'category' => 'required|string|in:Vegetables,Fruits,Grains,Dairy,Meat,Other',
+            'status' => 'required|string|in:available,unavailable,out_of_stock',
+            'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
         ]);
 
         $product->name = $request->name;

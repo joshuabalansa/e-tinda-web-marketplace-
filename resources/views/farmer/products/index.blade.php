@@ -126,19 +126,13 @@
                                 <!-- Product Image -->
                                 <div class="panel-body p-0">
                                     <div class="position-relative">
-                                        @if($product->image_url)
-                                            <img src="{{ asset('storage/' . $product->image_url) }}"
-                                                 alt="{{ $product->name }}"
-                                                 class="img-responsive product-image"
-                                                 data-toggle="modal"
-                                                 data-target="#imagePreviewModal"
-                                                 data-image="{{ asset('storage/' . $product->image_url) }}"
-                                                 data-name="{{ $product->name }}">
-                                        @else
-                                            <img src="https://placehold.co/600x400?text={{ urlencode($product->name) }}"
-                                                 alt="{{ $product->name }}"
-                                                 class="img-responsive product-image">
-                                        @endif
+                                        <img src="{{ $product->getImageUrl() }}"
+                                             alt="{{ $product->name }}"
+                                             class="img-responsive product-image"
+                                             data-toggle="modal"
+                                             data-target="#imagePreviewModal"
+                                             data-image="{{ $product->getImageUrl() }}"
+                                             data-name="{{ $product->name }}">
 
                                         <!-- Status Badge -->
                                         <div class="status-badge">

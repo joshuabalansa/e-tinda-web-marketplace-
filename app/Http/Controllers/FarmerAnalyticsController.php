@@ -22,14 +22,17 @@ class FarmerAnalyticsController extends Controller
         // Get orders for farmer's products
         $orders = Order::whereHas('items.product', function($query) use ($user) {
             $query->where('user_id', $user->id);
-        })->with(['items.product'])->get();
+        })->with(['items.product', 'items'])->get();
+
+        // Calculate revenue only for farmer's products
+        $currentMonthRevenue = $this->calculateFarmerRevenue($orders->where('created_at', '>=', now()->startOfMonth()), $user->id);
 
         // Prepare analytics data structure
         $analyticsData = [
             'revenue' => [
-                'current_month' => $orders->where('created_at', '>=', now()->startOfMonth())->sum('total_amount'),
-                'growth_percentage' => $this->calculateGrowthPercentage($orders),
-                'monthly_revenue' => $this->getMonthlyRevenue($orders),
+                'current_month' => $currentMonthRevenue,
+                'growth_percentage' => $this->calculateGrowthPercentage($orders, $user->id),
+                'monthly_revenue' => $this->getMonthlyRevenue($orders, $user->id),
             ],
             'orders' => [
                 'monthly_orders' => $this->getMonthlyOrders($orders),
@@ -56,12 +59,34 @@ class FarmerAnalyticsController extends Controller
     }
 
     /**
+     * Calculate revenue for farmer's products only.
+     */
+    private function calculateFarmerRevenue($orders, $farmerId)
+    {
+        $revenue = 0;
+        foreach ($orders as $order) {
+            foreach ($order->items as $item) {
+                if ($item->product && $item->product->user_id == $farmerId) {
+                    $revenue += $item->price * $item->quantity;
+                }
+            }
+        }
+        return $revenue;
+    }
+
+    /**
      * Calculate growth percentage for revenue.
      */
-    private function calculateGrowthPercentage($orders)
+    private function calculateGrowthPercentage($orders, $farmerId)
     {
-        $currentMonth = $orders->where('created_at', '>=', now()->startOfMonth())->sum('total_amount');
-        $lastMonth = $orders->whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])->sum('total_amount');
+        $currentMonth = $this->calculateFarmerRevenue(
+            $orders->where('created_at', '>=', now()->startOfMonth()),
+            $farmerId
+        );
+        $lastMonth = $this->calculateFarmerRevenue(
+            $orders->whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()]),
+            $farmerId
+        );
 
         if ($lastMonth == 0) return 0;
 
@@ -71,15 +96,23 @@ class FarmerAnalyticsController extends Controller
     /**
      * Get monthly revenue data.
      */
-    private function getMonthlyRevenue($orders)
+    private function getMonthlyRevenue($orders, $farmerId)
     {
         return $orders->groupBy(function($order) {
             return $order->created_at->format('Y-m');
-        })->map(function($orders, $month) {
+        })->map(function($monthOrders, $month) use ($farmerId) {
+            $revenue = 0;
+            foreach ($monthOrders as $order) {
+                foreach ($order->items as $item) {
+                    if ($item->product && $item->product->user_id == $farmerId) {
+                        $revenue += $item->price * $item->quantity;
+                    }
+                }
+            }
             return [
                 'month' => (int) substr($month, 5),
                 'year' => (int) substr($month, 0, 4),
-                'revenue' => $orders->sum('total_amount')
+                'revenue' => $revenue
             ];
         })->values();
     }
@@ -131,12 +164,17 @@ class FarmerAnalyticsController extends Controller
      */
     private function getCategoryPerformance($products)
     {
-        return $products->get()->groupBy('category')->map(function($products, $category) {
+        return $products->get()->groupBy('category')->map(function($categoryProducts, $category) {
+            $totalRevenue = 0;
+            foreach ($categoryProducts as $product) {
+                $orderItems = $product->orderItems;
+                foreach ($orderItems as $item) {
+                    $totalRevenue += $item->price * $item->quantity;
+                }
+            }
             return [
-                'category' => $category,
-                'total_revenue' => $products->sum(function($product) {
-                    return $product->orderItems()->sum('price');
-                })
+                'category' => $category ?: 'Uncategorized',
+                'total_revenue' => $totalRevenue
             ];
         })->values();
     }

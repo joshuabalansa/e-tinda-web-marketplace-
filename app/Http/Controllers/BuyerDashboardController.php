@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
 
 class BuyerDashboardController extends Controller
 {
@@ -108,5 +110,44 @@ class BuyerDashboardController extends Controller
         $order = $user->orders()->with(['items.product'])->findOrFail($orderId);
 
         return view('buyer.orders.show', compact('order'));
+    }
+
+    /**
+     * Cancel a pending order.
+     */
+    public function cancelOrder(Request $request, $orderId)
+    {
+        $user = auth()->user();
+        $order = $user->orders()->with(['items.product'])->findOrFail($orderId);
+
+        // Only allow cancellation of pending orders
+        if ($order->status !== 'pending') {
+            return redirect()->back()->with('error', 'Only pending orders can be cancelled.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Restore stock for all items in the order
+            foreach ($order->items as $item) {
+                if ($item->product) {
+                    $item->product->stock_quantity += $item->quantity;
+                    $item->product->save();
+                }
+            }
+
+            // Update order status to cancelled
+            $order->status = 'cancelled';
+            $order->save();
+
+            DB::commit();
+
+            return redirect()->route('buyer.orders.show', $order->id)
+                           ->with('success', 'Order has been cancelled successfully. Stock has been restored.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to cancel order: ' . $e->getMessage());
+        }
     }
 }

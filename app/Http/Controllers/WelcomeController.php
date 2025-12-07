@@ -69,7 +69,7 @@ class WelcomeController extends Controller
                         'name' => $product->name,
                         'price' => $product->price_per_unit,
                         'unit' => $product->unit_type,
-                        'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://placehold.co/600x400?text=' . urlencode($product->name),
+                        'image' => $product->getImageUrl(),
                         'description' => $product->description,
                         'vendor' => $product->user->name,
                         'category' => $product->category,

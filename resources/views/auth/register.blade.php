@@ -85,6 +85,12 @@
                                            name="password"
                                            required
                                            placeholder="Create a password">
+                                    <button type="button"
+                                            class="input-group-text bg-light toggle-password"
+                                            id="togglePassword"
+                                            style="cursor: pointer; border-left: none;">
+                                        <i class="fas fa-eye text-muted" id="togglePasswordIcon"></i>
+                                    </button>
                                 </div>
                                 <small class="text-muted">Minimum 8 characters</small>
                             </div>
@@ -102,6 +108,12 @@
                                            name="password_confirmation"
                                            required
                                            placeholder="Confirm your password">
+                                    <button type="button"
+                                            class="input-group-text bg-light toggle-password"
+                                            id="togglePasswordConfirmation"
+                                            style="cursor: pointer; border-left: none;">
+                                        <i class="fas fa-eye text-muted" id="togglePasswordConfirmationIcon"></i>
+                                    </button>
                                 </div>
                             </div>
 
@@ -152,6 +164,12 @@
             .input-group .form-control {
                 border-left: none;
             }
+            .toggle-password {
+                border-left: 1px solid #dee2e6 !important;
+            }
+            .toggle-password:hover {
+                background-color: #e9ecef !important;
+            }
             .btn-success {
                 background-color: #28a745;
                 border-color: #28a745;
@@ -164,7 +182,6 @@
     @endpush
 
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Password match validation
@@ -188,6 +205,52 @@
                         confirmPassword.classList.remove('is-invalid');
                     }
                 });
+
+                // Toggle password visibility for password field
+                const togglePassword = document.getElementById('togglePassword');
+                const togglePasswordIcon = document.getElementById('togglePasswordIcon');
+
+                if (togglePassword && password && togglePasswordIcon) {
+                    togglePassword.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                        password.setAttribute('type', type);
+
+                        // Toggle icon
+                        if (type === 'password') {
+                            togglePasswordIcon.classList.remove('fa-eye-slash');
+                            togglePasswordIcon.classList.add('fa-eye');
+                        } else {
+                            togglePasswordIcon.classList.remove('fa-eye');
+                            togglePasswordIcon.classList.add('fa-eye-slash');
+                        }
+                    });
+                }
+
+                // Toggle password visibility for confirm password field
+                const togglePasswordConfirmation = document.getElementById('togglePasswordConfirmation');
+                const togglePasswordConfirmationIcon = document.getElementById('togglePasswordConfirmationIcon');
+
+                if (togglePasswordConfirmation && confirmPassword && togglePasswordConfirmationIcon) {
+                    togglePasswordConfirmation.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+                        confirmPassword.setAttribute('type', type);
+
+                        // Toggle icon
+                        if (type === 'password') {
+                            togglePasswordConfirmationIcon.classList.remove('fa-eye-slash');
+                            togglePasswordConfirmationIcon.classList.add('fa-eye');
+                        } else {
+                            togglePasswordConfirmationIcon.classList.remove('fa-eye');
+                            togglePasswordConfirmationIcon.classList.add('fa-eye-slash');
+                        }
+                    });
+                }
             });
         </script>
     @endpush

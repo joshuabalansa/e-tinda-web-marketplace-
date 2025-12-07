@@ -28,6 +28,13 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <div class="container my-5">
         <div class="row">
             <!-- Order Information -->
@@ -58,10 +65,21 @@
                                     <p class="text-muted mb-0">
                                         <i class="fas fa-info-circle text-success me-2"></i>
                                         <strong>Status:</strong>
-                                        <span class="badge bg-{{ $order->status === 'completed' ? 'success' : ($order->status === 'pending' ? 'warning' : 'info') }} rounded-pill">
+                                        <span class="badge bg-{{ $order->status === 'completed' ? 'success' : ($order->status === 'pending' ? 'warning' : ($order->status === 'cancelled' ? 'danger' : 'info')) }} rounded-pill">
                                             {{ ucfirst($order->status) }}
                                         </span>
                                     </p>
+                                    @if($order->status === 'pending')
+                                        <div class="mt-3">
+                                            <form action="{{ route('buyer.orders.cancel', $order->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order? The stock will be restored to inventory.');">
+                                                @csrf
+                                                @method('POST')
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-times-circle me-2"></i> Cancel Order
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -152,8 +170,8 @@
                             @foreach($items as $item)
                             <div class="row mb-2 pb-2 border-bottom border-light">
                                 <div class="col-md-2">
-                                    @if($item->product && $item->product->image_url)
-                                        <img src="{{ asset('storage/' . $item->product->image_url) }}"
+                                    @if($item->product)
+                                        <img src="{{ $item->product->getImageUrl() }}"
                                              alt="{{ $item->product->name }}"
                                              class="img-fluid rounded"
                                              style="max-width: 60px; height: auto;">
@@ -217,6 +235,15 @@
                     </div>
 
                     <div class="text-center mt-4">
+                        @if($order->status === 'pending')
+                            <form action="{{ route('buyer.orders.cancel', $order->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order? The stock will be restored to inventory.');" class="mb-3">
+                                @csrf
+                                @method('POST')
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="fas fa-times-circle me-2"></i> Cancel Order
+                                </button>
+                            </form>
+                        @endif
                         <a href="{{ route('shop.index') }}" class="btn btn-success w-100">
                             <i class="fas fa-shopping-cart me-2"></i> Continue Shopping
                         </a>

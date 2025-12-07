@@ -93,7 +93,7 @@
                         <div class="order-item">
                             <div class="row align-items-center">
                                 <div class="col-md-2">
-                                    <img src="{{ $item->product->image_url ? asset('storage/' . $item->product->image_url) : 'https://placehold.co/100x100?text=' . urlencode($item->product->name) }}"
+                                    <img src="{{ $item->product->getImageUrl() }}"
                                          alt="{{ $item->product->name }}"
                                          class="img-fluid rounded"
                                          style="max-height: 60px;">

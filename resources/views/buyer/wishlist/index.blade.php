@@ -33,8 +33,8 @@
                     <div class="col-lg-4 col-md-6 mb-4">
                         <div class="card h-100 border-success">
                             <div class="card-img-top-container" style="height: 200px; overflow: hidden;">
-                                @if($item->product && $item->product->image_url)
-                                    <img src="{{ asset('storage/' . $item->product->image_url) }}"
+                                @if($item->product)
+                                    <img src="{{ $item->product->getImageUrl() }}"
                                          alt="{{ $item->product->name }}"
                                          class="card-img-top h-100 w-100"
                                          style="object-fit: cover;">

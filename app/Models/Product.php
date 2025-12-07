@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
@@ -41,5 +42,31 @@ class Product extends Model
     public function getPriceAttribute()
     {
         return $this->price_per_unit;
+    }
+
+    /**
+     * Get the full URL for the product image
+     * Works in both local and production environments
+     */
+    public function getImageUrl()
+    {
+        $imagePath = $this->getAttribute('image_url');
+        $productName = $this->name ?? 'Product';
+        // Format product name for placeholder: replace spaces with +
+        $placeholderText = str_replace(' ', '+', $productName);
+
+        // If no image path, return placeholder
+        if (!$imagePath || trim($imagePath) === '') {
+            return 'https://placehold.co/600x400?text=' . $placeholderText;
+        }
+
+        // If it's already a full URL, return it as is
+        if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
+            return $imagePath;
+        }
+
+        // Use asset() helper which respects the current domain and port
+        // This works better in local development with different ports
+        return asset('storage/' . ltrim($imagePath, '/'));
     }
 }

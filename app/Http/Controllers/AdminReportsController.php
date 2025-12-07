@@ -20,9 +20,9 @@ class AdminReportsController extends Controller
      */
     public function index(Request $request)
     {
-        $reportType = $request->get('type', 'overview');
+        $type = $request->get('type', 'overview');
 
-        switch ($reportType) {
+        switch ($type) {
             case 'users':
                 return $this->usersReport($request);
             case 'orders':
@@ -33,6 +33,7 @@ class AdminReportsController extends Controller
                 return $this->forumsReport($request);
             case 'financial':
                 return $this->financialReport($request);
+            case 'overview':
             default:
                 return $this->overviewReport($request);
         }
@@ -52,10 +53,10 @@ class AdminReportsController extends Controller
             'total_orders' => Order::count(),
             'completed_orders' => Order::where('status', 'completed')->count(),
             'pending_orders' => Order::where('status', 'pending')->count(),
-            'total_revenue' => Order::where('status', 'completed')->sum('total'),
+            'total_revenue' => Order::where('status', 'completed')->sum('total') ?? 0,
             'period_revenue' => Order::where('status', 'completed')
                 ->whereBetween('created_at', [$dateFrom, $dateTo])
-                ->sum('total'),
+                ->sum('total') ?? 0,
             'total_products' => Product::count(),
             'active_products' => Product::where('status', 'available')->count(),
             'total_forums' => Forum::count(),
@@ -93,7 +94,7 @@ class AdminReportsController extends Controller
             $query->where('role', $request->role);
         }
 
-        $users = $query->with(['products', 'orders'])->paginate(20);
+        $users = $query->with(['products', 'orders'])->latest()->paginate(20);
 
         $stats = [
             'total_users' => User::count(),
@@ -102,7 +103,12 @@ class AdminReportsController extends Controller
             'active_users' => User::where('is_active', true)->count(),
         ];
 
-        return view('admin.reports.users', compact('users', 'stats'));
+        // Add empty arrays for variables that might be expected by the view
+        $chartData = [];
+        $dateFrom = $request->get('date_from', date('Y-m-01'));
+        $dateTo = $request->get('date_to', date('Y-m-d'));
+
+        return view('admin.reports.index', compact('users', 'stats', 'chartData', 'dateFrom', 'dateTo'));
     }
 
     /**
@@ -110,7 +116,7 @@ class AdminReportsController extends Controller
      */
     private function ordersReport($request)
     {
-        $query = Order::with(['user', 'orderItems.product']);
+        $query = Order::with(['user', 'items.product']);
 
         if ($request->has('status') && $request->status) {
             $query->where('status', $request->status);
@@ -122,10 +128,15 @@ class AdminReportsController extends Controller
             'total_orders' => Order::count(),
             'completed_orders' => Order::where('status', 'completed')->count(),
             'pending_orders' => Order::where('status', 'pending')->count(),
-            'total_revenue' => Order::where('status', 'completed')->sum('total'),
+            'total_revenue' => Order::where('status', 'completed')->sum('total') ?? 0,
         ];
 
-        return view('admin.reports.orders', compact('orders', 'stats'));
+        // Add empty arrays for variables that might be expected by the view
+        $chartData = [];
+        $dateFrom = $request->get('date_from', date('Y-m-01'));
+        $dateTo = $request->get('date_to', date('Y-m-d'));
+
+        return view('admin.reports.index', compact('orders', 'stats', 'chartData', 'dateFrom', 'dateTo'));
     }
 
     /**
@@ -147,7 +158,12 @@ class AdminReportsController extends Controller
             'total_categories' => Product::distinct('category')->count('category'),
         ];
 
-        return view('admin.reports.products', compact('products', 'stats'));
+        // Add empty arrays for variables that might be expected by the view
+        $chartData = [];
+        $dateFrom = $request->get('date_from', date('Y-m-01'));
+        $dateTo = $request->get('date_to', date('Y-m-d'));
+
+        return view('admin.reports.index', compact('products', 'stats', 'chartData', 'dateFrom', 'dateTo'));
     }
 
     /**
@@ -170,7 +186,12 @@ class AdminReportsController extends Controller
             'total_replies' => ForumReply::count(),
         ];
 
-        return view('admin.reports.forums', compact('forums', 'stats'));
+        // Add empty arrays for variables that might be expected by the view
+        $chartData = [];
+        $dateFrom = $request->get('date_from', date('Y-m-01'));
+        $dateTo = $request->get('date_to', date('Y-m-d'));
+
+        return view('admin.reports.index', compact('forums', 'stats', 'chartData', 'dateFrom', 'dateTo'));
     }
 
     /**
@@ -182,15 +203,18 @@ class AdminReportsController extends Controller
         $dateTo = $request->get('date_to', date('Y-m-d'));
 
         $stats = [
-            'total_revenue' => Order::where('status', 'completed')->sum('total'),
+            'total_revenue' => Order::where('status', 'completed')->sum('total') ?? 0,
             'period_revenue' => Order::where('status', 'completed')
                 ->whereBetween('created_at', [$dateFrom, $dateTo])
-                ->sum('total'),
+                ->sum('total') ?? 0,
             'total_orders' => Order::where('status', 'completed')->count(),
-            'average_order_value' => Order::where('status', 'completed')->avg('total'),
+            'average_order_value' => Order::where('status', 'completed')->avg('total') ?? 0,
         ];
 
-        return view('admin.reports.financial', compact('stats', 'dateFrom', 'dateTo'));
+        // Add empty array for chartData that might be expected by the view
+        $chartData = [];
+
+        return view('admin.reports.index', compact('stats', 'dateFrom', 'dateTo', 'chartData'));
     }
 
     /**

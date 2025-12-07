@@ -1,8 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="main-content">
-    <div class="container-fluid">
+<div class="container-fluid">
         <!-- Page Header -->
         <div class="page-header">
             <div class="row">
@@ -219,7 +218,6 @@
                 </div>
             </div>
         </div>
-    </div>
 </div>
 
 <!-- Chart.js -->

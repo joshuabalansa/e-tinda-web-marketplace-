@@ -63,6 +63,12 @@
                                            required
                                            autocomplete="current-password"
                                            placeholder="Enter your password">
+                                    <button type="button"
+                                            class="input-group-text bg-light toggle-password"
+                                            id="togglePassword"
+                                            style="cursor: pointer; border-left: none;">
+                                        <i class="fas fa-eye text-muted" id="togglePasswordIcon"></i>
+                                    </button>
                                 </div>
                             </div>
 
@@ -131,6 +137,12 @@
             .input-group .form-control {
                 border-left: none;
             }
+            .toggle-password {
+                border-left: 1px solid #dee2e6 !important;
+            }
+            .toggle-password:hover {
+                background-color: #e9ecef !important;
+            }
             .btn-success {
                 background-color: #28a745;
                 border-color: #28a745;
@@ -139,6 +151,31 @@
     @endpush
 
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const togglePassword = document.getElementById('togglePassword');
+                const passwordInput = document.getElementById('password');
+                const toggleIcon = document.getElementById('togglePasswordIcon');
+
+                if (togglePassword && passwordInput && toggleIcon) {
+                    togglePassword.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                        passwordInput.setAttribute('type', type);
+
+                        // Toggle icon
+                        if (type === 'password') {
+                            toggleIcon.classList.remove('fa-eye-slash');
+                            toggleIcon.classList.add('fa-eye');
+                        } else {
+                            toggleIcon.classList.remove('fa-eye');
+                            toggleIcon.classList.add('fa-eye-slash');
+                        }
+                    });
+                }
+            });
+        </script>
     @endpush
 </x-guest-layout>

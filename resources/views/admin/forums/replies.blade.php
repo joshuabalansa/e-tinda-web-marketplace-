@@ -1,8 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="main-content">
-    <div class="container-fluid">
+<div class="container-fluid">
         <!-- Page Header -->
         <div class="page-header">
             <div class="row">
@@ -203,7 +202,6 @@
                 @endif
             </div>
         </div>
-    </div>
 </div>
 
 <!-- Reply Details Modal -->

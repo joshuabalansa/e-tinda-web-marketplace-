@@ -23,16 +23,21 @@ class CheckoutController extends Controller
             $product = Product::with('user')->find($id);
             if ($product) {
                 $farmer = $product->user;
+                // Get product image URL with fallback
+                $imageUrl = $product->getImageUrl();
+
                 $items[] = [
                     'id' => $product->id,
                     'name' => $product->name,
                     'price' => $product->price_per_unit,
                     'quantity' => $details['quantity'],
-                    'unit' => $product->unit_type,
-                    'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://placehold.co/600x400?text=' . urlencode($product->name),
+                    'unit' => $product->unit_type ?? 'unit',
+                    'image' => $imageUrl,
                     'subtotal' => $product->price_per_unit * $details['quantity'],
-                    'farmer_name' => $farmer->business_name ?? $farmer->name,
-                    'farmer_location' => $farmer->city ? $farmer->city . ', ' . $farmer->state : 'Philippines',
+                    'farmer_name' => $farmer->business_name ?? $farmer->name ?? 'Local Farmer',
+                    'farmer_location' => ($farmer->city && $farmer->state)
+                        ? $farmer->city . ', ' . $farmer->state
+                        : ($farmer->city ?? 'Philippines'),
                     'farmer_id' => $farmer->id
                 ];
                 $total += $product->price_per_unit * $details['quantity'];
@@ -49,23 +54,23 @@ class CheckoutController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:255',
-            'address' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:500',
             'city' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
-            'zip' => 'nullable|string|max:255',
+            'zip' => 'nullable|string|max:20',
             'shipping' => 'required|numeric|min:0',
             'delivery_option' => 'required|in:pickup,delivery',
-            'payment_method' => 'required|in:cash,gcash',
-            'special_instructions' => 'nullable|string|max:1000'
+            'payment_method' => 'required|in:cash',
+            'special_instructions' => 'nullable|string|max:2000'
         ]);
 
         // Additional validation for delivery option
         if ($request->delivery_option === 'delivery') {
             $request->validate([
-                'address' => 'required|string|max:255',
+                'address' => 'required|string|max:500',
                 'city' => 'required|string|max:255',
                 'state' => 'required|string|max:255',
-                'zip' => 'required|string|max:255',
+                'zip' => 'required|string|max:20',
             ]);
         }
 
@@ -88,24 +93,34 @@ class CheckoutController extends Controller
             $shipping = $request->shipping;
             $total = $subtotal + $shipping;
 
-            // Create order
+            // Create order with all user inputs
             $order = Order::create([
                 'user_id' => auth()->id(),
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'address' => $request->address ?? 'Farm Pickup',
-                'city' => $request->city ?? 'Farm Location',
-                'state' => $request->state ?? 'Farm Province',
-                'zip' => $request->zip ?? '0000',
+                'first_name' => trim($request->first_name),
+                'last_name' => trim($request->last_name),
+                'email' => trim($request->email),
+                'phone' => trim($request->phone),
+                'address' => $request->delivery_option === 'delivery'
+                    ? trim($request->address)
+                    : 'Farm Pickup',
+                'city' => $request->delivery_option === 'delivery'
+                    ? trim($request->city)
+                    : 'Farm Location',
+                'state' => $request->delivery_option === 'delivery'
+                    ? trim($request->state)
+                    : 'Farm Province',
+                'zip' => $request->delivery_option === 'delivery'
+                    ? trim($request->zip)
+                    : '0000',
                 'subtotal' => $subtotal,
                 'shipping' => $shipping,
                 'total' => $total,
                 'status' => 'pending',
                 'delivery_option' => $request->delivery_option,
                 'payment_method' => $request->payment_method,
-                'special_instructions' => $request->special_instructions
+                'special_instructions' => $request->filled('special_instructions')
+                    ? trim($request->special_instructions)
+                    : null
             ]);
 
             // Add order items

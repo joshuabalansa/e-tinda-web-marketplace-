@@ -67,6 +67,49 @@
     .multi-vendor-alert {
         border-left: 4px solid #17a2b8;
     }
+    /* Product Image Styles */
+    .product-image-container {
+        width: 60px;
+        height: 60px;
+        overflow: hidden;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+    }
+    .product-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .order-summary {
+            position: relative;
+            top: 0;
+            margin-top: 20px;
+        }
+        .product-image-container {
+            width: 50px;
+            height: 50px;
+        }
+        .farmer-info-card {
+            padding: 15px;
+        }
+        .farmer-info-card h4 {
+            font-size: 1.2rem;
+        }
+        .card-body {
+            padding: 15px;
+        }
+        .delivery-options {
+            padding: 12px;
+        }
+        .payment-method-card {
+            padding: 12px;
+        }
+    }
 </style>
 
 <header class="bg-light py-5">
@@ -140,9 +183,18 @@
 
                             <!-- Items from this farmer -->
                             @foreach($farmerItems as $item)
-                            <div class="row mb-2 pb-2 border-bottom border-light">
+                            <div class="row mb-2 pb-2 border-bottom border-light align-items-center">
                                 <div class="col-md-2">
-                                    <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}" class="img-fluid rounded" style="max-height: 50px;">
+                                    <div class="product-image-container">
+                                        @if(!empty($item['image']))
+                                            <img src="{{ $item['image'] }}"
+                                                 alt="{{ $item['name'] }}"
+                                                 class="img-fluid"
+                                                 onerror="this.onerror=null; this.src='https://placehold.co/60x60?text={{ urlencode(substr($item['name'], 0, 10)) }}'; this.style.objectFit='cover';">
+                                        @else
+                                            <i class="fas fa-image text-muted" style="font-size: 1.5rem;"></i>
+                                        @endif
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
                                     <h6 class="mb-1" style="font-size: 0.9rem;">{{ $item['name'] }}</h6>
@@ -338,15 +390,7 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="payment-method-card" data-method="gcash">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="payment_method" id="gcash" value="gcash">
-                                    <label class="form-check-label" for="gcash">
-                                        <strong><i class="fas fa-mobile-alt"></i> GCash</strong>
-                                        <br><small class="text-muted">Pay via GCash mobile payment</small>
-                                    </label>
-                                </div>
-                            </div>
+                            <input type="hidden" name="payment_method" value="cash">
                         </div>
 
                         <!-- Special Instructions -->
@@ -597,21 +641,42 @@ document.addEventListener('DOMContentLoaded', function() {
         totalDisplay.textContent = '₱' + total.toFixed(2);
     }
 
-    // Form validation
+    // Update delivery option input when radio changes
+    deliveryOptions.forEach(option => {
+        option.addEventListener('change', function() {
+            document.getElementById('delivery_option_input').value = this.value;
+        });
+    });
+
+    // Form validation and submission
     document.getElementById('checkoutForm').addEventListener('submit', function(e) {
         const deliveryOption = document.querySelector('input[name="delivery_option"]:checked').value;
 
+        // Ensure delivery option is set in hidden input
+        document.getElementById('delivery_option_input').value = deliveryOption;
+
         if (deliveryOption === 'delivery') {
-            const address = document.getElementById('address').value;
-            const city = document.getElementById('city').value;
-            const state = document.getElementById('state').value;
-            const zip = document.getElementById('zip').value;
+            const address = document.getElementById('address').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const state = document.getElementById('state').value.trim();
+            const zip = document.getElementById('zip').value.trim();
 
             if (!address || !city || !state || !zip) {
                 e.preventDefault();
-                alert('Please fill in all delivery address fields.');
+                alert('Please fill in all delivery address fields (Address, City, Province, and ZIP Code).');
                 return false;
             }
+        }
+
+        // Ensure shipping is set
+        const shipping = parseFloat(shippingInput.value) || 0;
+        document.getElementById('shipping_input').value = shipping;
+
+        // Show loading state
+        const submitButton = document.querySelector('button[type="submit"][form="checkoutForm"]');
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing...';
         }
     });
 });

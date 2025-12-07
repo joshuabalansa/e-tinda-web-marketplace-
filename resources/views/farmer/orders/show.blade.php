@@ -44,16 +44,10 @@
                                     <div class="well" style="margin-bottom: 15px;">
                                         <div class="row">
                                             <div class="col-md-2">
-                                                @if($item->product->image_url)
-                                                    <img src="{{ asset('storage/' . $item->product->image_url) }}"
-                                                         alt="{{ $item->product->name }}"
-                                                         class="img-responsive img-rounded">
-                                                @else
-                                                    <img src="https://placehold.co/600x400?text={{ urlencode($item->product->name) }}"
-                                                         alt="{{ $item->product->name }}"
-                                                         class="img-responsive img-rounded"
-                                                         style="height: 80px; object-fit: cover;">
-                                                @endif
+                                                <img src="{{ $item->product->getImageUrl() }}"
+                                                     alt="{{ $item->product->name }}"
+                                                     class="img-responsive img-rounded"
+                                                     style="height: 80px; object-fit: cover;">
                                             </div>
                                             <div class="col-md-6">
                                                 <h5 style="margin-top: 0;">{{ $item->product->name }}</h5>

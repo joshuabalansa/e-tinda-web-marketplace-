@@ -79,7 +79,7 @@ class ShopController extends Controller
                     'name' => $product->name,
                     'price' => $product->price_per_unit,
                     'unit' => $product->unit_type,
-                    'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://placehold.co/600x400?text=' . urlencode($product->name),
+                    'image' => $product->getImageUrl(),
                     'description' => $product->description,
                     'vendor' => $product->user->name,
                     'location' => $product->user->address ?? 'Location not specified',
@@ -98,6 +98,24 @@ class ShopController extends Controller
             ->filter()
             ->sort()
             ->values();
+
+        // If AJAX request, return JSON
+        if ($request->ajax()) {
+            $hasFilters = request()->hasAny(['category', 'min_price', 'max_price', 'query', 'in_stock']);
+            $activeFiltersHtml = '';
+
+            if ($hasFilters) {
+                $activeFiltersHtml = view('shop.partials.active-filters')->render();
+            }
+
+            return response()->json([
+                'products_html' => view('shop.partials.products', compact('products'))->render(),
+                'pagination_html' => $products->hasPages() ? $products->appends(request()->query())->links('pagination::bootstrap-4')->toHtml() : '',
+                'active_filters_html' => $activeFiltersHtml,
+                'results_count' => $products->total(),
+                'has_filters' => $hasFilters
+            ]);
+        }
 
         return view('shop.index', compact('products', 'categories'));
     }
@@ -140,7 +158,7 @@ class ShopController extends Controller
             'name' => $product->name,
             'price' => $product->price_per_unit,
             'unit' => $product->unit_type,
-            'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://placehold.co/600x400?text=' . urlencode($product->name),
+            'image' => $product->getImageUrl(),
             'description' => $product->description,
             'vendor' => $product->user->name,
             'location' => $product->user->address ?? 'Location not specified',
@@ -163,7 +181,7 @@ class ShopController extends Controller
                     'name' => $relatedProduct->name,
                     'price' => $relatedProduct->price_per_unit,
                     'unit' => $relatedProduct->unit_type,
-                    'image' => $relatedProduct->image_url ? asset('storage/' . $relatedProduct->image_url) : 'https://placehold.co/600x400?text=' . urlencode($relatedProduct->name),
+                    'image' => $relatedProduct->getImageUrl(),
                 ];
             });
 
@@ -216,7 +234,7 @@ class ShopController extends Controller
                     'name' => $product->name,
                     'price' => $product->price_per_unit,
                     'unit' => $product->unit_type,
-                    'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://placehold.co/600x400?text=' . urlencode($product->name),
+                    'image' => $product->getImageUrl(),
                     'description' => $product->description,
                     'vendor' => $product->user->name,
                     'location' => $product->user->address ?? 'Location not specified',
@@ -246,7 +264,7 @@ class ShopController extends Controller
                     'name' => $product->name,
                     'price' => $product->price_per_unit,
                     'unit' => $product->unit_type,
-                    'image' => $product->image_url ? asset('storage/' . $product->image_url) : 'https://placehold.co/600x400?text=' . urlencode($product->name),
+                    'image' => $product->getImageUrl(),
                     'description' => $product->description,
                     'vendor' => $product->user->name,
                     'location' => $product->user->address ?? 'Location not specified',

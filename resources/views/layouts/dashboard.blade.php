@@ -8,7 +8,7 @@
     <meta name="description" content="E-Tinda Marketplace - Farm to Table" />
     <meta name="author" content="" />
 
-    <title>Etinda</title>
+    <title>E-Tinda</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -217,6 +217,7 @@
             .sidebar {
                 transform: translateX(-100%);
                 width: 280px;
+                z-index: 1001;
             }
 
             .sidebar.mobile-open {
@@ -227,6 +228,7 @@
                 margin-left: 0;
                 margin-top: 80px;
                 width: 100%;
+                padding: 10px !important;
             }
 
             .top-navbar {
@@ -246,6 +248,59 @@
 
             .user-info {
                 gap: 0.5rem;
+            }
+
+            /* Mobile overlay */
+            .mobile-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1000;
+                display: none;
+            }
+
+            .mobile-overlay.active {
+                display: block;
+            }
+
+            /* Responsive tables */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Responsive cards */
+            .card {
+                margin-bottom: 15px;
+            }
+
+            /* Responsive buttons */
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .btn-group .btn {
+                width: auto;
+            }
+
+            /* Responsive forms */
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            /* Make sidebar menu items touch-friendly */
+            .sidebar-menu a {
+                padding: 18px 1.5rem !important;
+                min-height: 50px;
+            }
+
+            /* Prevent body scroll when mobile menu is open */
+            body.mobile-menu-open {
+                overflow: hidden;
             }
         }
 
@@ -275,6 +330,9 @@
 </head>
 
 <body>
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay"></div>
+
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
@@ -501,10 +559,34 @@
                 }
             });
 
-            // Mobile sidebar toggle
-            if (window.innerWidth <= 768) {
-                $('#sidebar').addClass('mobile-open');
+            // Mobile sidebar toggle with overlay
+            function toggleMobileMenu() {
+                if (window.innerWidth <= 768) {
+                    var isOpen = $('#sidebar').hasClass('mobile-open');
+                    if (isOpen) {
+                        $('#sidebar').removeClass('mobile-open');
+                        $('.mobile-overlay').removeClass('active');
+                        $('body').removeClass('mobile-menu-open');
+                    } else {
+                        $('#sidebar').addClass('mobile-open');
+                        $('.mobile-overlay').addClass('active');
+                        $('body').addClass('mobile-menu-open');
+                    }
+                }
             }
+
+            // Update sidebar toggle to handle mobile
+            $('#sidebarToggle').off('click').on('click', function() {
+                if (window.innerWidth > 768) {
+                    // Desktop behavior
+                    $('#sidebar').toggleClass('collapsed');
+                    $('#mainContent').toggleClass('expanded');
+                    $('.top-navbar').toggleClass('expanded');
+                } else {
+                    // Mobile behavior
+                    toggleMobileMenu();
+                }
+            });
 
             // Handle window resize
             $(window).on('resize', function() {
@@ -512,17 +594,27 @@
                     $('#sidebar').removeClass('collapsed');
                     $('#mainContent').removeClass('expanded');
                     $('.top-navbar').removeClass('expanded');
-                    $('#sidebar').addClass('mobile-open');
+                    if (!$('#sidebar').hasClass('mobile-open')) {
+                        $('.mobile-overlay').removeClass('active');
+                        $('body').removeClass('mobile-menu-open');
+                    }
                 } else {
                     $('#sidebar').removeClass('mobile-open');
+                    $('.mobile-overlay').removeClass('active');
+                    $('body').removeClass('mobile-menu-open');
                 }
+            });
+
+            // Close mobile sidebar when clicking overlay
+            $(document).on('click', '.mobile-overlay', function() {
+                toggleMobileMenu();
             });
 
             // Close mobile sidebar when clicking outside
             $(document).on('click', function(e) {
                 if (window.innerWidth <= 768) {
-                    if (!$(e.target).closest('#sidebar, #sidebarToggle').length) {
-                        $('#sidebar').removeClass('mobile-open');
+                    if (!$(e.target).closest('#sidebar, #sidebarToggle').length && $('#sidebar').hasClass('mobile-open')) {
+                        toggleMobileMenu();
                     }
                 }
             });

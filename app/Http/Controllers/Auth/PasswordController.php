@@ -24,6 +24,13 @@ class PasswordController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
+        // Redirect based on user role to maintain context
+        if ($request->user()->isAdmin()) {
+            return redirect()->route('admin.settings')->with('status', 'password-updated');
+        } elseif ($request->user()->isFarmer()) {
+            return redirect()->route('farmer.account')->with('status', 'password-updated');
+        }
+
         return back()->with('status', 'password-updated');
     }
 }

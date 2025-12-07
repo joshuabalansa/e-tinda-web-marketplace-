@@ -39,7 +39,7 @@ class ProductController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'price_per_unit' => 'required|numeric|min:0',
             'unit_type' => 'required|string|in:kg,g,lb,piece,dozen',
             'stock_quantity' => 'required|integer|min:0',
@@ -116,7 +116,7 @@ class ProductController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'description' => '',
+            'description' => 'nullable|string',
             'price_per_unit' => 'required|numeric|min:0',
             'unit_type' => 'required|string|in:kg,g,lb,piece,dozen',
             'stock_quantity' => 'required|integer|min:0',

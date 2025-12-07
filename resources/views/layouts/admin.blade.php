@@ -7,7 +7,7 @@
     <meta name="description" content="E-Tinda Marketplace - Admin Panel" />
     <meta name="author" content="" />
 
-    <title>Etinda</title>
+    <title>E-Tinda</title>
 
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('template-assets/js/jquery-ui/css/no-theme/jquery-ui-1.10.3.custom.min.css') }}">
@@ -182,6 +182,7 @@
         .page-container {
             display: flex;
             min-height: 100vh;
+            background-color: #f5f7fa;
         }
 
         .sidebar-menu {
@@ -206,8 +207,12 @@
             margin-left: 280px !important;
             flex: 1;
             min-height: 100vh;
+            width: calc(100% - 280px);
             overflow-y: auto;
-            transition: margin-left 0.3s ease;
+            transition: margin-left 0.3s ease, width 0.3s ease;
+            background-color: #f5f7fa;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Collapsed sidebar styles */
@@ -217,6 +222,7 @@
 
         .page-container.sidebar-collapsed .main-content {
             margin-left: 65px !important;
+            width: calc(100% - 65px);
         }
 
         /* Header styling - no longer sticky */
@@ -225,6 +231,7 @@
             margin: 0;
             padding: 15px 20px;
             border-bottom: 1px solid #e5e5e5;
+            flex-shrink: 0;
         }
 
         /* Content area styling */
@@ -233,6 +240,14 @@
             border: none;
             height: 1px;
             background: #e5e5e5;
+            flex-shrink: 0;
+        }
+
+        /* Content wrapper to fill remaining space */
+        .main-content .content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Footer positioning */
@@ -241,6 +256,7 @@
             padding: 20px;
             background: #f8f9fa;
             border-top: 1px solid #e5e5e5;
+            flex-shrink: 0;
         }
 
         /* Mobile Responsive Styles */
@@ -258,6 +274,7 @@
             .main-content {
                 margin-left: 0 !important;
                 width: 100%;
+                padding: 10px !important;
             }
 
             .page-container.sidebar-collapsed .sidebar-menu {
@@ -279,10 +296,23 @@
                 background: rgba(0, 0, 0, 0.5);
                 z-index: 999;
                 display: none;
+                pointer-events: auto;
             }
 
             .mobile-overlay.active {
                 display: block;
+            }
+
+            /* Ensure sidebar is above overlay on mobile */
+            .sidebar-menu.mobile-open {
+                z-index: 1001 !important;
+            }
+
+            /* Ensure menu links are clickable on mobile */
+            .sidebar-menu.mobile-open #main-menu > li > a {
+                pointer-events: auto !important;
+                z-index: 1002 !important;
+                position: relative;
             }
 
             /* Mobile menu button */
@@ -295,9 +325,10 @@
                 background: #0b5e20;
                 color: white;
                 border: none;
-                padding: 10px;
+                padding: 10px 15px;
                 border-radius: 5px;
                 cursor: pointer;
+                font-size: 18px;
             }
 
             .mobile-menu-toggle:hover {
@@ -306,12 +337,57 @@
 
             /* Adjust header for mobile */
             .main-content > .row:first-child {
-                padding-left: 60px;
+                padding: 10px 15px 10px 60px !important;
+                flex-wrap: wrap;
+                margin-bottom: 20px !important;
+            }
+
+            .main-content > .row:first-child .col-md-6 {
+                width: 100%;
+                margin-bottom: 10px;
             }
 
             /* Ensure sidebar is above everything on mobile */
             .sidebar-menu {
                 z-index: 1000;
+            }
+
+            /* Make menu items touch-friendly on mobile */
+            .sidebar-menu #main-menu > li > a {
+                padding: 18px 20px !important;
+                min-height: 50px;
+            }
+
+            /* Responsive tables */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Responsive cards */
+            .card {
+                margin-bottom: 15px;
+            }
+
+            /* Responsive buttons */
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .btn-group .btn {
+                width: auto;
+            }
+
+            /* Responsive forms */
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            /* Footer adjustments */
+            footer.main {
+                padding: 15px !important;
+                font-size: 14px;
             }
         }
 
@@ -328,6 +404,65 @@
         /* Prevent body scroll when mobile menu is open */
         body.mobile-menu-open {
             overflow: hidden;
+        }
+
+        /* Ensure menu items are visible */
+        .sidebar-menu #main-menu {
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        .sidebar-menu #main-menu > li {
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        .sidebar-menu #main-menu > li > a {
+            display: block !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            position: relative !important;
+            z-index: 1 !important;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+            touch-action: manipulation;
+        }
+
+        /* On mobile, ensure links are always clickable */
+        @media (max-width: 768px) {
+            .sidebar-menu #main-menu > li > a {
+                z-index: 1002 !important;
+                pointer-events: auto !important;
+            }
+        }
+
+        .sidebar-menu #main-menu > li > a > span.title {
+            display: inline-block !important;
+            visibility: visible !important;
+            pointer-events: none !important;
+        }
+
+        /* Ensure proper menu styling */
+        .sidebar-menu #main-menu > li > a {
+            padding: 15px 20px !important;
+            line-height: 1.5 !important;
+        }
+
+        .sidebar-menu #main-menu > li > a > i {
+            margin-right: 10px !important;
+            width: 20px !important;
+            text-align: center !important;
+            pointer-events: none !important;
+        }
+
+        /* Ensure links are clickable */
+        .sidebar-menu #main-menu > li > a:hover {
+            text-decoration: none !important;
+        }
+
+        /* Fix hover popout to not block clicks */
+        .page-container.sidebar-collapsed .sidebar-menu #main-menu > li:hover > a > span:not(.badge) {
+            pointer-events: none !important;
         }
     </style>
 
@@ -415,11 +550,11 @@
                     </a>
                 </li>
 
-                <!-- System Settings -->
-                <li class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
-                    <a href="#">
+                <!-- Settings -->
+                <li class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
+                    <a href="{{ route('admin.settings') }}">
                         <i class="entypo-cog"></i>
-                        <span class="title">System Settings</span>
+                        <span class="title">Settings</span>
                     </a>
                 </li>
 
@@ -644,7 +779,8 @@ $(document).ready(function() {
                     'opacity': '1',
                     'z-index': '1000',
                     'white-space': 'nowrap',
-                    'box-shadow': '2px 2px 5px rgba(0,0,0,0.3)'
+                    'box-shadow': '2px 2px 5px rgba(0,0,0,0.3)',
+                    'pointer-events': 'none'
                 });
             }
         });
@@ -657,6 +793,29 @@ $(document).ready(function() {
             $linkText.hide();
         });
 
+        // Ensure all menu links are clickable - optimized for mobile
+        $(document).on('click', '#main-menu > li > a', function(e) {
+            var $link = $(this);
+            var href = $link.attr('href');
+
+            // Only handle if it's a valid link
+            if (href && href !== '#' && href !== 'javascript:void(0)') {
+                // On mobile, close the menu after clicking (with small delay to allow navigation)
+                if ($(window).width() <= 768) {
+                    var currentHref = href;
+                    setTimeout(function() {
+                        closeMobileMenu();
+                        // Ensure navigation happens
+                        if (window.location.href !== currentHref) {
+                            window.location.href = currentHref;
+                        }
+                    }, 50);
+                }
+                // Allow default navigation
+                return true;
+            }
+        });
+
         // Ensure proper cleanup when sidebar is expanded
         $(document).on('click', '.sidebar-collapse-icon', function() {
             // Show all menu text when expanding sidebar
@@ -667,22 +826,30 @@ $(document).ready(function() {
             }, 300);
         });
 
-        // Mobile menu toggle functionality
-        $('#mobileMenuToggle').on('click', function(e) {
+        // Mobile menu toggle functionality - handle both click and touch
+        $('#mobileMenuToggle').on('click touchstart', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             toggleMobileMenu();
         });
 
         // Close mobile menu when clicking overlay
-        $('#mobileOverlay').on('click', function() {
+        $('#mobileOverlay').on('click touchstart', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             closeMobileMenu();
         });
 
         // Close mobile menu when clicking outside on mobile
-        $(document).on('click', function(e) {
+        $(document).on('click touchstart', function(e) {
             if ($(window).width() <= 768) {
-                if (!$(e.target).closest('.sidebar-menu, #mobileMenuToggle').length) {
-                    closeMobileMenu();
+                var $target = $(e.target);
+                // Don't close if clicking inside sidebar or toggle button
+                if (!$target.closest('.sidebar-menu, #mobileMenuToggle').length) {
+                    // Don't close if clicking on a menu link (let it navigate)
+                    if (!$target.closest('#main-menu > li > a').length) {
+                        closeMobileMenu();
+                    }
                 }
             }
         });
@@ -741,6 +908,14 @@ $(document).ready(function() {
         });
 
         console.log('Admin sidebar collapse functionality initialized successfully');
+
+        // Force menu visibility
+        setTimeout(function() {
+            $('#main-menu').show();
+            $('#main-menu > li').show();
+            $('#main-menu > li > a').show();
+            $('#main-menu > li > a > span.title').show();
+        }, 100);
 
     }, 200); // Increased delay to ensure Neon theme is fully loaded
 

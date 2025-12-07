@@ -27,21 +27,12 @@
                             <div class="panel-body p-0">
                                 <!-- Product Image -->
                                 <div class="position-relative">
-                                    @if($product->image_url)
-                                        <img src="{{ asset('storage/' . $product->image_url) }}"
-                                             alt="{{ $product->name }}"
-                                             class="img-responsive w-100"
-                                             style="height: 300px; object-fit: cover; cursor: pointer;"
-                                             data-toggle="modal"
-                                             data-target="#imageModal">
-                                    @else
-                                        <img src="https://placehold.co/600x400?text={{ urlencode($product->name) }}"
-                                             alt="{{ $product->name }}"
-                                             class="img-responsive w-100"
-                                             style="height: 300px; object-fit: cover; cursor: pointer;"
-                                             data-toggle="modal"
-                                             data-target="#imageModal">
-                                    @endif
+                                    <img src="{{ $product->getImageUrl() }}"
+                                         alt="{{ $product->name }}"
+                                         class="img-responsive w-100"
+                                         style="height: 300px; object-fit: cover; cursor: pointer;"
+                                         data-toggle="modal"
+                                         data-target="#imageModal">
 
                                     <!-- Status Badge -->
                                     <div class="position-absolute top-0 end-0 m-2">
@@ -264,7 +255,7 @@
                     </button>
                 </div>
                 <div class="modal-body p-0">
-                    <img src="{{ asset('storage/' . $product->image_url) }}"
+                    <img src="{{ $product->getImageUrl() }}"
                          alt="{{ $product->name }}"
                          class="img-responsive w-100"
                          style="max-height: 70vh; object-fit: contain;">

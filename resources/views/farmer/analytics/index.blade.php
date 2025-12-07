@@ -555,30 +555,127 @@ function refreshCharts() {
 }
 
 function exportData() {
-    // Simple CSV export functionality
-    const csvContent = generateCSV();
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'analytics_data.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
+    try {
+        // Simple CSV export functionality
+        const csvContent = generateCSV();
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+
+        // Generate filename with current date
+        const date = new Date();
+        const dateStr = date.toISOString().split('T')[0];
+        a.download = `analytics_data_${dateStr}.csv`;
+
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        // Show success notification
+        showNotification('Analytics data exported successfully!');
+    } catch (error) {
+        console.error('Export error:', error);
+        showNotification('Error exporting data. Please try again.', 'error');
+    }
 }
 
 function generateCSV() {
     let csv = 'Metric,Value\n';
-    csv += `Total Revenue (This Month),${analyticsData.revenue.current_month}\n`;
+    csv += `Total Revenue (This Month),₱${analyticsData.revenue.current_month.toFixed(2)}\n`;
     csv += `Growth Percentage,${analyticsData.revenue.growth_percentage}%\n`;
-    csv += `Total Orders,${analyticsData.orders.monthly_orders.sum('order_count')}\n`;
-    csv += `Active Products,${analyticsData.products.top_products.count()}\n`;
-    csv += `Low Stock Items,${analyticsData.inventory.low_stock.count()}\n`;
+
+    // Calculate total orders
+    const totalOrders = analyticsData.orders.monthly_orders.reduce((sum, item) => sum + item.order_count, 0);
+    csv += `Total Orders,${totalOrders}\n`;
+
+    csv += `Active Products,${analyticsData.products.top_products.length}\n`;
+    csv += `Low Stock Items,${analyticsData.inventory.low_stock.length}\n`;
+
+    // Add monthly revenue data
+    csv += '\nMonthly Revenue\n';
+    csv += 'Month,Year,Revenue\n';
+    analyticsData.revenue.monthly_revenue.forEach(item => {
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        csv += `${monthNames[item.month - 1]},${item.year},₱${item.revenue.toFixed(2)}\n`;
+    });
+
+    // Add top products
+    csv += '\nTop Selling Products\n';
+    csv += 'Product Name,Quantity Sold\n';
+    analyticsData.products.top_products.slice(0, 10).forEach(item => {
+        csv += `"${item.name}",${item.total_sold}\n`;
+    });
+
+    // Add order status distribution
+    csv += '\nOrder Status Distribution\n';
+    csv += 'Status,Count\n';
+    analyticsData.orders.status_distribution.forEach(item => {
+        csv += `${item.status},${item.order_count}\n`;
+    });
+
+    // Add low stock items
+    if (analyticsData.inventory.low_stock.length > 0) {
+        csv += '\nLow Stock Items\n';
+        csv += 'Product Name,Category,Stock Quantity\n';
+        analyticsData.inventory.low_stock.forEach(item => {
+            csv += `"${item.name}","${item.category}",${item.stock_quantity}\n`;
+        });
+    }
+
     return csv;
 }
 
 function changeChartPeriod(chartType, period) {
-    // This would typically make an AJAX call to update chart data
-    console.log(`Changing ${chartType} chart to ${period}`);
+    event.preventDefault();
+
+    if (chartType === 'revenue') {
+        let monthsToShow = 12;
+        if (period === '6months') monthsToShow = 6;
+        if (period === '3months') monthsToShow = 3;
+
+        // Filter the data
+        const filteredData = analyticsData.revenue.monthly_revenue.slice(-monthsToShow);
+
+        // Update chart data
+        revenueChart.data.labels = filteredData.map(item => {
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return `${monthNames[item.month - 1]} ${item.year}`;
+        }).reverse();
+
+        revenueChart.data.datasets[0].data = filteredData.map(item => item.revenue).reverse();
+        revenueChart.update();
+
+        // Show success message
+        showNotification(`Chart updated to show last ${monthsToShow} months`);
+    }
+}
+
+function showNotification(message, type = 'success') {
+    // Create a simple notification
+    const notification = document.createElement('div');
+    notification.className = type === 'error' ? 'alert alert-danger' : 'alert alert-success';
+    notification.style.position = 'fixed';
+    notification.style.top = '20px';
+    notification.style.right = '20px';
+    notification.style.zIndex = '9999';
+    notification.style.minWidth = '250px';
+    notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+    notification.innerHTML = `
+        <button type="button" class="close" onclick="this.parentElement.remove()">
+            <span>&times;</span>
+        </button>
+        ${message}
+    `;
+    document.body.appendChild(notification);
+
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 3000);
 }
 </script>
 

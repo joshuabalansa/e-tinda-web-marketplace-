@@ -5,7 +5,8 @@ cmds = [
 
 [phases.build]
 cmds = [
-    "echo 'Skipping frontend build - using Laravel without Vite'"
+    "echo 'Skipping frontend build - using Laravel without Vite'",
+    "php artisan storage:link || true"
 ]
 
 [start]

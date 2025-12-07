@@ -23,6 +23,15 @@
       background-color: #198754 !important;
       color: white !important;
     }
+    #searchInput {
+      border: 2px solid #e0e0e0;
+      transition: all 0.3s ease;
+    }
+    #searchInput:focus {
+      border-color: #198754;
+      box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+      outline: none;
+    }
   </style>
 
   <header class="bg-light py-5">
@@ -66,10 +75,10 @@
 
     <!-- Search Bar -->
     <div class="row mb-4">
-      <div class="col-md-8 mx-auto">
-        <form method="GET" action="{{ route('shop.index') }}" class="d-flex">
-          <input type="text" name="query" class="form-control me-2" placeholder="{{ __('shop.search_products') }}" value="{{ request('query') }}">
-          <button type="submit" class="btn btn-success">
+      <div class="col-md-10 mx-auto">
+        <form method="GET" action="{{ route('shop.index') }}" class="d-flex" id="searchForm" onsubmit="event.preventDefault(); performLiveSearch();">
+          <input type="text" name="query" id="searchInput" class="form-control me-2 rounded-pill" placeholder="{{ __('shop.search_products') }}" value="{{ request('query') }}" style="padding: 12px 20px; font-size: 16px;">
+          <button type="submit" class="btn btn-success rounded-pill" style="padding: 12px 24px;">
             <i class="fas fa-search"></i>
           </button>
         </form>
@@ -132,9 +141,11 @@
       <div class="col-lg-9">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h4 class="mb-0">{{ __('shop.products') }}
-            @if(request()->hasAny(['category', 'min_price', 'max_price', 'query', 'in_stock']))
-              <small class="text-muted">({{ $products->total() }} {{ __('shop.results') }})</small>
-            @endif
+            <small class="text-muted" id="resultsCount">
+              @if(request()->hasAny(['category', 'min_price', 'max_price', 'query', 'in_stock']))
+                ({{ $products->total() }} {{ __('shop.results') }})
+              @endif
+            </small>
           </h4>
           <div class="d-flex">
             <form method="GET" action="{{ route('shop.index') }}" class="d-flex">
@@ -156,8 +167,8 @@
         </div>
 
         <!-- Active Filters Display -->
-        @if(request()->hasAny(['category', 'min_price', 'max_price', 'query', 'in_stock']))
-          <div class="mb-3">
+        <div id="activeFilters" class="mb-3 text-center">
+          @if(request()->hasAny(['category', 'min_price', 'max_price', 'query', 'in_stock']))
             <small class="text-muted">{{ __('shop.active_filters') }}</small>
             @if(request('category') && request('category') != 'all')
               <span class="badge bg-success me-1">{{ request('category') }}</span>
@@ -174,86 +185,21 @@
             @if(request('in_stock'))
               <span class="badge bg-success me-1">{{ __('shop.in_stock_only') }}</span>
             @endif
-          </div>
-        @endif
+          @endif
+        </div>
 
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-          @forelse($products as $product)
-            <div class="col">
-              <a href="{{ route('shop.product.show', $product['id']) }}" class="product-link">
-                <div class="card h-100 product-card">
-                  @if(isset($product['certification']) && $product['certification'] === 'Organic Certified')
-                    <div class="badge bg-success position-absolute" style="top: 10px; right: 10px;">{{ __('shop.organic') }}</div>
-                  @endif
-                  @if($product['stock'] <= 0)
-                    <div class="badge bg-danger position-absolute" style="top: 10px; left: 10px;">{{ __('shop.out_of_stock') }}</div>
-                  @elseif($product['stock'] <= 5)
-                    <div class="badge bg-warning position-absolute" style="top: 10px; left: 10px;">{{ __('shop.low_stock') }}</div>
-                  @endif
-                  <img src="{{ $product['image'] }}" class="card-img-top" alt="{{ $product['name'] }}">
-                  <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">{{ $product['name'] }}</h5>
-                    <p class="card-text text-muted small">{{ $product['category'] }}</p>
-                    @if(isset($product['rating']))
-                      <div class="rating mb-2">
-                        @for($i = 0; $i < 5; $i++)
-                          @if($i < floor($product['rating']))
-                            <i class="fas fa-star"></i>
-                          @elseif($i < ceil($product['rating']) && $product['rating'] - floor($product['rating']) >= 0.5)
-                            <i class="fas fa-star-half-alt"></i>
-                          @else
-                            <i class="far fa-star"></i>
-                          @endif
-                        @endfor
-                        @if(isset($product['review_count']))
-                          <small class="text-muted ms-1">({{ $product['review_count'] }})</small>
-                        @endif
-                      </div>
-                    @endif
-                    <p class="card-text flex-grow-1">{{ Str::limit($product['description'], 100) }}</p>
-                    <div class="d-flex justify-content-between align-items-center mt-auto">
-                      <h5 class="mb-0 text-success">₱{{ number_format($product['price'], 2) }}/{{ $product['unit'] }}</h5>
-                      <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
-                        @csrf
-                        <input type="hidden" name="product_id" value="{{ $product['id'] }}">
-                        <input type="hidden" name="name" value="{{ $product['name'] }}">
-                        <input type="hidden" name="price" value="{{ $product['price'] }}">
-                        <input type="hidden" name="image" value="{{ $product['image'] }}">
-                        <input type="hidden" name="unit" value="{{ $product['unit'] }}">
-                        <input type="hidden" name="quantity" value="1">
-                        <button type="submit" class="btn btn-sm btn-success" {{ $product['stock'] <= 0 ? 'disabled' : '' }}>
-                          <i class="fas fa-cart-plus"></i> {{ $product['stock'] <= 0 ? __('shop.out_of_stock') : __('shop.add') }}
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div>
-          @empty
-            <div class="col-12 text-center py-5">
-              <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
-              <h3>{{ __('shop.no_products_found') }}</h3>
-              <p class="text-muted">
-                @if(request()->hasAny(['category', 'min_price', 'max_price', 'query', 'in_stock']))
-                  {{ __('shop.try_adjusting_filters') }}
-                @else
-                  {{ __('shop.check_back_later') }}
-                @endif
-              </p>
-              @if(request()->hasAny(['category', 'min_price', 'max_price', 'query', 'in_stock']))
-                <button class="btn btn-outline-success" onclick="clearFilters()">{{ __('shop.clear_all_filters_btn') }}</button>
-              @endif
-            </div>
-          @endforelse
+        <div id="productsContainer">
+          @include('shop.partials.products', ['products' => $products])
         </div>
 
         <!-- Pagination -->
-        @if($products->hasPages())
-          <nav aria-label="{{ __('shop.page_navigation') }}" class="mt-5">
-            {{ $products->appends(request()->query())->links('pagination::bootstrap-4') }}
-          </nav>
-        @endif
+        <div id="paginationContainer" class="mt-5">
+          @if($products->hasPages())
+            <nav aria-label="{{ __('shop.page_navigation') }}">
+              {{ $products->appends(request()->query())->links('pagination::bootstrap-4') }}
+            </nav>
+          @endif
+        </div>
       </div>
     </div>
   </div>
@@ -261,6 +207,117 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // Live search functionality with AJAX
+    let searchTimeout;
+    let isLoading = false;
+    const searchInput = document.getElementById('searchInput');
+    const searchForm = document.getElementById('searchForm');
+    const filterForm = document.getElementById('filterForm');
+    const productsContainer = document.getElementById('productsContainer');
+    const paginationContainer = document.getElementById('paginationContainer');
+    const resultsCount = document.getElementById('resultsCount');
+
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+
+        // Debounce the search - wait 500ms after user stops typing
+        searchTimeout = setTimeout(function() {
+          performLiveSearch();
+        }, 500);
+      });
+
+      // Also trigger search on Enter key
+      searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          clearTimeout(searchTimeout);
+          performLiveSearch();
+        }
+      });
+    }
+
+    function performLiveSearch() {
+      if (isLoading) return;
+
+      const query = searchInput.value.trim();
+
+      // Get current filter values
+      const category = document.getElementById('categoryInput')?.value || '';
+      const minPrice = document.getElementById('min_price')?.value || '';
+      const maxPrice = document.getElementById('max_price')?.value || '';
+      const inStock = document.getElementById('in_stock')?.checked ? '1' : '';
+      const sort = new URLSearchParams(window.location.search).get('sort') || '';
+
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (query) params.set('query', query);
+      if (category && category !== 'all') params.set('category', category);
+      if (minPrice) params.set('min_price', minPrice);
+      if (maxPrice) params.set('max_price', maxPrice);
+      if (inStock) params.set('in_stock', inStock);
+      if (sort) params.set('sort', sort);
+
+      // Update URL without reload
+      const newUrl = '{{ route("shop.index") }}' + (params.toString() ? '?' + params.toString() : '');
+      window.history.pushState({}, '', newUrl);
+
+      // Show loading state
+      isLoading = true;
+      productsContainer.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+
+      // Make AJAX request
+      fetch(newUrl, {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json',
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        isLoading = false;
+
+        // Update products
+        productsContainer.innerHTML = data.products_html;
+
+        // Update pagination
+        paginationContainer.innerHTML = data.pagination_html || '';
+
+        // Update active filters
+        const activeFiltersEl = document.getElementById('activeFilters');
+        if (activeFiltersEl) {
+          if (data.active_filters_html) {
+            activeFiltersEl.innerHTML = data.active_filters_html;
+            activeFiltersEl.style.display = 'block';
+          } else {
+            activeFiltersEl.innerHTML = '';
+            activeFiltersEl.style.display = 'none';
+          }
+        }
+
+        // Update results count
+        if (data.has_filters && data.results_count !== undefined) {
+          resultsCount.textContent = `(${data.results_count} {{ __('shop.results') }})`;
+        } else {
+          resultsCount.textContent = '';
+        }
+
+        // Scroll to top of products section smoothly
+        productsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      })
+      .catch(error => {
+        isLoading = false;
+        console.error('Error:', error);
+        productsContainer.innerHTML = '<div class="col-12 text-center py-5"><p class="text-danger">Error loading products. Please try again.</p></div>';
+      });
+    }
+
     function setCategory(category) {
       document.getElementById('categoryInput').value = category;
       // Update button states
@@ -284,6 +341,7 @@
       document.getElementById('min_price').value = '';
       document.getElementById('max_price').value = '';
       document.getElementById('in_stock').checked = false;
+      if (searchInput) searchInput.value = '';
 
       // Reset category buttons
       document.querySelectorAll('.category-btn').forEach(btn => {

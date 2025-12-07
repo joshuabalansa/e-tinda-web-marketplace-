@@ -246,6 +246,16 @@ class AdminController extends Controller
     }
 
     /**
+     * Display admin settings page.
+     */
+    public function settings()
+    {
+        return view('admin.settings', [
+            'user' => auth()->user(),
+        ]);
+    }
+
+    /**
      * Display admin reports.
      */
     public function reports()

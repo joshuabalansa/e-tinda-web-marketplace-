@@ -117,6 +117,7 @@ Route::middleware(['auth', 'role:buyer'])->group(function () {
     Route::delete('/buyer/wishlist/remove/{id}', [BuyerWishlistController::class, 'remove'])->name('buyer.wishlist.remove');
     Route::get('/buyer/orders', [BuyerDashboardController::class, 'orders'])->name('buyer.orders');
     Route::get('/buyer/orders/{order}', [BuyerDashboardController::class, 'showOrder'])->name('buyer.orders.show');
+    Route::post('/buyer/orders/{order}/cancel', [BuyerDashboardController::class, 'cancelOrder'])->name('buyer.orders.cancel');
     Route::get('/buyer/history', [BuyerDashboardController::class, 'history'])->name('buyer.history');
 });
 
@@ -144,6 +145,9 @@ Route::delete('/forums/replies/{reply}', [ForumsController::class, 'deleteReply'
 // Admin routes
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+    
+    // Admin settings
+    Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');
 
     // User management routes
     Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users.index');
@@ -191,6 +195,7 @@ Route::middleware(['auth', 'role:farmer'])->group(function () {
     Route::put('/farmer/orders/{order}/status', [FarmerOrdersController::class, 'updateStatus'])->name('farmer.orders.update-status');
     Route::get('/farmer/analytics', [FarmerAnalyticsController::class, 'index'])->name('farmer.analytics');
     Route::get('/farmer/reports', [FarmerReportsController::class, 'index'])->name('farmer.reports.index');
+    Route::get('/farmer/reports/export', [FarmerReportsController::class, 'export'])->name('farmer.reports.export');
     Route::get('/farmer/forums', [FarmerForumsController::class, 'index'])->name('farmer.forums');
     Route::get('/farmer/forums/{forum}', [FarmerForumsController::class, 'show'])->name('farmer.forums.show');
     Route::post('/farmer/forums/{forum}/reply', [FarmerForumsController::class, 'reply'])->name('farmer.forums.reply');

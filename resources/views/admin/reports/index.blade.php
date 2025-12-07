@@ -1,8 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="main-content">
-    <div class="container-fluid">
+<div class="container-fluid">
         <!-- Page Header -->
         <div class="page-header">
             <div class="row">
@@ -390,7 +389,6 @@
                 </div>
             </div>
         @endif
-    </div>
 </div>
 
 <!-- Chart.js -->
@@ -400,60 +398,72 @@
 <script>
 // Orders by Status Chart
 const ordersStatusCtx = document.getElementById('ordersStatusChart').getContext('2d');
-const ordersStatusData = @json($chartData['orders_by_status']);
+const ordersStatusData = @json($chartData['orders_by_status'] ?? []);
 
-new Chart(ordersStatusCtx, {
-    type: 'doughnut',
-    data: {
-        labels: Object.keys(ordersStatusData),
-        datasets: [{
-            data: Object.values(ordersStatusData),
-            backgroundColor: [
-                '#FF6384',
-                '#36A2EB',
-                '#FFCE56',
-                '#4BC0C0'
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
+if (Object.keys(ordersStatusData).length > 0) {
+    new Chart(ordersStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(ordersStatusData),
+            datasets: [{
+                data: Object.values(ordersStatusData),
+                backgroundColor: [
+                    '#FF6384',
+                    '#36A2EB',
+                    '#FFCE56',
+                    '#4BC0C0'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
             }
         }
-    }
-});
+    });
+} else {
+    ordersStatusCtx.font = '16px Arial';
+    ordersStatusCtx.textAlign = 'center';
+    ordersStatusCtx.fillText('No data available', ordersStatusCtx.canvas.width / 2, ordersStatusCtx.canvas.height / 2);
+}
 
 // Users by Role Chart
 const usersRoleCtx = document.getElementById('usersRoleChart').getContext('2d');
-const usersRoleData = @json($chartData['users_by_role']);
+const usersRoleData = @json($chartData['users_by_role'] ?? []);
 
-new Chart(usersRoleCtx, {
-    type: 'pie',
-    data: {
-        labels: Object.keys(usersRoleData),
-        datasets: [{
-            data: Object.values(usersRoleData),
-            backgroundColor: [
-                '#FF6384',
-                '#36A2EB',
-                '#FFCE56'
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
+if (Object.keys(usersRoleData).length > 0) {
+    new Chart(usersRoleCtx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(usersRoleData),
+            datasets: [{
+                data: Object.values(usersRoleData),
+                backgroundColor: [
+                    '#FF6384',
+                    '#36A2EB',
+                    '#FFCE56'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
             }
         }
-    }
-});
+    });
+} else {
+    usersRoleCtx.font = '16px Arial';
+    usersRoleCtx.textAlign = 'center';
+    usersRoleCtx.fillText('No data available', usersRoleCtx.canvas.width / 2, usersRoleCtx.canvas.height / 2);
+}
 </script>
 @endif
 @endsection

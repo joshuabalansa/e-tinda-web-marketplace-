@@ -146,7 +146,7 @@
                                                     <div class="current-image mb-3">
                                                         <p class="small text-muted mb-2">Current Image:</p>
                                                         <div class="position-relative d-inline-block">
-                                                            <img src="{{ asset('storage/' . $product->image_url) }}"
+                                                            <img src="{{ $product->getImageUrl() }}"
                                                                  alt="{{ $product->name }}"
                                                                  class="img-responsive"
                                                                  style="max-width: 200px; max-height: 200px; object-fit: cover;">

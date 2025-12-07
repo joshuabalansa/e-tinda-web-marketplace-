@@ -1,10 +1,45 @@
 /* Admin Forum Moderation Custom Styles */
 .main-content {
-    padding: 20px;
+    padding: 0;
+    background-color: #f5f7fa;
+}
+
+.main-content .container-fluid {
+    padding: 20px 30px;
+    background-color: #f5f7fa;
+    min-height: calc(100vh - 120px);
+}
+
+.panel {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
 }
 
 .panel-body {
     padding: 20px;
+    background-color: #fff;
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.page-title {
+    margin: 0 0 5px 0;
+    font-size: 28px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.page-description {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 14px;
 }
 
 /* Statistics Cards */
@@ -106,13 +141,18 @@
 
 /* Responsive Improvements */
 @media (min-width: 1200px) {
-    .container-fluid {
-        padding-left: 30px;
-        padding-right: 30px;
+    .main-content .container-fluid {
+        padding-left: 40px;
+        padding-right: 40px;
     }
 }
 
 @media (max-width: 768px) {
+    .main-content .container-fluid {
+        padding: 15px;
+        min-height: auto;
+    }
+
     .col-lg-2 {
         margin-bottom: 15px;
     }
@@ -120,6 +160,14 @@
     .form-horizontal .control-label {
         text-align: left;
         margin-bottom: 5px;
+    }
+
+    .page-title {
+        font-size: 22px;
+    }
+
+    .panel {
+        margin-bottom: 15px;
     }
 }
 
