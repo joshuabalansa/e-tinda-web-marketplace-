@@ -365,6 +365,41 @@ const analyticsData = @json($analyticsData);
 
 // Revenue Chart
 const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+// Calculate max revenue for step size calculation
+const maxRevenue = Math.max(...analyticsData.revenue.monthly_revenue.map(item => item.revenue), 0);
+// Calculate a nice step size that ensures whole numbers
+let stepSize = 100;
+let suggestedMax = 100;
+if (maxRevenue > 0) {
+    if (maxRevenue <= 1) {
+        // For very small values, use step size of 1 and round up max
+        stepSize = 1;
+        suggestedMax = Math.ceil(maxRevenue) + 1;
+        if (suggestedMax < 2) suggestedMax = 2; // Ensure at least 2 for visibility
+    } else if (maxRevenue < 10) {
+        stepSize = 1;
+        suggestedMax = Math.ceil(maxRevenue) + 1;
+    } else if (maxRevenue < 100) {
+        stepSize = 10;
+        suggestedMax = Math.ceil(maxRevenue / 10) * 10 + 10;
+    } else if (maxRevenue < 1000) {
+        stepSize = 100;
+        suggestedMax = Math.ceil(maxRevenue / 100) * 100 + 100;
+    } else if (maxRevenue < 10000) {
+        stepSize = 1000;
+        suggestedMax = Math.ceil(maxRevenue / 1000) * 1000 + 1000;
+    } else {
+        stepSize = Math.ceil(maxRevenue / 10);
+        // Round to nearest nice number (100, 500, 1000, etc.)
+        const magnitude = Math.pow(10, Math.floor(Math.log10(stepSize)));
+        stepSize = Math.ceil(stepSize / magnitude) * magnitude;
+        suggestedMax = Math.ceil(maxRevenue / stepSize) * stepSize + stepSize;
+    }
+} else {
+    // Default when no revenue data
+    stepSize = 100;
+    suggestedMax = 1000;
+}
 const revenueChart = new Chart(revenueCtx, {
     type: 'line',
     data: {
@@ -387,9 +422,23 @@ const revenueChart = new Chart(revenueCtx, {
         scales: {
             y: {
                 beginAtZero: true,
+                suggestedMax: suggestedMax,
+                afterBuildTicks: function(axis) {
+                    // Filter out non-whole number ticks
+                    axis.ticks = axis.ticks.filter(function(tick) {
+                        return Math.round(tick.value) % 1 === 0;
+                    });
+                },
                 ticks: {
+                    stepSize: stepSize,
+                    precision: 0,
                     callback: function(value) {
-                        return '₱' + value.toLocaleString();
+                        // Only show whole numbers - round to ensure no decimals
+                        const roundedValue = Math.round(value);
+                        if (roundedValue % 1 === 0) {
+                            return '₱' + roundedValue.toLocaleString();
+                        }
+                        return '';
                     }
                 }
             }
@@ -638,6 +687,41 @@ function changeChartPeriod(chartType, period) {
         // Filter the data
         const filteredData = analyticsData.revenue.monthly_revenue.slice(-monthsToShow);
 
+        // Recalculate step size and suggested max based on filtered data
+        const maxRevenue = Math.max(...filteredData.map(item => item.revenue), 0);
+        let newStepSize = 100;
+        let newSuggestedMax = 100;
+        if (maxRevenue > 0) {
+            if (maxRevenue <= 1) {
+                // For very small values, use step size of 1 and round up max
+                newStepSize = 1;
+                newSuggestedMax = Math.ceil(maxRevenue) + 1;
+                if (newSuggestedMax < 2) newSuggestedMax = 2; // Ensure at least 2 for visibility
+            } else if (maxRevenue < 10) {
+                newStepSize = 1;
+                newSuggestedMax = Math.ceil(maxRevenue) + 1;
+            } else if (maxRevenue < 100) {
+                newStepSize = 10;
+                newSuggestedMax = Math.ceil(maxRevenue / 10) * 10 + 10;
+            } else if (maxRevenue < 1000) {
+                newStepSize = 100;
+                newSuggestedMax = Math.ceil(maxRevenue / 100) * 100 + 100;
+            } else if (maxRevenue < 10000) {
+                newStepSize = 1000;
+                newSuggestedMax = Math.ceil(maxRevenue / 1000) * 1000 + 1000;
+            } else {
+                newStepSize = Math.ceil(maxRevenue / 10);
+                // Round to nearest nice number (100, 500, 1000, etc.)
+                const magnitude = Math.pow(10, Math.floor(Math.log10(newStepSize)));
+                newStepSize = Math.ceil(newStepSize / magnitude) * magnitude;
+                newSuggestedMax = Math.ceil(maxRevenue / newStepSize) * newStepSize + newStepSize;
+            }
+        } else {
+            // Default when no revenue data
+            newStepSize = 100;
+            newSuggestedMax = 1000;
+        }
+
         // Update chart data
         revenueChart.data.labels = filteredData.map(item => {
             const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -645,6 +729,11 @@ function changeChartPeriod(chartType, period) {
         }).reverse();
 
         revenueChart.data.datasets[0].data = filteredData.map(item => item.revenue).reverse();
+
+        // Update step size and suggested max
+        revenueChart.options.scales.y.ticks.stepSize = newStepSize;
+        revenueChart.options.scales.y.suggestedMax = newSuggestedMax;
+
         revenueChart.update();
 
         // Show success message

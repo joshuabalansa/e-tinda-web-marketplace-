@@ -14,6 +14,9 @@ class LanguageController extends Controller
         if (in_array($locale, ['en', 'hil'])) {
             Session::put('locale', $locale);
             App::setLocale($locale);
+
+            // Set cookie for persistence across sessions
+            return redirect()->back()->withCookie(cookie('locale', $locale, 60 * 24 * 30)); // 30 days
         }
 
         return redirect()->back();

@@ -476,7 +476,7 @@
               <h5 class="card-title fw-bold mb-2">{{ $product['name'] }}</h5>
               <p class="card-text text-muted small flex-grow-1">{{ Str::limit($product['description'], 60) }}</p>
               <div class="mb-3">
-                <span class="h5 text-success fw-bold mb-0">${{ number_format($product['price'], 2) }}</span>
+                <span class="h5 text-success fw-bold mb-0">₱{{ number_format($product['price'], 2) }}</span>
                 <small class="text-muted">/{{ $product['unit'] }}</small>
               </div>
               <div class="mb-3">

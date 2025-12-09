@@ -58,7 +58,7 @@
                     </div>
                     <div class="col-md-3 col-sm-6 mb-3">
                         <div class="text-center">
-                            <a href="#" class="btn btn-warning btn-lg btn-block">
+                            <a href="{{ route('farmer.reports.index') }}" class="btn btn-warning btn-lg btn-block">
                                 <i class="entypo-doc-text" style="font-size: 2rem;"></i>
                                 <br>Reports
                             </a>

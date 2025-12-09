@@ -39,6 +39,7 @@ class FarmerAccountController extends Controller
             'zip_code' => 'nullable|string|max:20',
             'country' => 'nullable|string|max:100',
             'delivery_radius' => 'nullable|integer|min:0',
+            'coordinates' => 'nullable|string|max:255',
             'password' => 'nullable|string|min:8|confirmed',
         ]);
 
@@ -55,6 +56,7 @@ class FarmerAccountController extends Controller
         $user->zip_code = $request->zip_code;
         $user->country = $request->country;
         $user->delivery_radius = $request->delivery_radius;
+        $user->coordinates = $request->coordinates;
 
         // Update password if provided
         if ($request->filled('password')) {

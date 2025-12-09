@@ -12,9 +12,45 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     /* Custom styles that override or complement Bootstrap */
-    body {
+    html, body {
+      height: 100%;
       font-family: 'Segoe UI', sans-serif;
       background-color: #f9f9f9;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Main content wrapper - grows to fill available space */
+    .main-content-wrapper {
+      flex: 1 0 auto;
+    }
+
+    /* Footer stays at bottom */
+    footer {
+      flex-shrink: 0;
+      margin-top: auto;
+    }
+
+    /* Mobile-specific footer positioning */
+    @media (max-width: 768px) {
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .main-content-wrapper {
+        flex: 1;
+        min-height: 0;
+      }
+
+      footer {
+        margin-top: auto;
+      }
     }
 
     header {
@@ -323,6 +359,52 @@
         padding-bottom: 1rem;
       }
 
+      /* Header buttons mobile responsive */
+      .navbar .d-flex.align-items-center {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.5rem;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        align-items: stretch !important;
+      }
+
+      .navbar .d-flex.align-items-center > * {
+        width: 100%;
+        margin: 0 !important;
+      }
+
+      .navbar .d-flex.align-items-center .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.625rem 1rem;
+        font-size: 0.9rem;
+        min-height: 44px; /* Touch-friendly minimum height */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .navbar .d-flex.align-items-center .language-switcher {
+        width: 100%;
+      }
+
+      .navbar .d-flex.align-items-center .language-switcher .btn {
+        width: 100%;
+        min-height: 44px;
+      }
+
+      .navbar .d-flex.align-items-center a.btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+      }
+
+      .navbar .d-flex.align-items-center .badge {
+        margin-left: 0.5rem;
+      }
+
       .hero .d-flex.align-items-center {
         flex-direction: column;
         text-align: center;
@@ -374,6 +456,27 @@
       .hero .me-4 {
         margin-right: 0.5rem !important;
         margin-bottom: 1rem;
+      }
+
+      /* Smaller screens - compact header buttons */
+      .navbar .d-flex.align-items-center {
+        gap: 0.375rem;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+      }
+
+      .navbar .d-flex.align-items-center .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+      }
+
+      .navbar .d-flex.align-items-center .btn i {
+        font-size: 0.875rem;
+      }
+
+      .navbar .d-flex.align-items-center .badge {
+        font-size: 0.75rem;
+        padding: 0.25em 0.5em;
       }
     }
 
@@ -430,24 +533,20 @@
             </li>
           </ul>
           <div class="d-flex align-items-center">
-            <!-- Language Toggle -->
-            <div class="dropdown me-3">
-              <button class="btn btn-outline-light dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-globe me-2"></i>{{ app()->getLocale() == 'en' ? __('common.english') : __('common.hiligaynon') }}
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
-                <li><a class="dropdown-item" href="{{ route('language.switch', 'en') }}">
-                  <i class="fas fa-flag me-2"></i>{{ __('common.english') }}
-                </a></li>
-                <li><a class="dropdown-item" href="{{ route('language.switch', 'hil') }}">
-                  <i class="fas fa-flag me-2"></i>{{ __('common.hiligaynon') }}
-                </a></li>
-              </ul>
+            <!-- Language Switcher -->
+            <div class="me-3">
+                @include('components.language-switcher')
             </div>
 
             <a href="/cart" class="btn btn-outline-light me-2">
               <i class="fas fa-shopping-cart"></i>
-              <span class="badge bg-danger ms-1">{{ count(session('cart', [])) }}</span>
+              <span class="badge bg-danger ms-1">
+                @auth
+                  {{ auth()->user()->cartItems()->count() }}
+                @else
+                  {{ count(session('cart', [])) }}
+                @endauth
+              </span>
             </a>
             @auth
                 <a href="/dashboard" class="btn btn-light text-success">{{ __('common.my_account') }}</a>
@@ -460,7 +559,10 @@
     </nav>
   </header>
 
-  @yield('content')
+  <div class="main-content-wrapper">
+    @yield('content')
+  </div>
+
   <!-- Footer Section -->
   <footer class="bg-success text-white py-4">
     <div class="container">
@@ -469,10 +571,6 @@
           <h5><i class="fas fa-leaf me-2"></i>E-tinda</h5>
           <p>Connecting local farmers with the community.</p>
         </div>
-      </div>
-      <hr class="my-4 bg-light">
-      <div class="text-center">
-        <p class="mb-0">&copy; 2025 E-tinda Farmers' Market. All rights reserved.</p>
       </div>
     </div>
   </footer>

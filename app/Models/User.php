@@ -126,4 +126,49 @@ class User extends Authenticatable
     {
         return $this->hasMany(Product::class);
     }
+
+    /**
+     * Get the cart items for the user.
+     */
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
+    /**
+     * Get formatted location string for display.
+     * Uses farm_address, city, state, country fields.
+     */
+    public function getFormattedLocation()
+    {
+        $parts = [];
+
+        if ($this->farm_address) {
+            $parts[] = $this->farm_address;
+        }
+
+        if ($this->city) {
+            $parts[] = $this->city;
+        }
+
+        if ($this->state) {
+            $parts[] = $this->state;
+        }
+
+        if ($this->country) {
+            $parts[] = $this->country;
+        }
+
+        // If we have any location data, return it
+        if (!empty($parts)) {
+            return implode(', ', $parts);
+        }
+
+        // Fallback to address field if available
+        if ($this->address) {
+            return $this->address;
+        }
+
+        return 'Location not specified';
+    }
 }

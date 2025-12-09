@@ -43,6 +43,7 @@
                                     <p class="mb-0">₱{{ number_format($item['subtotal'], 2) }}</p>
                                     <form action="{{ route('cart.remove', $item['id']) }}" method="POST" class="d-inline">
                                         @csrf
+                                        @method('DELETE')
                                         <button type="submit" class="btn btn-link text-danger p-0">{{ __('shop.remove') }}</button>
                                     </form>
                                 </div>

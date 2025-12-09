@@ -72,6 +72,109 @@
                                 </select>
                             </div>
 
+                            <!-- Farmer Location Fields (shown when farmer is selected) -->
+                            <div id="farmer-location-fields" style="display: none;">
+                                <h6 class="text-muted mb-3 mt-3">Farm Location Information</h6>
+
+                                <!-- Farm Address -->
+                                <div class="mb-3">
+                                    <label for="farm_address" class="form-label">Farm Address</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="fas fa-map-marker-alt text-muted"></i>
+                                        </span>
+                                        <textarea class="form-control"
+                                                  id="farm_address"
+                                                  name="farm_address"
+                                                  rows="2"
+                                                  placeholder="Enter your farm address">{{ old('farm_address') }}</textarea>
+                                    </div>
+                                    @error('farm_address')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="row">
+                                    <!-- City -->
+                                    <div class="col-md-6 mb-3">
+                                        <label for="city" class="form-label">City/Municipality</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light">
+                                                <i class="fas fa-city text-muted"></i>
+                                            </span>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   id="city"
+                                                   name="city"
+                                                   value="{{ old('city') }}"
+                                                   placeholder="e.g., Quezon City">
+                                        </div>
+                                        @error('city')
+                                            <div class="text-danger small">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <!-- State/Province -->
+                                    <div class="col-md-6 mb-3">
+                                        <label for="state" class="form-label">Province</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light">
+                                                <i class="fas fa-map text-muted"></i>
+                                            </span>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   id="state"
+                                                   name="state"
+                                                   value="{{ old('state') }}"
+                                                   placeholder="e.g., Metro Manila">
+                                        </div>
+                                        @error('state')
+                                            <div class="text-danger small">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <!-- ZIP Code -->
+                                    <div class="col-md-6 mb-3">
+                                        <label for="zip_code" class="form-label">ZIP Code</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light">
+                                                <i class="fas fa-mail-bulk text-muted"></i>
+                                            </span>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   id="zip_code"
+                                                   name="zip_code"
+                                                   value="{{ old('zip_code') }}"
+                                                   placeholder="e.g., 1100">
+                                        </div>
+                                        @error('zip_code')
+                                            <div class="text-danger small">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Country -->
+                                    <div class="col-md-6 mb-3">
+                                        <label for="country" class="form-label">Country</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light">
+                                                <i class="fas fa-globe text-muted"></i>
+                                            </span>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   id="country"
+                                                   name="country"
+                                                   value="{{ old('country', 'Philippines') }}"
+                                                   placeholder="Philippines">
+                                        </div>
+                                        @error('country')
+                                            <div class="text-danger small">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Password -->
                             <div class="mb-3">
                                 <label for="password" class="form-label">Password</label>
@@ -184,6 +287,35 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+                // Show/hide farmer location fields based on role selection
+                const roleSelect = document.getElementById('role');
+                const farmerLocationFields = document.getElementById('farmer-location-fields');
+                const farmAddressField = document.getElementById('farm_address');
+                const cityField = document.getElementById('city');
+                const stateField = document.getElementById('state');
+
+                function toggleFarmerFields() {
+                    if (roleSelect.value === 'farmer') {
+                        farmerLocationFields.style.display = 'block';
+                        // Make location fields required when farmer is selected
+                        farmAddressField.setAttribute('required', 'required');
+                        cityField.setAttribute('required', 'required');
+                        stateField.setAttribute('required', 'required');
+                    } else {
+                        farmerLocationFields.style.display = 'none';
+                        // Remove required attribute when not farmer
+                        farmAddressField.removeAttribute('required');
+                        cityField.removeAttribute('required');
+                        stateField.removeAttribute('required');
+                    }
+                }
+
+                // Initial check
+                toggleFarmerFields();
+
+                // Listen for changes
+                roleSelect.addEventListener('change', toggleFarmerFields);
+
                 // Password match validation
                 const password = document.getElementById('password');
                 const confirmPassword = document.getElementById('password_confirmation');

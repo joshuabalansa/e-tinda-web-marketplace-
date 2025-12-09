@@ -490,6 +490,11 @@
                     <div class="farmer-contact-info mt-3">
                         <h6><i class="fas fa-phone"></i> Need Help?</h6>
                         <p class="mb-1">Contact the farmers directly for questions about your order.</p>
+                        <p class="mb-1">
+                            <i class="fas fa-phone-alt me-2"></i>
+                            <strong>Phone:</strong>
+                            <a href="tel:09075552372" class="text-decoration-none">09075552372</a>
+                        </p>
                         <small class="text-muted">Supporting local agriculture since 2024</small>
                     </div>
 

@@ -146,7 +146,13 @@
 
             <a href="/cart" class="btn btn-outline-light me-2">
               <i class="fas fa-shopping-cart"></i>
-              <span class="badge bg-danger ms-1">3</span>
+              <span class="badge bg-danger ms-1">
+                @auth
+                  {{ auth()->user()->cartItems()->count() }}
+                @else
+                  {{ count(session('cart', [])) }}
+                @endauth
+              </span>
             </a>
             @auth
                 <div class="dropdown">
@@ -186,10 +192,6 @@
           <h5><i class="fas fa-leaf me-2"></i>E-tinda</h5>
           <p>Connecting local farmers with the community.</p>
         </div>
-      </div>
-      <hr class="my-4 bg-light">
-      <div class="text-center">
-        <p class="mb-0">&copy; 2025 E-tinda Farmers' Market. All rights reserved.</p>
       </div>
     </div>
   </footer>

@@ -5,20 +5,20 @@
             $currentLocale = request()->cookie('locale', app()->getLocale());
         @endphp
         @if($currentLocale == 'hil')
-            <span class="flag-icon flag-icon-ph me-1"></span><span class="btn-text">Hiligaynon</span>
+            <span class="flag-icon flag-icon-ph me-1"></span><span class="btn-text">{{ __('common.hiligaynon') }}</span>
         @else
-            <span class="flag-icon flag-icon-us me-1"></span><span class="btn-text">English</span>
+            <span class="flag-icon flag-icon-us me-1"></span><span class="btn-text">{{ __('common.english') }}</span>
         @endif
     </button>
-    <ul class="dropdown-menu">
+    <ul class="dropdown-menu dropdown-menu-end">
         <li>
             <a class="dropdown-item" href="{{ route('language.switch', 'en') }}">
-                <span class="flag-icon flag-icon-us me-2"></span>English
+                <span class="flag-icon flag-icon-us me-2"></span>{{ __('common.english') }}
             </a>
         </li>
         <li>
             <a class="dropdown-item" href="{{ route('language.switch', 'hil') }}">
-                <span class="flag-icon flag-icon-ph me-2"></span>Hiligaynon
+                <span class="flag-icon flag-icon-ph me-2"></span>{{ __('common.hiligaynon') }}
             </a>
         </li>
     </ul>
@@ -47,17 +47,43 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    .language-switcher {
+        width: 100%;
+    }
+
+    .language-switcher .btn {
+        font-size: 0.9rem;
+        padding: 0.625rem 1rem;
+        width: 100%;
+        min-height: 44px; /* Touch-friendly */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .language-switcher .btn .btn-text {
+        display: inline-block;
+        margin-left: 0.5rem;
+    }
+
+    .language-switcher .btn i {
+        margin-right: 0.5rem !important;
+    }
+
+    .language-switcher .dropdown-menu {
+        width: 100%;
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
     .language-switcher .btn {
         font-size: 0.875rem;
-        padding: 0.375rem 0.75rem;
+        padding: 0.5rem 0.75rem;
     }
-    
+
     .language-switcher .btn .btn-text {
-        display: none;
-    }
-    
-    .language-switcher .btn i {
-        margin-right: 0 !important;
+        font-size: 0.875rem;
     }
 }
 </style>

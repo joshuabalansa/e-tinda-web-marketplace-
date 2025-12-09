@@ -5,43 +5,112 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\CartItem;
 use App\Services\DeliveryFeeCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 
 class CheckoutController extends Controller
 {
+    /**
+     * Get formatted farmer location for checkout display
+     * Returns a concise format: city, state, country
+     */
+    private function getFarmerLocationForCheckout($farmer)
+    {
+        $parts = [];
+
+        if ($farmer->city) {
+            $parts[] = $farmer->city;
+        }
+
+        if ($farmer->state) {
+            $parts[] = $farmer->state;
+        }
+
+        if ($farmer->country) {
+            $parts[] = $farmer->country;
+        }
+
+        if (!empty($parts)) {
+            return implode(', ', $parts);
+        }
+
+        return 'Philippines';
+    }
+
+    /**
+     * Get cart items from database (if authenticated) or session (if guest)
+     */
+    private function getCartItems()
+    {
+        if (Auth::check()) {
+            // Load from database for authenticated users
+            $cartItems = Auth::user()->cartItems()->with('product.user')->get();
+            $items = [];
+
+            foreach ($cartItems as $cartItem) {
+                $product = $cartItem->product;
+                if ($product) {
+                    $farmer = $product->user;
+                    $imageUrl = $product->getImageUrl();
+
+                    $items[] = [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'price' => $product->price_per_unit,
+                        'quantity' => $cartItem->quantity,
+                        'unit' => $product->unit_type ?? 'unit',
+                        'image' => $imageUrl,
+                        'subtotal' => $product->price_per_unit * $cartItem->quantity,
+                        'farmer_name' => $farmer->business_name ?? $farmer->name ?? 'Local Farmer',
+                        'farmer_location' => $this->getFarmerLocationForCheckout($farmer),
+                        'farmer_id' => $farmer->id
+                    ];
+                }
+            }
+
+            return $items;
+        } else {
+            // Load from session for guests
+            $cart = Session::get('cart', []);
+            $items = [];
+
+            foreach ($cart as $id => $details) {
+                $product = Product::with('user')->find($id);
+                if ($product) {
+                    $farmer = $product->user;
+                    $imageUrl = $product->getImageUrl();
+
+                    $items[] = [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'price' => $product->price_per_unit,
+                        'quantity' => $details['quantity'],
+                        'unit' => $product->unit_type ?? 'unit',
+                        'image' => $imageUrl,
+                        'subtotal' => $product->price_per_unit * $details['quantity'],
+                        'farmer_name' => $farmer->business_name ?? $farmer->name ?? 'Local Farmer',
+                        'farmer_location' => $this->getFarmerLocationForCheckout($farmer),
+                        'farmer_id' => $farmer->id
+                    ];
+                }
+            }
+
+            return $items;
+        }
+    }
+
     public function index()
     {
-        $cart = Session::get('cart', []);
-        $items = [];
+        $items = $this->getCartItems();
         $total = 0;
         $shippingCost = 100; // Default shipping cost
 
-        foreach ($cart as $id => $details) {
-            $product = Product::with('user')->find($id);
-            if ($product) {
-                $farmer = $product->user;
-                // Get product image URL with fallback
-                $imageUrl = $product->getImageUrl();
-
-                $items[] = [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => $product->price_per_unit,
-                    'quantity' => $details['quantity'],
-                    'unit' => $product->unit_type ?? 'unit',
-                    'image' => $imageUrl,
-                    'subtotal' => $product->price_per_unit * $details['quantity'],
-                    'farmer_name' => $farmer->business_name ?? $farmer->name ?? 'Local Farmer',
-                    'farmer_location' => ($farmer->city && $farmer->state)
-                        ? $farmer->city . ', ' . $farmer->state
-                        : ($farmer->city ?? 'Philippines'),
-                    'farmer_id' => $farmer->id
-                ];
-                $total += $product->price_per_unit * $details['quantity'];
-            }
+        foreach ($items as $item) {
+            $total += $item['subtotal'];
         }
 
         return view('shop.checkout', compact('items', 'total', 'shippingCost'));
@@ -74,19 +143,19 @@ class CheckoutController extends Controller
             ]);
         }
 
-        $cart = Session::get('cart', []);
-        if (empty($cart)) {
+        // Get cart items
+        $items = $this->getCartItems();
+        if (empty($items)) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
         try {
             DB::beginTransaction();
 
-            // Calculate subtotal from cart
+            // Calculate subtotal from cart items
             $subtotal = 0;
-            foreach ($cart as $id => $details) {
-                $product = Product::findOrFail($id);
-                $subtotal += $product->price_per_unit * $details['quantity'];
+            foreach ($items as $item) {
+                $subtotal += $item['subtotal'];
             }
 
             // Calculate total with shipping
@@ -124,10 +193,10 @@ class CheckoutController extends Controller
             ]);
 
             // Add order items
-            foreach ($cart as $id => $details) {
-                $product = Product::findOrFail($id);
+            foreach ($items as $item) {
+                $product = Product::findOrFail($item['id']);
 
-                if ($product->stock_quantity < $details['quantity']) {
+                if ($product->stock_quantity < $item['quantity']) {
                     throw new \Exception("Not enough stock available for {$product->name}");
                 }
 
@@ -135,17 +204,23 @@ class CheckoutController extends Controller
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $product->id,
-                    'quantity' => $details['quantity'],
+                    'quantity' => $item['quantity'],
                     'price' => $product->price_per_unit
                 ]);
 
                 // Update product stock
-                $product->stock_quantity -= $details['quantity'];
+                $product->stock_quantity -= $item['quantity'];
                 $product->save();
             }
 
             // Clear cart
-            Session::forget('cart');
+            if (Auth::check()) {
+                // Clear from database for authenticated users
+                CartItem::where('user_id', Auth::id())->delete();
+            } else {
+                // Clear from session for guests
+                Session::forget('cart');
+            }
 
             DB::commit();
 

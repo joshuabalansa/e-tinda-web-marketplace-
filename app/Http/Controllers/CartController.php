@@ -3,31 +3,70 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\CartItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
+    /**
+     * Get cart items from database (if authenticated) or session (if guest)
+     */
+    private function getCartItems()
+    {
+        if (Auth::check()) {
+            // Load from database for authenticated users
+            $cartItems = Auth::user()->cartItems()->with('product')->get();
+            $items = [];
+
+            foreach ($cartItems as $cartItem) {
+                $product = $cartItem->product;
+                if ($product) {
+                    $items[] = [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'price' => $product->price_per_unit,
+                        'quantity' => $cartItem->quantity,
+                        'unit' => $product->unit_type,
+                        'image' => $product->getImageUrl(),
+                        'subtotal' => $product->price_per_unit * $cartItem->quantity
+                    ];
+                }
+            }
+
+            return $items;
+        } else {
+            // Load from session for guests
+            $cart = Session::get('cart', []);
+            $items = [];
+
+            foreach ($cart as $id => $details) {
+                $product = Product::find($id);
+                if ($product) {
+                    $items[] = [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'price' => $product->price_per_unit,
+                        'quantity' => $details['quantity'],
+                        'unit' => $product->unit_type,
+                        'image' => $product->getImageUrl(),
+                        'subtotal' => $product->price_per_unit * $details['quantity']
+                    ];
+                }
+            }
+
+            return $items;
+        }
+    }
+
     public function index()
     {
-        $cart = Session::get('cart', []);
+        $items = $this->getCartItems();
         $total = 0;
-        $items = [];
 
-        foreach ($cart as $id => $details) {
-            $product = Product::find($id);
-            if ($product) {
-                $items[] = [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => $product->price_per_unit,
-                    'quantity' => $details['quantity'],
-                    'unit' => $product->unit_type,
-                    'image' => $product->getImageUrl(),
-                    'subtotal' => $product->price_per_unit * $details['quantity']
-                ];
-                $total += $product->price_per_unit * $details['quantity'];
-            }
+        foreach ($items as $item) {
+            $total += $item['subtotal'];
         }
 
         return view('shop.cart', compact('items', 'total'));
@@ -46,21 +85,40 @@ class CartController extends Controller
             return back()->with('error', 'Not enough stock available.');
         }
 
-        $cart = Session::get('cart', []);
+        if (Auth::check()) {
+            // Save to database for authenticated users
+            $cartItem = CartItem::firstOrNew([
+                'user_id' => Auth::id(),
+                'product_id' => $request->product_id
+            ]);
 
-        if (isset($cart[$request->product_id])) {
-            $newQuantity = $cart[$request->product_id]['quantity'] + $request->quantity;
+            $newQuantity = $cartItem->exists ? $cartItem->quantity + $request->quantity : $request->quantity;
+
             if ($newQuantity > $product->stock_quantity) {
                 return back()->with('error', 'Not enough stock available.');
             }
-            $cart[$request->product_id]['quantity'] = $newQuantity;
+
+            $cartItem->quantity = $newQuantity;
+            $cartItem->save();
         } else {
-            $cart[$request->product_id] = [
-                'quantity' => $request->quantity
-            ];
+            // Save to session for guests
+            $cart = Session::get('cart', []);
+
+            if (isset($cart[$request->product_id])) {
+                $newQuantity = $cart[$request->product_id]['quantity'] + $request->quantity;
+                if ($newQuantity > $product->stock_quantity) {
+                    return back()->with('error', 'Not enough stock available.');
+                }
+                $cart[$request->product_id]['quantity'] = $newQuantity;
+            } else {
+                $cart[$request->product_id] = [
+                    'quantity' => $request->quantity
+                ];
+            }
+
+            Session::put('cart', $cart);
         }
 
-        Session::put('cart', $cart);
         return redirect()->route('cart.index')->with('success', 'Product added to cart successfully.');
     }
 
@@ -72,34 +130,113 @@ class CartController extends Controller
         ]);
 
         $product = Product::findOrFail($request->product_id);
-        $cart = Session::get('cart', []);
 
-        if ($request->quantity == 0) {
-            unset($cart[$request->product_id]);
-        } else {
-            if ($request->quantity > $product->stock_quantity) {
-                return back()->with('error', 'Not enough stock available.');
+        if (Auth::check()) {
+            // Update in database for authenticated users
+            if ($request->quantity == 0) {
+                CartItem::where('user_id', Auth::id())
+                    ->where('product_id', $request->product_id)
+                    ->delete();
+            } else {
+                if ($request->quantity > $product->stock_quantity) {
+                    return back()->with('error', 'Not enough stock available.');
+                }
+
+                $cartItem = CartItem::firstOrNew([
+                    'user_id' => Auth::id(),
+                    'product_id' => $request->product_id
+                ]);
+                $cartItem->quantity = $request->quantity;
+                $cartItem->save();
             }
-            $cart[$request->product_id]['quantity'] = $request->quantity;
+        } else {
+            // Update in session for guests
+            $cart = Session::get('cart', []);
+
+            if ($request->quantity == 0) {
+                unset($cart[$request->product_id]);
+            } else {
+                if ($request->quantity > $product->stock_quantity) {
+                    return back()->with('error', 'Not enough stock available.');
+                }
+                $cart[$request->product_id]['quantity'] = $request->quantity;
+            }
+
+            Session::put('cart', $cart);
         }
 
-        Session::put('cart', $cart);
         return redirect()->route('cart.index')->with('success', 'Cart updated successfully.');
     }
 
     public function remove($id)
     {
-        $cart = Session::get('cart', []);
-        if (isset($cart[$id])) {
-            unset($cart[$id]);
-            Session::put('cart', $cart);
+        if (Auth::check()) {
+            // Remove from database for authenticated users
+            CartItem::where('user_id', Auth::id())
+                ->where('product_id', $id)
+                ->delete();
+        } else {
+            // Remove from session for guests
+            $cart = Session::get('cart', []);
+            if (isset($cart[$id])) {
+                unset($cart[$id]);
+                Session::put('cart', $cart);
+            }
         }
+
         return redirect()->route('cart.index')->with('success', 'Product removed from cart.');
     }
 
     public function clear()
     {
-        Session::forget('cart');
+        if (Auth::check()) {
+            // Clear from database for authenticated users
+            CartItem::where('user_id', Auth::id())->delete();
+        } else {
+            // Clear from session for guests
+            Session::forget('cart');
+        }
+
         return redirect()->route('cart.index')->with('success', 'Cart cleared successfully.');
+    }
+
+    /**
+     * Sync session cart with database cart when user logs in
+     * This method is called from AuthenticatedSessionController
+     */
+    public function syncSessionToDatabase($userId)
+    {
+        $sessionCart = Session::get('cart', []);
+
+        if (empty($sessionCart)) {
+            return;
+        }
+
+        foreach ($sessionCart as $productId => $details) {
+            $product = Product::find($productId);
+            if (!$product) {
+                continue;
+            }
+
+            $cartItem = CartItem::firstOrNew([
+                'user_id' => $userId,
+                'product_id' => $productId
+            ]);
+
+            // If item already exists in database, add session quantity to it
+            // Otherwise, use session quantity
+            if ($cartItem->exists) {
+                $newQuantity = $cartItem->quantity + $details['quantity'];
+                // Don't exceed stock
+                $cartItem->quantity = min($newQuantity, $product->stock_quantity);
+            } else {
+                $cartItem->quantity = min($details['quantity'], $product->stock_quantity);
+            }
+
+            $cartItem->save();
+        }
+
+        // Clear session cart after syncing
+        Session::forget('cart');
     }
 }

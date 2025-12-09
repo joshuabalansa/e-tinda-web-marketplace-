@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Controllers\CartController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +32,10 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
+        // Sync session cart to database when user logs in
+        $cartController = new CartController();
+        $cartController->syncSessionToDatabase($user->id);
+
         if ($user->role->value === UserRole::Admin->value) {
 
             return redirect()->intended(route('admin.dashboard', absolute: false));
@@ -38,7 +43,7 @@ class AuthenticatedSessionController extends Controller
         } elseif ($user->role->value === UserRole::Farmer->value) {
 
             return redirect()->intended(route('farmer.dashboard', absolute: false));
-            
+
         } else {
             return redirect()->intended(route('buyer.dashboard', absolute: false));
         }
