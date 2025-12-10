@@ -137,6 +137,11 @@
             <li class="nav-item">
               <a class="nav-link" href="/forums">forums</a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#instructionModal">
+                <i class="fas fa-play-circle me-1"></i>Instruction
+              </a>
+            </li>
           </ul>
           <div class="d-flex align-items-center">
             <!-- Language Switcher -->
@@ -199,6 +204,31 @@
   <!-- Bootstrap JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- Instruction Video Modal -->
+  <div class="modal fade" id="instructionModal" tabindex="-1" aria-labelledby="instructionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="instructionModalLabel">
+            <i class="fas fa-video me-2"></i>Instruction Video
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div class="ratio ratio-16x9">
+            <video id="instructionVideo" controls style="width: 100%; height: 100%;">
+              <source src="{{ asset('uploads/video/Messenger_creation_A0C63F95-0817-4188-BC07-46E7280CD777.mp4') }}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Add to cart simulation
     document.addEventListener('DOMContentLoaded', function() {
@@ -233,6 +263,16 @@
           }, 3000);
         });
       });
+
+      // Pause video when modal is closed
+      const instructionModal = document.getElementById('instructionModal');
+      const instructionVideo = document.getElementById('instructionVideo');
+      if (instructionModal && instructionVideo) {
+        instructionModal.addEventListener('hidden.bs.modal', function () {
+          instructionVideo.pause();
+          instructionVideo.currentTime = 0;
+        });
+      }
     });
   </script>
 

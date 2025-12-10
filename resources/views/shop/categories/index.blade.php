@@ -4,6 +4,12 @@
 <div class="container py-5">
     <h1 class="section-title text-center mb-5">Browse Categories</h1>
 
+    @if($categories->isEmpty())
+    <div class="alert alert-info text-center">
+        <h4>No categories available</h4>
+        <p>There are currently no product categories available. Please check back later.</p>
+    </div>
+    @else
     <div class="row g-4">
         @foreach($categories as $category)
         <div class="col-md-4">
@@ -14,12 +20,13 @@
                     <p class="card-text">{{ $category['description'] }}</p>
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="badge bg-success">{{ $category['product_count'] }} Products</span>
-                        <a href="{{ route('categories.show', $category['name']) }}" class="btn btn-outline-success">View Products</a>
+                        <a href="{{ route('categories.show', urlencode($category['name'])) }}" class="btn btn-outline-success">View Products</a>
                     </div>
                 </div>
             </div>
         </div>
         @endforeach
     </div>
+    @endif
 </div>
 @endsection

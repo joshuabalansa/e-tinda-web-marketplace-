@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -157,5 +158,40 @@ class FarmerProductsController extends Controller
 
         return redirect()->route('farmer.products.index')
             ->with('success', 'Product deleted successfully!');
+    }
+
+    /**
+     * Get reviews for a product
+     */
+    public function getReviews(Product $product)
+    {
+        // Ensure the product belongs to the authenticated farmer
+        if ($product->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized access to this product.');
+        }
+
+        $reviews = Review::with(['buyer'])
+            ->where('product_id', $product->id)
+            ->orderBy('review_date', 'desc')
+            ->get()
+            ->map(function ($review) {
+                return [
+                    'id' => $review->review_id,
+                    'buyer_name' => $review->buyer->name ?? 'Anonymous',
+                    'rating' => $review->rating,
+                    'comment' => $review->comment,
+                    'review_date' => $review->review_date->format('M d, Y'),
+                ];
+            });
+
+        $averageRating = $product->averageRating();
+        $totalReviews = $product->totalReviews();
+
+        return response()->json([
+            'success' => true,
+            'reviews' => $reviews,
+            'average_rating' => round($averageRating, 1),
+            'total_reviews' => $totalReviews,
+        ]);
     }
 }

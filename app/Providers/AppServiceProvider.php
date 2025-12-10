@@ -32,21 +32,33 @@ class AppServiceProvider extends ServiceProvider
 		// This ensures Storage::url() generates correct URLs in production
 		// CRITICAL: Bucket must be set to "public" in Laravel Cloud dashboard for this to work
 		// IMPORTANT: Force 'local' driver to prevent S3 initialization errors
-		if ($this->app->environment('production')) {
-			$appUrl = config('app.url');
-			if ($appUrl) {
-				// Force public disk to use 'local' driver to avoid S3 class errors
-				// Laravel Cloud buckets are mounted as local filesystem, not S3
-				// Merge config to preserve existing keys like 'root'
+		$publicDiskDriver = config('filesystems.disks.public.driver', 'local');
+		$appUrl = config('app.url');
+		$isLocal = $this->app->environment('local', 'testing');
+
+		// If S3 driver is configured but we're in local environment, use local driver instead
+		// This prevents errors when the flysystem-aws-s3-v3 package is not installed
+		if ($publicDiskDriver === 's3' && $isLocal) {
+			// Force public disk to use 'local' driver to avoid S3 class errors
+			// Merge config to preserve existing keys like 'root'
+			$publicDiskConfig = config('filesystems.disks.public', []);
+			config([
+				'filesystems.disks.public' => array_merge($publicDiskConfig, [
+					'driver' => 'local',
+					'root' => $publicDiskConfig['root'] ?? storage_path('app/public'),
+					'url' => $appUrl ? $appUrl . '/storage' : '/storage',
+					'visibility' => $publicDiskConfig['visibility'] ?? 'public',
+					'throw' => $publicDiskConfig['throw'] ?? false,
+					'report' => $publicDiskConfig['report'] ?? false,
+				])
+			]);
+		} elseif ($this->app->environment('production') && $appUrl) {
+			// In production, if using local driver, ensure URL is set correctly
+			if ($publicDiskDriver === 'local') {
 				$publicDiskConfig = config('filesystems.disks.public', []);
 				config([
 					'filesystems.disks.public' => array_merge($publicDiskConfig, [
-						'driver' => 'local',
-						'root' => $publicDiskConfig['root'] ?? storage_path('app/public'),
 						'url' => $appUrl . '/storage',
-						'visibility' => $publicDiskConfig['visibility'] ?? 'public',
-						'throw' => $publicDiskConfig['throw'] ?? false,
-						'report' => $publicDiskConfig['report'] ?? false,
 					])
 				]);
 			}

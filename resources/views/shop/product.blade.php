@@ -28,7 +28,28 @@
             </div>
 
             <!-- Price -->
-            <h2 class="text-success mb-4">₱{{ number_format($productData['price'], 2) }}/{{ $productData['unit'] }}</h2>
+            <h2 class="text-success mb-2">₱{{ number_format($productData['price'], 2) }}/{{ $productData['unit'] }}</h2>
+
+            <!-- Rating Summary -->
+            @if($productData['total_reviews'] > 0)
+                <div class="mb-4">
+                    <div class="d-flex align-items-center">
+                        <div class="text-warning me-2">
+                            @for($i = 1; $i <= 5; $i++)
+                                @if($i <= floor($productData['average_rating']))
+                                    <i class="fas fa-star"></i>
+                                @elseif($i - 0.5 <= $productData['average_rating'])
+                                    <i class="fas fa-star-half-alt"></i>
+                                @else
+                                    <i class="far fa-star"></i>
+                                @endif
+                            @endfor
+                        </div>
+                        <span class="fw-bold me-2">{{ $productData['average_rating'] }}</span>
+                        <span class="text-muted">({{ $productData['total_reviews'] }} review{{ $productData['total_reviews'] !== 1 ? 's' : '' }})</span>
+                    </div>
+                </div>
+            @endif
 
             <!-- Description -->
             <p class="mb-4">{{ $productData['description'] }}</p>
@@ -63,7 +84,7 @@
             </form>
 
             <!-- Additional Info -->
-            <div class="card">
+            <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">{{ __('shop.product_details') }}</h5>
                     <ul class="list-unstyled mb-0">
@@ -73,6 +94,16 @@
                         <li><strong>{{ __('shop.storage') }}:</strong> {{ $productData['storage'] }}</li>
                     </ul>
                 </div>
+            </div>
+
+            <!-- Reviews Button -->
+            <div class="mb-4">
+                <button type="button" class="btn btn-success btn-lg w-100" data-bs-toggle="modal" data-bs-target="#reviewsModal" onclick="loadReviews({{ $productData['id'] }})">
+                    <i class="fas fa-star me-2"></i>View Reviews
+                    @if($productData['total_reviews'] > 0)
+                        <span class="badge bg-light text-success ms-2">{{ $productData['total_reviews'] }}</span>
+                    @endif
+                </button>
             </div>
         </div>
     </div>
@@ -98,6 +129,28 @@
         </div>
     </div>
     @endif
+</div>
+
+<!-- Reviews Modal -->
+<div class="modal fade" id="reviewsModal" tabindex="-1" aria-labelledby="reviewsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="reviewsModalLabel">
+                    <i class="fas fa-star me-2"></i>Product Reviews
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="reviewsContent">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading reviews...</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -220,6 +273,121 @@ document.addEventListener('DOMContentLoaded', function() {
         wishlistBtn.style.transition = 'all 0.3s ease';
     }
 });
+
+// Load reviews function
+function loadReviews(productId) {
+    const reviewsContent = document.getElementById('reviewsContent');
+    reviewsContent.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 text-muted">Loading reviews...</p>
+        </div>
+    `;
+
+    fetch(`/shop/product/${productId}/reviews`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayReviews(data);
+            } else {
+                reviewsContent.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>Failed to load reviews.
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            reviewsContent.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>Error loading reviews. Please try again.
+                </div>
+            `;
+        });
+}
+
+// Display reviews in modal
+function displayReviews(data) {
+    const reviewsContent = document.getElementById('reviewsContent');
+
+    if (data.total_reviews === 0) {
+        reviewsContent.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No Reviews Yet</h5>
+                <p class="text-muted">Be the first to review this product!</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = `
+        <div class="mb-4">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div>
+                    <h4 class="mb-0">
+                        <span class="text-warning">
+                            ${generateStars(data.average_rating)}
+                        </span>
+                        <span class="ms-2">${data.average_rating}</span>
+                    </h4>
+                    <p class="text-muted mb-0 small">Based on ${data.total_reviews} review${data.total_reviews !== 1 ? 's' : ''}</p>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="reviews-list">
+    `;
+
+    data.reviews.forEach(review => {
+        html += `
+            <div class="review-item mb-4 pb-4 border-bottom">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <h6 class="mb-1 fw-bold">${escapeHtml(review.buyer_name)}</h6>
+                        <div class="text-warning mb-2">
+                            ${generateStars(review.rating)}
+                        </div>
+                    </div>
+                    <small class="text-muted">${review.review_date}</small>
+                </div>
+                ${review.comment ? `<p class="mb-0">${escapeHtml(review.comment)}</p>` : '<p class="text-muted mb-0"><em>No comment provided</em></p>'}
+            </div>
+        `;
+    });
+
+    html += `</div>`;
+    reviewsContent.innerHTML = html;
+}
+
+// Generate star rating HTML
+function generateStars(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+    let stars = '';
+    for (let i = 0; i < fullStars; i++) {
+        stars += '<i class="fas fa-star"></i>';
+    }
+    if (hasHalfStar) {
+        stars += '<i class="fas fa-star-half-alt"></i>';
+    }
+    for (let i = 0; i < emptyStars; i++) {
+        stars += '<i class="far fa-star"></i>';
+    }
+    return stars;
+}
+
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
 </script>
 
 <style>

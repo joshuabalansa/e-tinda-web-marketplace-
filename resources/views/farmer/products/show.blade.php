@@ -179,6 +179,17 @@
                                                class="btn btn-warning btn-sm">
                                                 <i class="entypo-pencil"></i> Edit Product
                                             </a>
+                                            <button type="button"
+                                                    class="btn btn-success btn-sm"
+                                                    onclick="openReviewsModal({{ $product->id }})">
+                                                <i class="fas fa-star"></i> View Reviews
+                                                @php
+                                                    $totalReviews = $product->totalReviews();
+                                                @endphp
+                                                @if($totalReviews > 0)
+                                                    <span class="badge badge-light ml-1">{{ $totalReviews }}</span>
+                                                @endif
+                                            </button>
                                             <a href="{{ route('farmer.products.index') }}"
                                                class="btn btn-default btn-sm">
                                                 <i class="entypo-left-open"></i> Back to Products
@@ -264,6 +275,28 @@
         </div>
     </div>
 @endif
+
+<!-- Reviews Modal -->
+<div class="modal fade" id="reviewsModal" tabindex="-1" role="dialog" aria-labelledby="reviewsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="reviewsModalLabel">
+                    <i class="fas fa-star"></i> Product Reviews
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="reviewsContent" style="max-height: 60vh; overflow-y: auto;">
+                <div class="text-center py-5">
+                    <i class="fa fa-spinner fa-spin fa-2x text-success"></i>
+                    <p class="mt-3 text-muted">Loading reviews...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('styles')
@@ -649,6 +682,58 @@
         .p-md-4 { padding: 0.75rem; }
         .mb-md-4 { margin-bottom: 0.75rem; }
     }
+
+    /* Reviews Modal Styling */
+    .modal-content {
+        border-radius: 0;
+        border: 1px solid #ddd;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .review-item {
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .review-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .text-warning i {
+        color: #f39c12;
+        margin-right: 2px;
+    }
+
+    .badge-light {
+        background-color: #f8f9fa;
+        color: #00a651;
+        border: 1px solid #00a651;
+    }
+
+    .ml-1 {
+        margin-left: 0.25rem;
+    }
+
+    .ml-2 {
+        margin-left: 0.5rem;
+    }
+
+    .mt-3 {
+        margin-top: 1rem;
+    }
+
+    .border-bottom {
+        border-bottom: 1px solid #e9ecef;
+    }
 </style>
 @endpush
 
@@ -672,5 +757,156 @@ $(document).ready(function() {
         });
     });
 });
+
+// Open reviews modal and load reviews
+function openReviewsModal(productId) {
+    // Show the modal first using jQuery (Bootstrap 3)
+    if (typeof jQuery !== 'undefined' && jQuery.fn.modal) {
+        jQuery('#reviewsModal').modal('show');
+    } else {
+        // Fallback if jQuery is not available
+        const modal = document.getElementById('reviewsModal');
+        if (modal) {
+            modal.style.display = 'block';
+            modal.classList.add('show');
+            document.body.classList.add('modal-open');
+        }
+    }
+
+    // Then load the reviews
+    loadFarmerReviews(productId);
+}
+
+// Load reviews function for farmer
+function loadFarmerReviews(productId) {
+    const reviewsContent = document.getElementById('reviewsContent');
+    if (!reviewsContent) {
+        console.error('Reviews content element not found');
+        return;
+    }
+
+    reviewsContent.innerHTML = `
+        <div class="text-center py-5">
+            <i class="fa fa-spinner fa-spin fa-2x text-success"></i>
+            <p class="mt-3 text-muted">Loading reviews...</p>
+        </div>
+    `;
+
+    fetch(`/farmer/products/${productId}/reviews`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+    })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Reviews data:', data);
+            if (data.success) {
+                displayFarmerReviews(data);
+            } else {
+                reviewsContent.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i> Failed to load reviews: ${data.message || 'Unknown error'}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading reviews:', error);
+            reviewsContent.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i> Error loading reviews: ${error.message}. Please check the console for details.
+                </div>
+            `;
+        });
+}
+
+// Display reviews in modal for farmer
+function displayFarmerReviews(data) {
+    const reviewsContent = document.getElementById('reviewsContent');
+
+    if (data.total_reviews === 0) {
+        reviewsContent.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-star" style="font-size: 3rem; color: #ccc;"></i>
+                <h5 class="text-muted mt-3">No Reviews Yet</h5>
+                <p class="text-muted">This product hasn't received any reviews yet.</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = `
+        <div class="mb-4">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div>
+                    <h4 class="mb-0">
+                        <span class="text-warning">
+                            ${generateFarmerStars(data.average_rating)}
+                        </span>
+                        <span class="ml-2">${data.average_rating}</span>
+                    </h4>
+                    <p class="text-muted mb-0 small">Based on ${data.total_reviews} review${data.total_reviews !== 1 ? 's' : ''}</p>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="reviews-list">
+    `;
+
+    data.reviews.forEach(review => {
+        html += `
+            <div class="review-item mb-4 pb-4 border-bottom">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <h6 class="mb-1 fw-bold">${escapeFarmerHtml(review.buyer_name)}</h6>
+                        <div class="text-warning mb-2">
+                            ${generateFarmerStars(review.rating)}
+                        </div>
+                    </div>
+                    <small class="text-muted">${review.review_date}</small>
+                </div>
+                ${review.comment ? `<p class="mb-0">${escapeFarmerHtml(review.comment)}</p>` : '<p class="text-muted mb-0"><em>No comment provided</em></p>'}
+            </div>
+        `;
+    });
+
+    html += `</div>`;
+    reviewsContent.innerHTML = html;
+}
+
+// Generate star rating HTML for farmer
+function generateFarmerStars(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+    let stars = '';
+    for (let i = 0; i < fullStars; i++) {
+        stars += '<i class="fas fa-star"></i>';
+    }
+    if (hasHalfStar) {
+        stars += '<i class="fas fa-star-half-alt"></i>';
+    }
+    for (let i = 0; i < emptyStars; i++) {
+        stars += '<i class="far fa-star"></i>';
+    }
+    return stars;
+}
+
+// Escape HTML to prevent XSS for farmer
+function escapeFarmerHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
 </script>
 @endpush

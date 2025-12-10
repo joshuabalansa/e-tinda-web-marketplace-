@@ -36,15 +36,24 @@ Route::get('/storage/{path}', function ($path) {
     $path = str_replace('..', '', $path);
     $path = ltrim($path, '/');
 
-    // Try using Storage facade (works with Laravel Cloud buckets)
+    // Try using Storage facade (works with Laravel Cloud buckets and local storage)
     // Wrap in try-catch to handle cases where S3 classes aren't available
     try {
-        // Check if the public disk is configured as 'local' to avoid S3 initialization
+        $disk = Storage::disk('public');
         $publicDiskDriver = config('filesystems.disks.public.driver', 'local');
 
-        if ($publicDiskDriver === 'local') {
-            $disk = Storage::disk('public');
+        // For S3/Laravel Cloud buckets, redirect to the direct S3 URL
+        if ($publicDiskDriver === 's3') {
+            if ($disk->exists($path)) {
+                // Get the full S3 URL and redirect to it
+                $url = $disk->url($path);
+                return redirect($url);
+            }
+            abort(404, 'File not found');
+        }
 
+        // For local driver, serve the file directly
+        if ($publicDiskDriver === 'local') {
             if ($disk->exists($path)) {
                 // Get the file content
                 $fileContent = $disk->get($path);
@@ -87,8 +96,12 @@ Route::get('/storage/{path}', function ($path) {
             }
         }
     } catch (\Exception $e) {
-        // If Storage fails or S3 classes aren't available, fall through to file system approach
-        // This prevents the "Class not found" error from breaking the application
+        // Log the error for debugging
+        \Log::error('Storage route error: ' . $e->getMessage(), [
+            'path' => $path,
+            'driver' => config('filesystems.disks.public.driver'),
+        ]);
+        // Fall through to file system approach
     }
 
     // Fallback to file system approach for local development or if Storage fails
@@ -207,6 +220,7 @@ require __DIR__.'/auth.php';
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/search', [ShopController::class, 'search'])->name('shop.search');
 Route::get('/shop/product/{id}', [ShopController::class, 'show'])->name('shop.product.show');
+Route::get('/shop/product/{id}/reviews', [ShopController::class, 'getReviews'])->name('shop.product.reviews');
 
 // Cart routes
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -231,6 +245,9 @@ Route::middleware(['auth', 'role:buyer'])->group(function () {
     Route::get('/buyer/orders', [BuyerDashboardController::class, 'orders'])->name('buyer.orders');
     Route::get('/buyer/orders/{order}', [BuyerDashboardController::class, 'showOrder'])->name('buyer.orders.show');
     Route::post('/buyer/orders/{order}/cancel', [BuyerDashboardController::class, 'cancelOrder'])->name('buyer.orders.cancel');
+    Route::post('/buyer/orders/{order}/received', [BuyerDashboardController::class, 'markAsReceived'])->name('buyer.orders.received');
+    Route::get('/buyer/orders/{order}/review', [BuyerDashboardController::class, 'showReviewForm'])->name('buyer.orders.review');
+    Route::post('/buyer/orders/{order}/review', [BuyerDashboardController::class, 'submitReview'])->name('buyer.orders.review.submit');
     Route::get('/buyer/history', [BuyerDashboardController::class, 'history'])->name('buyer.history');
 });
 
@@ -303,6 +320,7 @@ Route::middleware(['auth', 'role:farmer'])->group(function () {
     Route::get('/farmer/products/{product}/edit', [FarmerProductsController::class, 'edit'])->name('farmer.products.edit');
     Route::put('/farmer/products/{product}', [FarmerProductsController::class, 'update'])->name('farmer.products.update');
     Route::delete('/farmer/products/{product}', [FarmerProductsController::class, 'destroy'])->name('farmer.products.destroy');
+    Route::get('/farmer/products/{product}/reviews', [FarmerProductsController::class, 'getReviews'])->name('farmer.products.reviews');
     Route::get('/farmer/orders', [FarmerOrdersController::class, 'index'])->name('farmer.orders');
     Route::get('/farmer/orders/{order}', [FarmerOrdersController::class, 'show'])->name('farmer.orders.show');
     Route::put('/farmer/orders/{order}/status', [FarmerOrdersController::class, 'updateStatus'])->name('farmer.orders.update-status');

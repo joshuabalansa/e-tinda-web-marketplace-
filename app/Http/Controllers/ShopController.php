@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Review;
 use Illuminate\Support\Facades\DB;
 
 class ShopController extends Controller
@@ -165,7 +166,9 @@ class ShopController extends Controller
             'category' => $product->category,
             'stock' => $product->stock_quantity,
             'harvest_date' => $product->harvest_date->format('Y-m-d'),
-            'storage' => 'Store in a cool, dry place'
+            'storage' => 'Store in a cool, dry place',
+            'average_rating' => round($product->averageRating(), 1),
+            'total_reviews' => $product->totalReviews()
         ];
 
         // Get related products (same category)
@@ -276,5 +279,37 @@ class ShopController extends Controller
             });
 
         return view('shop.index', compact('products'));
+    }
+
+    /**
+     * Get reviews for a product
+     */
+    public function getReviews($id)
+    {
+        $product = Product::findOrFail($id);
+
+        $reviews = Review::with(['buyer'])
+            ->where('product_id', $id)
+            ->orderBy('review_date', 'desc')
+            ->get()
+            ->map(function ($review) {
+                return [
+                    'id' => $review->review_id,
+                    'buyer_name' => $review->buyer->name ?? 'Anonymous',
+                    'rating' => $review->rating,
+                    'comment' => $review->comment,
+                    'review_date' => $review->review_date->format('M d, Y'),
+                ];
+            });
+
+        $averageRating = $product->averageRating();
+        $totalReviews = $product->totalReviews();
+
+        return response()->json([
+            'success' => true,
+            'reviews' => $reviews,
+            'average_rating' => round($averageRating, 1),
+            'total_reviews' => $totalReviews,
+        ]);
     }
 }

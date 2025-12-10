@@ -26,6 +26,29 @@ class Review extends Model
     ];
 
     /**
+     * Validation rules for reviews
+     */
+    public static function rules()
+    {
+        return [
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:1000',
+            'product_id' => 'required|exists:products,id',
+        ];
+    }
+
+    /**
+     * Check if a product has already been reviewed by a buyer in an order
+     */
+    public static function hasReviewed($orderId, $productId, $buyerId)
+    {
+        return self::where('order_id', $orderId)
+            ->where('product_id', $productId)
+            ->where('buyer_id', $buyerId)
+            ->exists();
+    }
+
+    /**
      * Get the order that the review belongs to.
      */
     public function order()
@@ -49,6 +72,7 @@ class Review extends Model
         return $this->belongsTo(Product::class);
     }
 }
+
 
 
 

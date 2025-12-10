@@ -186,8 +186,8 @@ class ForumReply extends Model
                     'video_path' => $this->video_path,
                     'error' => $e->getMessage()
                 ]);
-                // Fallback to asset() method
-                return asset('storage/' . $this->video_path);
+                // Fallback to storage route
+                return url('storage/' . $this->video_path);
             }
         }
         return null;
@@ -203,7 +203,7 @@ class ForumReply extends Model
         }
 
         try {
-            $url = asset('storage/' . $this->video_path);
+            $url = url('storage/' . $this->video_path);
             $headers = get_headers($url);
             return $headers && strpos($headers[0], '200') !== false;
         } catch (\Exception $e) {

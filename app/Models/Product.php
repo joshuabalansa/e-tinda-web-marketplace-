@@ -38,6 +38,27 @@ class Product extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Calculate the average rating for this product
+     */
+    public function averageRating()
+    {
+        return $this->reviews()->avg('rating') ?? 0;
+    }
+
+    /**
+     * Get the total number of reviews for this product
+     */
+    public function totalReviews()
+    {
+        return $this->reviews()->count();
+    }
+
     // Accessor for price compatibility
     public function getPriceAttribute()
     {
@@ -66,12 +87,26 @@ class Product extends Model
         }
 
         // Use Storage::url() for proper URL generation
-        // This respects the filesystem configuration and works in both local and production
+        // This works with both local storage and Laravel Cloud buckets
         try {
-            return Storage::disk('public')->url($imagePath);
+            // Check if the disk driver is available before using it
+            $disk = Storage::disk('public');
+            $driver = config('filesystems.disks.public.driver', 'local');
+
+            // If S3 driver is configured but not available, use fallback
+            if ($driver === 's3') {
+                try {
+                    return $disk->url($imagePath);
+                } catch (\Exception $e) {
+                    // S3 driver not available, fallback to local URL
+                    return url('storage/' . ltrim($imagePath, '/'));
+                }
+            }
+
+            return $disk->url($imagePath);
         } catch (\Exception $e) {
-            // Fallback to asset() if Storage fails
-            return asset('storage/' . ltrim($imagePath, '/'));
+            // Fallback to storage route if direct URL fails
+            return url('storage/' . ltrim($imagePath, '/'));
         }
     }
 }

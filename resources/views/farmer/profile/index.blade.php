@@ -132,7 +132,7 @@
                                                             <div class="form-group">
                                                                 <label>Current Profile Picture</label>
                                                                 <div>
-                                                                    <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="Profile Picture" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
+                                                                    <img src="{{ url('storage/' . $user->profile_picture) }}" alt="Profile Picture" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
                                                                 </div>
                                                             </div>
                                                         @endif

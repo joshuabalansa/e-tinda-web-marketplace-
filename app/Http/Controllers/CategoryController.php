@@ -10,17 +10,44 @@ class CategoryController extends Controller
     public function index()
     {
         try {
-            // Get real categories from products in the database
-            $categoryData = Product::where('status', 'available')
+            // Get all available products with categories
+            // Using a simpler approach that works across all databases
+            $products = Product::where('status', 'available')
                 ->whereNotNull('category')
                 ->where('category', '!=', '')
-                ->select('category')
-                ->selectRaw('COUNT(*) as product_count')
-                ->groupBy('category')
-                ->get();
+                ->get(['category']);
+
+            // Group by category in PHP for better compatibility
+            $categoryData = $products->filter(function ($product) {
+                return !empty(trim($product->category));
+            })->groupBy(function ($product) {
+                return trim($product->category);
+            })->map(function ($items, $category) {
+                return (object) [
+                    'category' => $category,
+                    'product_count' => $items->count()
+                ];
+            })->values();
+
+            // Log for debugging if no categories found
+            if ($categoryData->isEmpty()) {
+                $totalProducts = Product::count();
+                $availableProducts = Product::where('status', 'available')->count();
+                $productsWithCategory = Product::where('status', 'available')
+                    ->whereNotNull('category')
+                    ->where('category', '!=', '')
+                    ->count();
+                \Log::warning('CategoryController: No categories found.', [
+                    'total_products' => $totalProducts,
+                    'available_products' => $availableProducts,
+                    'products_with_category' => $productsWithCategory
+                ]);
+            }
         } catch (\Exception $e) {
             // Fallback to empty collection if database connection fails
-            \Log::error('Database connection failed in CategoryController: ' . $e->getMessage());
+            \Log::error('Database connection failed in CategoryController: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
             $categoryData = collect();
         }
 
@@ -44,13 +71,19 @@ class CategoryController extends Controller
                 'Other' => 'Various other farm products'
             ];
 
+            // Normalize category name (trim and handle case)
+            $categoryName = trim($item->category);
+
             return [
-                'name' => $item->category,
-                'description' => $categoryDescriptions[$item->category] ?? 'Quality farm products',
-                'image' => $categoryImages[$item->category] ?? 'https://via.placeholder.com/300x200?text=Category',
-                'product_count' => $item->product_count
+                'name' => $categoryName,
+                'description' => $categoryDescriptions[$categoryName] ?? 'Quality farm products',
+                'image' => $categoryImages[$categoryName] ?? 'https://via.placeholder.com/300x200?text=Category',
+                'product_count' => (int) $item->product_count
             ];
-        });
+        })->filter(function ($category) {
+            // Filter out any invalid categories
+            return !empty($category['name']);
+        })->values();
 
         return view('shop.categories.index', compact('categories'));
     }
@@ -58,10 +91,13 @@ class CategoryController extends Controller
     public function show($category)
     {
         try {
-            // Get products for the specific category
+            // Decode URL-encoded category name
+            $category = urldecode($category);
+
+            // Get products for the specific category (case-insensitive search)
             $products = Product::with('user')
                 ->where('status', 'available')
-                ->where('category', $category)
+                ->whereRaw('LOWER(TRIM(category)) = LOWER(?)', [trim($category)])
                 ->latest()
                 ->paginate(9)
                 ->through(function ($product) {
@@ -72,11 +108,11 @@ class CategoryController extends Controller
                         'unit' => $product->unit_type,
                         'image' => $product->getImageUrl(),
                         'description' => $product->description,
-                        'vendor' => $product->user->name,
+                        'vendor' => $product->user->name ?? 'Unknown Vendor',
                         'location' => $product->user->address ?? 'Location not specified',
                         'category' => $product->category,
                         'stock' => $product->stock_quantity,
-                        'harvest_date' => $product->harvest_date->format('Y-m-d'),
+                        'harvest_date' => $product->harvest_date ? $product->harvest_date->format('Y-m-d') : null,
                         'storage' => 'Store in a cool, dry place'
                     ];
                 });
@@ -85,15 +121,30 @@ class CategoryController extends Controller
             $categories = Product::where('status', 'available')
                 ->whereNotNull('category')
                 ->where('category', '!=', '')
+                ->whereRaw('TRIM(category) != ?', [''])
                 ->select('category')
                 ->distinct()
                 ->pluck('category')
+                ->map(function ($cat) {
+                    return trim($cat);
+                })
                 ->filter()
+                ->unique()
                 ->sort()
                 ->values();
+
+            // Log if no products found for debugging
+            if ($products->isEmpty()) {
+                \Log::warning('CategoryController show: No products found for category: ' . $category, [
+                    'available_categories' => $categories->toArray()
+                ]);
+            }
         } catch (\Exception $e) {
             // Fallback to empty collections if database connection fails
-            \Log::error('Database connection failed in CategoryController show method: ' . $e->getMessage());
+            \Log::error('Database connection failed in CategoryController show method: ' . $e->getMessage(), [
+                'category' => $category,
+                'trace' => $e->getTraceAsString()
+            ]);
             $products = collect();
             $categories = collect();
         }

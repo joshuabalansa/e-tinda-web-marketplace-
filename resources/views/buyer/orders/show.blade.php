@@ -244,6 +244,36 @@
                                 </button>
                             </form>
                         @endif
+
+                        @if($order->status === 'delivered' && !$order->isReceived())
+                            <form action="{{ route('buyer.orders.received', $order->id) }}" method="POST" class="mb-3">
+                                @csrf
+                                @method('POST')
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-check-circle me-2"></i> Mark as Received
+                                </button>
+                            </form>
+                        @endif
+
+                        @if($order->status === 'delivered' && $order->isReceived())
+                            @php
+                                $reviewedProductIds = $order->reviews->pluck('product_id')->toArray();
+                                $hasUnreviewedProducts = $order->items->filter(function($item) use ($reviewedProductIds) {
+                                    return $item->product && !in_array($item->product->id, $reviewedProductIds);
+                                })->count() > 0;
+                            @endphp
+
+                            @if($hasUnreviewedProducts)
+                                <a href="{{ route('buyer.orders.review', $order->id) }}" class="btn btn-warning w-100 mb-3">
+                                    <i class="fas fa-star me-2"></i> Leave Review
+                                </a>
+                            @else
+                                <div class="alert alert-success mb-3">
+                                    <i class="fas fa-check-circle me-2"></i> All products have been reviewed
+                                </div>
+                            @endif
+                        @endif
+
                         <a href="{{ route('shop.index') }}" class="btn btn-success w-100">
                             <i class="fas fa-shopping-cart me-2"></i> Continue Shopping
                         </a>

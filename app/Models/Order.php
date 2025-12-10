@@ -28,7 +28,12 @@ class Order extends Model
         'special_instructions',
         'pickup_date',
         'delivery_date',
-        'farmer_notes'
+        'farmer_notes',
+        'received_at'
+    ];
+
+    protected $casts = [
+        'received_at' => 'datetime',
     ];
 
     public function items()
@@ -39,6 +44,28 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Check if the order has been received by the buyer
+     */
+    public function isReceived()
+    {
+        return $this->received_at !== null;
+    }
+
+    /**
+     * Check if the order can be reviewed
+     * Order must be delivered and received
+     */
+    public function canBeReviewed()
+    {
+        return $this->status === 'delivered' && $this->isReceived();
     }
 
     // Accessor for total_amount compatibility
