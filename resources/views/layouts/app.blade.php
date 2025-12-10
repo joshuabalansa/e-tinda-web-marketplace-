@@ -217,7 +217,7 @@
         <div class="modal-body p-0">
           <div class="ratio ratio-16x9">
             <video id="instructionVideo" controls style="width: 100%; height: 100%;">
-              <source src="{{ asset('uploads/video/Messenger_creation_A0C63F95-0817-4188-BC07-46E7280CD777.mp4') }}" type="video/mp4">
+              <source src="{{ url('storage/uploads/video/Messenger_creation_A0C63F95-0817-4188-BC07-46E7280CD777.mp4') }}" type="video/mp4">
               Your browser does not support the video tag.
             </video>
           </div>

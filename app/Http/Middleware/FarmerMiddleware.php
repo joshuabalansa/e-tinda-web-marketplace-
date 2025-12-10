@@ -16,7 +16,19 @@ class FarmerMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || $request->user()->role->value !== UserRole::Farmer->value) {
+        $user = $request->user();
+
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        // Check if user has a role
+        if (!isset($user->role) || $user->role === null) {
+            abort(403, 'User role not configured. Please contact support.');
+        }
+
+        // Use the isFarmer() method for consistency
+        if (!$user->isFarmer()) {
             abort(403, 'Unauthorized action.');
         }
 

@@ -82,16 +82,25 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
+        if (!$this->role) {
+            return false;
+        }
         return $this->role === UserRole::Admin;
     }
 
     public function isFarmer(): bool
     {
+        if (!$this->role) {
+            return false;
+        }
         return $this->role === UserRole::Farmer;
     }
 
     public function isBuyer(): bool
     {
+        if (!$this->role) {
+            return false;
+        }
         return $this->role === UserRole::Buyer;
     }
 
