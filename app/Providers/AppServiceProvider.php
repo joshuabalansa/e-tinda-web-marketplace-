@@ -30,17 +30,24 @@ class AppServiceProvider extends ServiceProvider
 
 		// Configure storage URL for Laravel Cloud
 		// This ensures Storage::url() generates correct URLs in production
-		// CRITICAL: Bucket must be set to "public" in Laravel Cloud dashboard for this to work
-		// IMPORTANT: Force 'local' driver to prevent S3 initialization errors
+		// CRITICAL: Force 'local' driver to prevent S3 initialization errors
+		// Only use S3 if explicitly configured AND the package is available
 		$publicDiskDriver = config('filesystems.disks.public.driver', 'local');
 		$appUrl = config('app.url');
-		$isLocal = $this->app->environment('local', 'testing');
-
-		// If S3 driver is configured but we're in local environment, use local driver instead
-		// This prevents errors when the flysystem-aws-s3-v3 package is not installed
-		if ($publicDiskDriver === 's3' && $isLocal) {
+		$hasAwsCredentials = env('AWS_ACCESS_KEY_ID') && env('AWS_SECRET_ACCESS_KEY');
+		
+		// Check if S3 package is available (safely)
+		$hasS3Package = false;
+		try {
+			$hasS3Package = class_exists(\League\Flysystem\AwsS3V3\AwsS3V3Adapter::class);
+		} catch (\Throwable $e) {
+			// Class doesn't exist, S3 package not installed
+			$hasS3Package = false;
+		}
+		
+		// Always use 'local' driver unless S3 is explicitly requested AND package is installed
+		if ($publicDiskDriver === 's3' && (!$hasAwsCredentials || !$hasS3Package)) {
 			// Force public disk to use 'local' driver to avoid S3 class errors
-			// Merge config to preserve existing keys like 'root'
 			$publicDiskConfig = config('filesystems.disks.public', []);
 			config([
 				'filesystems.disks.public' => array_merge($publicDiskConfig, [
@@ -54,10 +61,11 @@ class AppServiceProvider extends ServiceProvider
 			]);
 		} elseif ($this->app->environment('production') && $appUrl) {
 			// In production, if using local driver, ensure URL is set correctly
-			if ($publicDiskDriver === 'local') {
+			if ($publicDiskDriver === 'local' || !$hasS3Package) {
 				$publicDiskConfig = config('filesystems.disks.public', []);
 				config([
 					'filesystems.disks.public' => array_merge($publicDiskConfig, [
+						'driver' => 'local',
 						'url' => $appUrl . '/storage',
 					])
 				]);

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Review;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ShopController extends Controller
 {
@@ -14,111 +15,140 @@ class ShopController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::with('user')
-            ->where('status', 'available');
+        try {
+            $query = Product::with('user')
+                ->where('status', 'available')
+                ->whereHas('user'); // Only show products with valid users
 
-        // Search filter
-        if ($request->filled('query')) {
-            $searchTerm = trim($request->input('query'));
-            if (!empty($searchTerm)) {
-                $query->where(function($q) use ($searchTerm) {
-                    $q->where('name', 'like', "%{$searchTerm}%")
-                      ->orWhere('description', 'like', "%{$searchTerm}%")
-                      ->orWhere('category', 'like', "%{$searchTerm}%");
-                });
-            }
-        }
-
-        // Category filter
-        if ($request->filled('category') && $request->category !== 'all') {
-            $query->where('category', $request->category);
-        }
-
-        // Price range filter
-        if ($request->filled('min_price') && is_numeric($request->min_price) && $request->min_price >= 0) {
-            $query->where('price_per_unit', '>=', (float)$request->min_price);
-        }
-        if ($request->filled('max_price') && is_numeric($request->max_price) && $request->max_price >= 0) {
-            $query->where('price_per_unit', '<=', (float)$request->max_price);
-        }
-
-        // Stock filter
-        if ($request->boolean('in_stock')) {
-            $query->where('stock_quantity', '>', 0);
-        }
-
-        // Sort products
-        $allowedSorts = ['price_low_high', 'price_high_low', 'newest', 'name_asc', 'name_desc'];
-        $sort = $request->input('sort');
-
-        if (in_array($sort, $allowedSorts)) {
-            switch ($sort) {
-                case 'price_low_high':
-                    $query->orderBy('price_per_unit', 'asc');
-                    break;
-                case 'price_high_low':
-                    $query->orderBy('price_per_unit', 'desc');
-                    break;
-                case 'newest':
-                    $query->latest();
-                    break;
-                case 'name_asc':
-                    $query->orderBy('name', 'asc');
-                    break;
-                case 'name_desc':
-                    $query->orderBy('name', 'desc');
-                    break;
-            }
-        } else {
-            $query->latest();
-        }
-
-        $products = $query->paginate(9)
-            ->through(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => $product->price_per_unit,
-                    'unit' => $product->unit_type,
-                    'image' => $product->getImageUrl(),
-                    'description' => $product->description,
-                    'vendor' => $product->user->name,
-                    'location' => $product->user->getFormattedLocation(),
-                    'category' => $product->category,
-                    'stock' => $product->stock_quantity,
-                    'harvest_date' => $product->harvest_date->format('Y-m-d'),
-                    'storage' => 'Store in a cool, dry place'
-                ];
-            });
-
-        // Get unique categories for filter
-        $categories = Product::where('status', 'available')
-            ->select('category')
-            ->distinct()
-            ->pluck('category')
-            ->filter()
-            ->sort()
-            ->values();
-
-        // If AJAX request, return JSON
-        if ($request->ajax()) {
-            $hasFilters = request()->hasAny(['category', 'min_price', 'max_price', 'query', 'in_stock']);
-            $activeFiltersHtml = '';
-
-            if ($hasFilters) {
-                $activeFiltersHtml = view('shop.partials.active-filters')->render();
+            // Search filter
+            if ($request->filled('query')) {
+                $searchTerm = trim($request->input('query'));
+                if (!empty($searchTerm)) {
+                    $query->where(function($q) use ($searchTerm) {
+                        $q->where('name', 'like', "%{$searchTerm}%")
+                          ->orWhere('description', 'like', "%{$searchTerm}%")
+                          ->orWhere('category', 'like', "%{$searchTerm}%");
+                    });
+                }
             }
 
-            return response()->json([
-                'products_html' => view('shop.partials.products', compact('products'))->render(),
-                'pagination_html' => $products->hasPages() ? $products->appends(request()->query())->links('pagination::bootstrap-4')->toHtml() : '',
-                'active_filters_html' => $activeFiltersHtml,
-                'results_count' => $products->total(),
-                'has_filters' => $hasFilters
+            // Category filter
+            if ($request->filled('category') && $request->category !== 'all') {
+                $query->where('category', $request->category);
+            }
+
+            // Price range filter
+            if ($request->filled('min_price') && is_numeric($request->min_price) && $request->min_price >= 0) {
+                $query->where('price_per_unit', '>=', (float)$request->min_price);
+            }
+            if ($request->filled('max_price') && is_numeric($request->max_price) && $request->max_price >= 0) {
+                $query->where('price_per_unit', '<=', (float)$request->max_price);
+            }
+
+            // Stock filter
+            if ($request->boolean('in_stock')) {
+                $query->where('stock_quantity', '>', 0);
+            }
+
+            // Sort products
+            $allowedSorts = ['price_low_high', 'price_high_low', 'newest', 'name_asc', 'name_desc'];
+            $sort = $request->input('sort');
+
+            if (in_array($sort, $allowedSorts)) {
+                switch ($sort) {
+                    case 'price_low_high':
+                        $query->orderBy('price_per_unit', 'asc');
+                        break;
+                    case 'price_high_low':
+                        $query->orderBy('price_per_unit', 'desc');
+                        break;
+                    case 'newest':
+                        $query->latest();
+                        break;
+                    case 'name_asc':
+                        $query->orderBy('name', 'asc');
+                        break;
+                    case 'name_desc':
+                        $query->orderBy('name', 'desc');
+                        break;
+                }
+            } else {
+                $query->latest();
+            }
+
+            $products = $query->paginate(9)
+                ->through(function ($product) {
+                    try {
+                        return [
+                            'id' => $product->id,
+                            'name' => $product->name ?? 'Unnamed Product',
+                            'price' => $product->price_per_unit ?? 0,
+                            'unit' => $product->unit_type ?? 'piece',
+                            'image' => $product->getImageUrl() ?? asset('assets/images/placeholder.jpg'),
+                            'description' => $product->description ?? '',
+                            'vendor' => $product->user ? $product->user->name : 'Unknown Vendor',
+                            'location' => $product->user ? $product->user->getFormattedLocation() : 'Location not available',
+                            'category' => $product->category ?? 'Other',
+                            'stock' => $product->stock_quantity ?? 0,
+                            'harvest_date' => $product->harvest_date ? $product->harvest_date->format('Y-m-d') : 'N/A',
+                            'storage' => 'Store in a cool, dry place'
+                        ];
+                    } catch (\Exception $e) {
+                        \Log::error('Error processing product in shop index', [
+                            'product_id' => $product->id ?? 'unknown',
+                            'error' => $e->getMessage()
+                        ]);
+                        return null;
+                    }
+                })
+                ->filter(); // Remove any null entries
+
+            // Get unique categories for filter
+            $categories = Product::where('status', 'available')
+                ->whereHas('user')
+                ->select('category')
+                ->distinct()
+                ->pluck('category')
+                ->filter()
+                ->sort()
+                ->values();
+
+            // If AJAX request, return JSON
+            if ($request->ajax()) {
+                $hasFilters = request()->hasAny(['category', 'min_price', 'max_price', 'query', 'in_stock']);
+                $activeFiltersHtml = '';
+
+                if ($hasFilters) {
+                    try {
+                        $activeFiltersHtml = view('shop.partials.active-filters')->render();
+                    } catch (\Exception $e) {
+                        \Log::error('Error rendering active filters', ['error' => $e->getMessage()]);
+                    }
+                }
+
+                return response()->json([
+                    'products_html' => view('shop.partials.products', compact('products'))->render(),
+                    'pagination_html' => $products->hasPages() ? $products->appends(request()->query())->links('pagination::bootstrap-4')->toHtml() : '',
+                    'active_filters_html' => $activeFiltersHtml,
+                    'results_count' => $products->total(),
+                    'has_filters' => $hasFilters
+                ]);
+            }
+
+            return view('shop.index', compact('products', 'categories'));
+        } catch (\Exception $e) {
+            \Log::error('Error in ShopController@index', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
-        }
 
-        return view('shop.index', compact('products', 'categories'));
+            // Return empty results instead of crashing
+            $products = collect([])->paginate(9);
+            $categories = collect([]);
+
+            return view('shop.index', compact('products', 'categories'))
+                ->with('error', 'Unable to load products. Please try again later.');
+        }
     }
 
     /**
@@ -161,11 +191,11 @@ class ShopController extends Controller
             'unit' => $product->unit_type,
             'image' => $product->getImageUrl(),
             'description' => $product->description,
-            'vendor' => $product->user->name,
-            'location' => $product->user->getFormattedLocation(),
+            'vendor' => $product->user ? $product->user->name : 'Unknown Vendor',
+            'location' => $product->user ? $product->user->getFormattedLocation() : 'Location not available',
             'category' => $product->category,
             'stock' => $product->stock_quantity,
-            'harvest_date' => $product->harvest_date->format('Y-m-d'),
+            'harvest_date' => $product->harvest_date ? $product->harvest_date->format('Y-m-d') : 'N/A',
             'storage' => 'Store in a cool, dry place',
             'average_rating' => round($product->averageRating(), 1),
             'total_reviews' => $product->totalReviews()
@@ -184,7 +214,7 @@ class ShopController extends Controller
                     'name' => $relatedProduct->name,
                     'price' => $relatedProduct->price_per_unit,
                     'unit' => $relatedProduct->unit_type,
-                    'image' => $relatedProduct->getImageUrl(),
+                    'image' => $relatedProduct->getImageUrl() ?? asset('assets/images/placeholder.jpg'),
                 ];
             });
 
@@ -239,11 +269,11 @@ class ShopController extends Controller
                     'unit' => $product->unit_type,
                     'image' => $product->getImageUrl(),
                     'description' => $product->description,
-                    'vendor' => $product->user->name,
-                    'location' => $product->user->getFormattedLocation(),
+                    'vendor' => $product->user ? $product->user->name : 'Unknown Vendor',
+                    'location' => $product->user ? $product->user->getFormattedLocation() : 'Location not available',
                     'category' => $product->category,
                     'stock' => $product->stock_quantity,
-                    'harvest_date' => $product->harvest_date->format('Y-m-d'),
+                    'harvest_date' => $product->harvest_date ? $product->harvest_date->format('Y-m-d') : 'N/A',
                     'storage' => 'Store in a cool, dry place'
                 ];
             });
@@ -269,11 +299,11 @@ class ShopController extends Controller
                     'unit' => $product->unit_type,
                     'image' => $product->getImageUrl(),
                     'description' => $product->description,
-                    'vendor' => $product->user->name,
-                    'location' => $product->user->getFormattedLocation(),
+                    'vendor' => $product->user ? $product->user->name : 'Unknown Vendor',
+                    'location' => $product->user ? $product->user->getFormattedLocation() : 'Location not available',
                     'category' => $product->category,
                     'stock' => $product->stock_quantity,
-                    'harvest_date' => $product->harvest_date->format('Y-m-d'),
+                    'harvest_date' => $product->harvest_date ? $product->harvest_date->format('Y-m-d') : 'N/A',
                     'storage' => 'Store in a cool, dry place'
                 ];
             });
