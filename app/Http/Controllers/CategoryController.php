@@ -99,23 +99,25 @@ class CategoryController extends Controller
                 ->where('status', 'available')
                 ->whereRaw('LOWER(TRIM(category)) = LOWER(?)', [trim($category)])
                 ->latest()
-                ->paginate(9)
-                ->through(function ($product) {
-                    return [
-                        'id' => $product->id,
-                        'name' => $product->name,
-                        'price' => $product->price_per_unit,
-                        'unit' => $product->unit_type,
-                        'image' => $product->getImageUrl(),
-                        'description' => $product->description,
-                        'vendor' => $product->user->name ?? 'Unknown Vendor',
-                        'location' => $product->user->address ?? 'Location not specified',
-                        'category' => $product->category,
-                        'stock' => $product->stock_quantity,
-                        'harvest_date' => $product->harvest_date ? $product->harvest_date->format('Y-m-d') : null,
-                        'storage' => 'Store in a cool, dry place'
-                    ];
-                });
+                ->paginate(9);
+                
+            // Transform the items without losing pagination
+            $products->getCollection()->transform(function ($product) {
+                return (object)[
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price' => $product->price_per_unit,
+                    'unit' => $product->unit_type,
+                    'image' => $product->getImageUrl(),
+                    'description' => $product->description,
+                    'vendor' => $product->user->name ?? 'Unknown Vendor',
+                    'location' => $product->user->address ?? 'Location not specified',
+                    'category' => $product->category,
+                    'stock' => $product->stock_quantity,
+                    'harvest_date' => $product->harvest_date ? $product->harvest_date->format('Y-m-d') : null,
+                    'storage' => 'Store in a cool, dry place'
+                ];
+            });
 
             // Get unique categories for filter (for the shop layout)
             $categories = Product::where('status', 'available')

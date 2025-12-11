@@ -76,32 +76,37 @@ class ShopController extends Controller
                 $query->latest();
             }
 
-            $products = $query->paginate(9)
-                ->through(function ($product) {
-                    try {
-                        return [
-                            'id' => $product->id,
-                            'name' => $product->name ?? 'Unnamed Product',
-                            'price' => $product->price_per_unit ?? 0,
-                            'unit' => $product->unit_type ?? 'piece',
-                            'image' => $product->getImageUrl() ?? asset('assets/images/placeholder.jpg'),
-                            'description' => $product->description ?? '',
-                            'vendor' => $product->user ? $product->user->name : 'Unknown Vendor',
-                            'location' => $product->user ? $product->user->getFormattedLocation() : 'Location not available',
-                            'category' => $product->category ?? 'Other',
-                            'stock' => $product->stock_quantity ?? 0,
-                            'harvest_date' => $product->harvest_date ? $product->harvest_date->format('Y-m-d') : 'N/A',
-                            'storage' => 'Store in a cool, dry place'
-                        ];
-                    } catch (\Exception $e) {
-                        \Log::error('Error processing product in shop index', [
-                            'product_id' => $product->id ?? 'unknown',
-                            'error' => $e->getMessage()
-                        ]);
-                        return null;
-                    }
-                })
-                ->filter(); // Remove any null entries
+            // Paginate the results
+            $products = $query->paginate(9);
+            
+            // Transform the items without losing pagination
+            $products->getCollection()->transform(function ($product) {
+                try {
+                    return (object)[
+                        'id' => $product->id,
+                        'name' => $product->name ?? 'Unnamed Product',
+                        'price' => $product->price_per_unit ?? 0,
+                        'unit' => $product->unit_type ?? 'piece',
+                        'image' => $product->getImageUrl() ?? asset('assets/images/placeholder.jpg'),
+                        'description' => $product->description ?? '',
+                        'vendor' => $product->user ? $product->user->name : 'Unknown Vendor',
+                        'location' => $product->user ? $product->user->getFormattedLocation() : 'Location not available',
+                        'category' => $product->category ?? 'Other',
+                        'stock' => $product->stock_quantity ?? 0,
+                        'harvest_date' => $product->harvest_date ? $product->harvest_date->format('Y-m-d') : 'N/A',
+                        'storage' => 'Store in a cool, dry place'
+                    ];
+                } catch (\Exception $e) {
+                    \Log::error('Error processing product in shop index', [
+                        'product_id' => $product->id ?? 'unknown',
+                        'error' => $e->getMessage()
+                    ]);
+                    return null;
+                }
+            });
+            
+            // Filter out null entries from the collection
+            $products->setCollection($products->getCollection()->filter());
 
             // Get unique categories for filter
             $categories = Product::where('status', 'available')
@@ -260,23 +265,25 @@ class ShopController extends Controller
                   ->orWhere('category', 'like', "%{$query}%");
             })
             ->latest()
-            ->paginate(9)
-            ->through(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => $product->price_per_unit,
-                    'unit' => $product->unit_type,
-                    'image' => $product->getImageUrl(),
-                    'description' => $product->description,
-                    'vendor' => $product->user ? $product->user->name : 'Unknown Vendor',
-                    'location' => $product->user ? $product->user->getFormattedLocation() : 'Location not available',
-                    'category' => $product->category,
-                    'stock' => $product->stock_quantity,
-                    'harvest_date' => $product->harvest_date ? $product->harvest_date->format('Y-m-d') : 'N/A',
-                    'storage' => 'Store in a cool, dry place'
-                ];
-            });
+            ->paginate(9);
+            
+        // Transform the items without losing pagination
+        $products->getCollection()->transform(function ($product) {
+            return (object)[
+                'id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price_per_unit,
+                'unit' => $product->unit_type,
+                'image' => $product->getImageUrl(),
+                'description' => $product->description,
+                'vendor' => $product->user ? $product->user->name : 'Unknown Vendor',
+                'location' => $product->user ? $product->user->getFormattedLocation() : 'Location not available',
+                'category' => $product->category,
+                'stock' => $product->stock_quantity,
+                'harvest_date' => $product->harvest_date ? $product->harvest_date->format('Y-m-d') : 'N/A',
+                'storage' => 'Store in a cool, dry place'
+            ];
+        });
 
         return view('shop.index', compact('products'));
     }
@@ -290,18 +297,20 @@ class ShopController extends Controller
             ->where('status', 'available')
             ->where('category', $category)
             ->latest()
-            ->paginate(9)
-            ->through(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => $product->price_per_unit,
-                    'unit' => $product->unit_type,
-                    'image' => $product->getImageUrl(),
-                    'description' => $product->description,
-                    'vendor' => $product->user ? $product->user->name : 'Unknown Vendor',
-                    'location' => $product->user ? $product->user->getFormattedLocation() : 'Location not available',
-                    'category' => $product->category,
+            ->paginate(9);
+            
+        // Transform the items without losing pagination
+        $products->getCollection()->transform(function ($product) {
+            return (object)[
+                'id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price_per_unit,
+                'unit' => $product->unit_type,
+                'image' => $product->getImageUrl(),
+                'description' => $product->description,
+                'vendor' => $product->user ? $product->user->name : 'Unknown Vendor',
+                'location' => $product->user ? $product->user->getFormattedLocation() : 'Location not available',
+                'category' => $product->category,
                     'stock' => $product->stock_quantity,
                     'harvest_date' => $product->harvest_date ? $product->harvest_date->format('Y-m-d') : 'N/A',
                     'storage' => 'Store in a cool, dry place'

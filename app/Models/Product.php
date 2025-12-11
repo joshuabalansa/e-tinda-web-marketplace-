@@ -86,27 +86,31 @@ class Product extends Model
             return $imagePath;
         }
 
+        // Clean the path - remove any leading slashes or 'storage/' prefix
+        $cleanPath = ltrim($imagePath, '/');
+        $cleanPath = preg_replace('/^storage\//', '', $cleanPath);
+
+        // In production (Laravel Cloud), use the APP_URL with storage path
+        if (app()->environment('production')) {
+            // Laravel Cloud typically uses the APP_URL for storage
+            $baseUrl = rtrim(config('app.url'), '/');
+            return $baseUrl . '/storage/' . $cleanPath;
+        }
+
         // Use Storage::url() for proper URL generation
-        // This works with both local storage and Laravel Cloud buckets
         try {
-            // Check if the disk driver is available before using it
             $disk = Storage::disk('public');
-            $driver = config('filesystems.disks.public.driver', 'local');
-
-            // If S3 driver is configured but not available, use fallback
-            if ($driver === 's3') {
-                try {
-                    return $disk->url($imagePath);
-                } catch (\Exception $e) {
-                    // S3 driver not available, fallback to local URL
-                    return url('storage/' . ltrim($imagePath, '/'));
-                }
+            
+            // Check if file exists
+            if ($disk->exists($cleanPath)) {
+                return $disk->url($cleanPath);
             }
-
-            return $disk->url($imagePath);
+            
+            // Fallback to direct URL construction
+            return url('storage/' . $cleanPath);
         } catch (\Exception $e) {
             // Fallback to storage route if direct URL fails
-            return url('storage/' . ltrim($imagePath, '/'));
+            return url('storage/' . $cleanPath);
         }
     }
 }
