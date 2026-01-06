@@ -20,7 +20,11 @@ class ForumsController extends Controller
         $forums = Forum::active()->with('user')->latest()->paginate(10);
         $categories = Forum::active()->select('category')->distinct()->pluck('category');
 
-        return view('forums.index', compact('forums', 'categories'));
+        // Get harvest calendar data for current month
+        $currentMonth = (int) date('n');
+        $harvestCalendar = $this->getHarvestCalendarDataForMonth($currentMonth);
+
+        return view('forums.index', compact('forums', 'categories', 'harvestCalendar', 'currentMonth'));
     }
 
     /**
@@ -65,19 +69,48 @@ class ForumsController extends Controller
             }
         }
 
-        $request->validate([
+        $validationRules = [
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'category' => 'required|string|max:255',
             'video' => 'nullable|file|mimes:' . implode(',', config('upload.allowed_video_types', ['mp4', 'avi', 'mov', 'wmv'])) . '|max:' . (config('upload.max_video_size', 50 * 1024 * 1024) / 1024), // Get from config
             'images.*' => 'nullable|image|mimes:' . implode(',', config('upload.allowed_image_types', ['jpg', 'jpeg', 'png', 'gif', 'webp'])) . '|max:' . (config('upload.max_image_size', 10 * 1024 * 1024) / 1024),
-        ]);
+        ];
+
+        // Add harvest calendar validation if is_harvest_post is checked
+        // Only farmers can post to harvest calendar
+        if ($request->has('is_harvest_post') && $request->is_harvest_post) {
+            // Check if user is a farmer
+            if (!Auth::user()->isFarmer()) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['is_harvest_post' => 'Only farmers can post to the harvest calendar.']);
+            }
+
+            $validationRules['product_name'] = 'required|string|max:255';
+            $validationRules['harvest_start_date'] = 'required|date';
+            $validationRules['harvest_end_date'] = 'required|date|after_or_equal:harvest_start_date';
+            $validationRules['harvest_season'] = 'nullable|string|max:255';
+            $validationRules['product_category'] = 'nullable|string|max:255';
+        }
+
+        $request->validate($validationRules);
 
         $forum = new Forum();
         $forum->user_id = Auth::id();
         $forum->title = $request->title;
         $forum->content = $request->content;
         $forum->category = $request->category;
+
+        // Handle harvest calendar fields
+        if ($request->has('is_harvest_post') && $request->is_harvest_post) {
+            $forum->is_harvest_post = true;
+            $forum->product_name = $request->product_name;
+            $forum->harvest_start_date = $request->harvest_start_date;
+            $forum->harvest_end_date = $request->harvest_end_date;
+            $forum->harvest_season = $request->harvest_season;
+            $forum->product_category = $request->product_category;
+        }
 
         // Handle video upload
         if ($request->hasFile('video')) {
@@ -424,5 +457,130 @@ class ForumsController extends Controller
 
         return redirect()->route('forums.topic', $testForum->id)
             ->with('success', 'Test forum created with video demonstration.');
+    }
+
+    /**
+     * Display the full harvest calendar page.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function harvestCalendar()
+    {
+        $currentMonth = (int) date('n');
+        $harvestCalendar = $this->getHarvestCalendarDataForMonth($currentMonth);
+        $allMonthsData = $this->getAllMonthsHarvestData();
+
+        return view('forums.harvest-calendar', compact('harvestCalendar', 'currentMonth', 'allMonthsData'));
+    }
+
+    /**
+     * Get harvest calendar data as JSON (AJAX endpoint).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getHarvestCalendarData(Request $request)
+    {
+        $month = $request->input('month', (int) date('n'));
+        $data = $this->getHarvestCalendarDataForMonth($month);
+
+        return response()->json($data);
+    }
+
+    /**
+     * Get harvest posts for a specific month.
+     *
+     * @param  int  $month
+     * @return \Illuminate\View\View|\Illuminate\Http\JsonResponse
+     */
+    public function getHarvestByMonth($month)
+    {
+        $month = (int) $month;
+        if ($month < 1 || $month > 12) {
+            $month = (int) date('n');
+        }
+
+        $harvestPosts = Forum::active()
+            ->harvestPosts()
+            ->byMonth($month)
+            ->with('user')
+            ->orderBy('harvest_start_date')
+            ->get();
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'month' => $month,
+                'month_name' => date('F', mktime(0, 0, 0, $month, 1)),
+                'posts' => $harvestPosts->map(function($post) {
+                    return [
+                        'id' => $post->id,
+                        'title' => $post->title,
+                        'product_name' => $post->product_name,
+                        'product_category' => $post->product_category,
+                        'harvest_start_date' => $post->harvest_start_date?->format('Y-m-d'),
+                        'harvest_end_date' => $post->harvest_end_date?->format('Y-m-d'),
+                        'harvest_season' => $post->harvest_season,
+                        'user' => $post->user->name,
+                        'url' => route('forums.topic', $post->id),
+                    ];
+                })
+            ]);
+        }
+
+        return view('forums.harvest-month', compact('harvestPosts', 'month'));
+    }
+
+    /**
+     * Get harvest calendar data for a specific month.
+     *
+     * @param  int  $month
+     * @return array
+     */
+    private function getHarvestCalendarDataForMonth($month)
+    {
+        $harvestPosts = Forum::active()
+            ->harvestPosts()
+            ->byMonth($month)
+            ->with('user')
+            ->orderBy('product_name')
+            ->get();
+
+        $productsByCategory = [];
+        foreach ($harvestPosts as $post) {
+            $category = $post->product_category ?: 'Other';
+            if (!isset($productsByCategory[$category])) {
+                $productsByCategory[$category] = [];
+            }
+            $productsByCategory[$category][] = [
+                'id' => $post->id,
+                'product_name' => $post->product_name,
+                'harvest_start_date' => $post->harvest_start_date?->format('M d'),
+                'harvest_end_date' => $post->harvest_end_date?->format('M d'),
+                'harvest_season' => $post->harvest_season,
+                'user' => $post->user->name,
+                'url' => route('forums.topic', $post->id),
+            ];
+        }
+
+        return [
+            'month' => $month,
+            'month_name' => date('F', mktime(0, 0, 0, $month, 1)),
+            'products_by_category' => $productsByCategory,
+            'total_products' => $harvestPosts->count(),
+        ];
+    }
+
+    /**
+     * Get harvest data for all 12 months.
+     *
+     * @return array
+     */
+    private function getAllMonthsHarvestData()
+    {
+        $allData = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $allData[$month] = $this->getHarvestCalendarDataForMonth($month);
+        }
+        return $allData;
     }
 }

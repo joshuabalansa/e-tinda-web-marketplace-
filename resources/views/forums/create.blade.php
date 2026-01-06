@@ -68,6 +68,88 @@
                             @enderror
                         </div>
 
+                        <!-- Harvest Calendar Section - Only for Farmers -->
+                        @auth
+                            @if(auth()->user()->isFarmer())
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="is_harvest_post" name="is_harvest_post" value="1" {{ old('is_harvest_post') ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="is_harvest_post">
+                                            <strong>{{ __('forums.post_to_harvest_calendar') }}</strong>
+                                        </label>
+                                    </div>
+                                    <div class="form-text">{{ __('forums.harvest_calendar_description') }}</div>
+                                </div>
+                            @endif
+                        @endauth
+
+                        <div id="harvest-fields" style="display: none;">
+                            <div class="card border-success mb-3">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0">{{ __('forums.harvest_calendar') }}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="product_name" class="form-label">{{ __('forums.product_name') }} <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control @error('product_name') is-invalid @enderror" id="product_name" name="product_name" value="{{ old('product_name') }}" placeholder="{{ __('forums.product_name_placeholder') }}">
+                                        @error('product_name')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="harvest_start_date" class="form-label">{{ __('forums.harvest_start_date') }} <span class="text-danger">*</span></label>
+                                            <input type="date" class="form-control @error('harvest_start_date') is-invalid @enderror" id="harvest_start_date" name="harvest_start_date" value="{{ old('harvest_start_date') }}">
+                                            @error('harvest_start_date')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="harvest_end_date" class="form-label">{{ __('forums.harvest_end_date') }} <span class="text-danger">*</span></label>
+                                            <input type="date" class="form-control @error('harvest_end_date') is-invalid @enderror" id="harvest_end_date" name="harvest_end_date" value="{{ old('harvest_end_date') }}">
+                                            @error('harvest_end_date')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="harvest_season" class="form-label">{{ __('forums.harvest_season') }}</label>
+                                            <select class="form-select @error('harvest_season') is-invalid @enderror" id="harvest_season" name="harvest_season">
+                                                <option value="">{{ __('forums.harvest_season_select') }}</option>
+                                                <option value="Spring" {{ old('harvest_season') == 'Spring' ? 'selected' : '' }}>{{ __('forums.season_spring') }}</option>
+                                                <option value="Summer" {{ old('harvest_season') == 'Summer' ? 'selected' : '' }}>{{ __('forums.season_summer') }}</option>
+                                                <option value="Fall" {{ old('harvest_season') == 'Fall' ? 'selected' : '' }}>{{ __('forums.season_fall') }}</option>
+                                                <option value="Winter" {{ old('harvest_season') == 'Winter' ? 'selected' : '' }}>{{ __('forums.season_winter') }}</option>
+                                                <option value="Dry Season" {{ old('harvest_season') == 'Dry Season' ? 'selected' : '' }}>{{ __('forums.season_dry') }}</option>
+                                                <option value="Wet Season" {{ old('harvest_season') == 'Wet Season' ? 'selected' : '' }}>{{ __('forums.season_wet') }}</option>
+                                            </select>
+                                            @error('harvest_season')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="product_category" class="form-label">{{ __('forums.product_category') }}</label>
+                                            <select class="form-select @error('product_category') is-invalid @enderror" id="product_category" name="product_category">
+                                                <option value="">{{ __('forums.product_category_select') }}</option>
+                                                <option value="Vegetables" {{ old('product_category') == 'Vegetables' ? 'selected' : '' }}>{{ __('forums.category_vegetables') }}</option>
+                                                <option value="Fruits" {{ old('product_category') == 'Fruits' ? 'selected' : '' }}>{{ __('forums.category_fruits') }}</option>
+                                                <option value="Grains" {{ old('product_category') == 'Grains' ? 'selected' : '' }}>{{ __('forums.category_grains') }}</option>
+                                                <option value="Livestock" {{ old('product_category') == 'Livestock' ? 'selected' : '' }}>{{ __('forums.category_livestock') }}</option>
+                                                <option value="Herbs" {{ old('product_category') == 'Herbs' ? 'selected' : '' }}>{{ __('forums.category_herbs') }}</option>
+                                                <option value="Other" {{ old('product_category') == 'Other' ? 'selected' : '' }}>{{ __('forums.category_other') }}</option>
+                                            </select>
+                                            @error('product_category')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="mb-3">
                             <label for="images" class="form-label">{{ __('forums.image_attachment') }}</label>
                             <input type="file" class="form-control @error('images.*') is-invalid @enderror" id="images" name="images[]" accept="image/*" multiple data-max-size="10485760">
@@ -215,6 +297,32 @@ document.addEventListener('DOMContentLoaded', function() {
             videoPreview.style.display = 'none';
         }
     });
+
+    // Harvest calendar fields toggle
+    const harvestCheckbox = document.getElementById('is_harvest_post');
+    const harvestFields = document.getElementById('harvest-fields');
+
+    function toggleHarvestFields() {
+        if (harvestCheckbox.checked) {
+            harvestFields.style.display = 'block';
+            // Make harvest fields required
+            document.getElementById('product_name').required = true;
+            document.getElementById('harvest_start_date').required = true;
+            document.getElementById('harvest_end_date').required = true;
+        } else {
+            harvestFields.style.display = 'none';
+            // Remove required attribute
+            document.getElementById('product_name').required = false;
+            document.getElementById('harvest_start_date').required = false;
+            document.getElementById('harvest_end_date').required = false;
+        }
+    }
+
+    // Initialize on page load
+    toggleHarvestFields();
+
+    // Toggle on checkbox change
+    harvestCheckbox.addEventListener('change', toggleHarvestFields);
 });
 </script>
 @endpush

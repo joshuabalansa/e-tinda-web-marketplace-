@@ -26,6 +26,12 @@ class Forum extends Model
         'moderation_notes',
         'moderated_by',
         'moderated_at',
+        'product_name',
+        'harvest_start_date',
+        'harvest_end_date',
+        'harvest_season',
+        'is_harvest_post',
+        'product_category',
     ];
 
     /**
@@ -37,6 +43,9 @@ class Forum extends Model
         'moderated_at' => 'datetime',
         'is_flagged' => 'boolean',
         'views' => 'integer',
+        'harvest_start_date' => 'date',
+        'harvest_end_date' => 'date',
+        'is_harvest_post' => 'boolean',
     ];
 
     /**
@@ -414,5 +423,79 @@ class Forum extends Model
         }
 
         return false;
+    }
+
+    /**
+     * Scope to get only harvest calendar posts.
+     */
+    public function scopeHarvestPosts($query)
+    {
+        return $query->where('is_harvest_post', true);
+    }
+
+    /**
+     * Scope to filter by season.
+     */
+    public function scopeBySeason($query, $season)
+    {
+        return $query->where('harvest_season', $season);
+    }
+
+    /**
+     * Scope to filter by month (1-12).
+     */
+    public function scopeByMonth($query, $month)
+    {
+        return $query->where(function($q) use ($month) {
+            // Normal case: harvest within same year (e.g., March to June)
+            // Month is between start and end month
+            $q->where(function($q1) use ($month) {
+                $q1->whereRaw('MONTH(harvest_start_date) <= ?', [$month])
+                   ->whereRaw('MONTH(harvest_end_date) >= ?', [$month]);
+            })
+            // Year-spanning case: harvest crosses year boundary (e.g., November to February)
+            // Month is either >= start_month OR <= end_month
+            ->orWhere(function($q2) use ($month) {
+                $q2->whereRaw('MONTH(harvest_start_date) > MONTH(harvest_end_date)')
+                   ->where(function($q3) use ($month) {
+                       $q3->whereRaw('MONTH(harvest_start_date) <= ?', [$month])
+                          ->orWhereRaw('MONTH(harvest_end_date) >= ?', [$month]);
+                   });
+            });
+        });
+    }
+
+    /**
+     * Get array of months when product is available.
+     */
+    public function getHarvestMonthsAttribute()
+    {
+        if (!$this->harvest_start_date || !$this->harvest_end_date) {
+            return [];
+        }
+
+        $start = $this->harvest_start_date;
+        $end = $this->harvest_end_date;
+        $months = [];
+
+        $current = $start->copy();
+        while ($current->lte($end)) {
+            $months[] = (int) $current->format('n'); // 1-12
+            $current->addMonth();
+        }
+
+        // Handle year-spanning harvests (e.g., November to February)
+        if ($start->month > $end->month) {
+            // Harvest spans across year boundary
+            for ($m = $start->month; $m <= 12; $m++) {
+                $months[] = $m;
+            }
+            for ($m = 1; $m <= $end->month; $m++) {
+                $months[] = $m;
+            }
+            $months = array_unique($months);
+        }
+
+        return array_unique($months);
     }
 }

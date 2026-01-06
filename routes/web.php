@@ -268,6 +268,13 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/forums', [ForumsController::class, 'index'])->name('forums.index');
 Route::get('/forums/create', [ForumsController::class, 'create'])->name('forums.create')->middleware('auth');
 Route::post('/forums', [ForumsController::class, 'store'])->name('forums.store')->middleware('auth');
+
+// Harvest calendar routes (must come before /forums/{forum} route)
+Route::get('/forums/harvest-calendar', [ForumsController::class, 'harvestCalendar'])->name('forums.harvest-calendar');
+Route::get('/forums/harvest-calendar/data', [ForumsController::class, 'getHarvestCalendarData'])->name('forums.harvest-calendar.data');
+Route::get('/forums/harvest-calendar/month/{month}', [ForumsController::class, 'getHarvestByMonth'])->name('forums.harvest-calendar.month');
+
+// Forum topic routes (must come after specific routes)
 Route::get('/forums/{forum}', [ForumsController::class, 'show'])->name('forums.show');
 Route::get('/forums/topic/{forum}', [ForumsController::class, 'show'])->name('forums.topic');
 Route::get('/forums/{forum}/edit', [ForumsController::class, 'edit'])->name('forums.edit')->middleware('auth');

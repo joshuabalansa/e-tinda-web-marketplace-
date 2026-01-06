@@ -12,9 +12,10 @@
 <!-- Forums Content Section -->
 <div class="container my-5">
     <div class="row">
-        <!-- Forum Categories -->
+        <!-- Sidebar -->
         <div class="col-lg-3 mb-4">
-            <div class="card border-success">
+            <!-- Forum Categories -->
+            <div class="card border-success mb-4">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0">{{ __('forums.categories') }}</h5>
                 </div>
@@ -29,6 +30,11 @@
                     @endforeach
                 </div>
             </div>
+
+            <!-- Harvest Calendar Widget -->
+            @if(isset($harvestCalendar) && isset($currentMonth))
+                <x-harvest-calendar :harvestCalendar="$harvestCalendar" :currentMonth="$currentMonth" />
+            @endif
         </div>
 
         <!-- Forum Topics -->
