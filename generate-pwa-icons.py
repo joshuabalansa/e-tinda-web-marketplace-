@@ -102,3 +102,4 @@ for size in icon_sizes:
 print(f"\nDone! Icons generated in: {output_dir}")
 print("You can now test PWA installation.")
 
+

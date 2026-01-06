@@ -236,3 +236,4 @@ npx cap sync android
 
 **Remember**: PWAs are web apps that install through browsers. They're not APK files, but you can convert them to APK if needed using the tools above.
 
+

@@ -112,3 +112,4 @@ imagedestroy($sourceImage);
 echo "\nDone! Icons generated in: $outputDir\n";
 echo "You can now test PWA installation.\n";
 
+

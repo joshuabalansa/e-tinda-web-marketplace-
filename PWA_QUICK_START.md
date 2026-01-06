@@ -119,3 +119,4 @@ See the detailed guide: `PWA_INSTALLATION_GUIDE.md`
 2. Test installation on your device
 3. If you need APK, use PWABuilder to convert
 
+
