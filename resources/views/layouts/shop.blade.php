@@ -4,12 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="theme-color" content="#28a745">
+  <meta name="description" content="E-Tinda - Farm to Table Marketplace. Connecting local farmers with the community.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="E-Tinda">
   <title>E-Tinda</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="{{ asset('manifest.json') }}">
+
+  <!-- Apple Touch Icons -->
+  <link rel="apple-touch-icon" href="{{ asset('favicon.ico') }}">
+  <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
   <!-- Bootstrap CSS CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <!-- Font Awesome CDN for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Leaflet CSS for maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
   <style>
     /* Custom styles that override or complement Bootstrap */
     html, body {
@@ -543,6 +559,11 @@
                 @include('components.language-switcher')
             </div>
 
+            <!-- PWA Install Button (hidden by default, shown when install prompt is available) -->
+            <button id="pwa-install-button" class="btn btn-outline-light me-2" style="display: none;" title="Install E-Tinda App">
+              <i class="fas fa-download me-1"></i>Install App
+            </button>
+
             <a href="/cart" class="btn btn-outline-light me-2">
               <i class="fas fa-shopping-cart"></i>
               <span class="badge bg-danger ms-1">
@@ -586,6 +607,14 @@
   <!-- Bootstrap JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- PWA Scripts -->
+  @if(file_exists(public_path('build/manifest.json')))
+    @vite(['resources/js/app.js'])
+  @else
+    <!-- Fallback PWA registration when Vite is not built -->
+    <script src="{{ asset('pwa-register.js') }}"></script>
+  @endif
+
   <!-- Notification Container -->
   <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
     @if(session('success'))
@@ -614,7 +643,7 @@
         <div class="modal-body p-0">
           <div class="ratio ratio-16x9">
             <video id="instructionVideo" controls style="width: 100%; height: 100%;">
-              <source src="{{ asset('storage/uploads/video/Messenger_creation_A0C63F95-0817-4188-BC07-46E7280CD777.mp4') }}" type="video/mp4">
+              <source src="{{ asset('uploads/Messenger_creation_A0C63F95-0817-4188-BC07-46E7280CD777.mp4') }}" type="video/mp4">
               Your browser does not support the video tag.
             </video>
           </div>

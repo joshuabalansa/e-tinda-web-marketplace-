@@ -28,6 +28,17 @@ return [
     'delete_confirmation' => 'Are you sure you want to delete this topic?',
     'delete_reply_confirmation' => 'Are you sure you want to delete this reply?',
 
+    // Image Upload
+    'image_attachment' => 'Image Attachment (Optional)',
+    'image_help_text' => 'Supported formats: JPG, JPEG, PNG, GIF, WebP. Max size: 10MB per image.',
+    'image_preview' => 'Image Preview',
+    'please_select_image' => 'Please select a valid image file.',
+    'has_image' => 'Has image attachment',
+    'no_image_attached' => 'No images attached to this topic.',
+    'no_image_attached_reply' => 'No images attached to this reply.',
+    'current_images' => 'Current Images',
+    'image_replace_warning' => 'Uploading new images will replace the current ones.',
+
     // Video Upload
     'video_attachment' => 'Video Attachment (Optional)',
     'video_help_text' => 'Supported formats: MP4, AVI, MOV, WMV. Max size: 50MB.',

@@ -153,6 +153,25 @@
                         <td><strong>Country:</strong></td>
                         <td>{{ $user->country ?: '-' }}</td>
                     </tr>
+                    <tr>
+                        <td><strong>Delivery Radius:</strong></td>
+                        <td>{{ $user->delivery_radius ? $user->delivery_radius . ' km' : '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GPS Coordinates:</strong></td>
+                        <td>
+                            @if($user->coordinates)
+                                {{ $user->coordinates }}
+                                @if($user->hasValidCoordinates())
+                                    <span class="label label-success">Valid</span>
+                                @else
+                                    <span class="label label-warning">Invalid Format</span>
+                                @endif
+                            @else
+                                -
+                            @endif
+                        </td>
+                    </tr>
                 </table>
             </div>
         </div>
@@ -252,6 +271,7 @@
                                 <th>Order #</th>
                                 <th>Total</th>
                                 <th>Status</th>
+                                <th>Type</th>
                                 <th>Date</th>
                             </tr>
                         </thead>
@@ -264,6 +284,15 @@
                                     <span class="label label-{{ $order->status === 'completed' ? 'success' : ($order->status === 'pending' ? 'warning' : 'info') }}">
                                         {{ ucfirst($order->status) }}
                                     </span>
+                                </td>
+                                <td>
+                                    @if($order->is_negotiation)
+                                        <span class="label label-warning">
+                                            <i class="entypo-hand"></i> Negotiation
+                                        </span>
+                                    @else
+                                        <span class="label label-default">Regular</span>
+                                    @endif
                                 </td>
                                 <td>{{ $order->created_at->format('M d, Y') }}</td>
                             </tr>

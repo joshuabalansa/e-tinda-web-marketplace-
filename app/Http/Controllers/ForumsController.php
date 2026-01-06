@@ -53,11 +53,24 @@ class ForumsController extends Controller
             }
         }
 
+        // Check image file sizes before validation
+        if ($request->hasFile('images')) {
+            $maxImageSize = config('upload.max_image_size', 10 * 1024 * 1024);
+            foreach ($request->file('images') as $image) {
+                if ($image->getSize() > $maxImageSize) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['images' => 'Image file size must be less than ' . round($maxImageSize / (1024 * 1024), 0) . 'MB. Current size: ' . round($image->getSize() / (1024 * 1024), 2) . 'MB']);
+                }
+            }
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'category' => 'required|string|max:255',
             'video' => 'nullable|file|mimes:' . implode(',', config('upload.allowed_video_types', ['mp4', 'avi', 'mov', 'wmv'])) . '|max:' . (config('upload.max_video_size', 50 * 1024 * 1024) / 1024), // Get from config
+            'images.*' => 'nullable|image|mimes:' . implode(',', config('upload.allowed_image_types', ['jpg', 'jpeg', 'png', 'gif', 'webp'])) . '|max:' . (config('upload.max_image_size', 10 * 1024 * 1024) / 1024),
         ]);
 
         $forum = new Forum();
@@ -74,6 +87,24 @@ class ForumsController extends Controller
 
             $forum->video_path = $videoPath;
             $forum->video_original_name = $video->getClientOriginalName();
+        }
+
+        // Handle image uploads (multiple images)
+        if ($request->hasFile('images')) {
+            $imagePaths = [];
+            $imageNames = [];
+
+            foreach ($request->file('images') as $image) {
+                $imageName = time() . '_' . uniqid() . '_' . $image->getClientOriginalName();
+                $imagePath = $image->storeAs(config('upload.image_storage_path', 'forums/images'), $imageName, config('upload.storage_disk', 'public'));
+
+                $imagePaths[] = $imagePath;
+                $imageNames[] = $image->getClientOriginalName();
+            }
+
+            // Store as JSON for multiple images
+            $forum->image_path = json_encode($imagePaths);
+            $forum->image_original_name = json_encode($imageNames);
         }
 
         $forum->save();
@@ -148,16 +179,65 @@ class ForumsController extends Controller
             }
         }
 
+        // Check image file sizes before validation
+        if ($request->hasFile('images')) {
+            $maxImageSize = config('upload.max_image_size', 10 * 1024 * 1024);
+            foreach ($request->file('images') as $image) {
+                if ($image->getSize() > $maxImageSize) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['images' => 'Image file size must be less than ' . round($maxImageSize / (1024 * 1024), 0) . 'MB. Current size: ' . round($image->getSize() / (1024 * 1024), 2) . 'MB']);
+                }
+            }
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'category' => 'required|string|max:255',
             'video' => 'nullable|file|mimes:' . implode(',', config('upload.allowed_video_types', ['mp4', 'avi', 'mov', 'wmv'])) . '|max:' . (config('upload.max_video_size', 50 * 1024 * 1024) / 1024), // Get from config
+            'images.*' => 'nullable|image|mimes:' . implode(',', config('upload.allowed_image_types', ['jpg', 'jpeg', 'png', 'gif', 'webp'])) . '|max:' . (config('upload.max_image_size', 10 * 1024 * 1024) / 1024),
         ]);
 
         $forum->title = $request->title;
         $forum->content = $request->content;
         $forum->category = $request->category;
+
+        // Handle image uploads (multiple images)
+        if ($request->hasFile('images')) {
+            // Delete old images if they exist
+            $oldImagePaths = $forum->getImagePaths();
+            foreach ($oldImagePaths as $oldImagePath) {
+                if ($oldImagePath && Storage::disk(config('upload.storage_disk', 'public'))->exists($oldImagePath)) {
+                    try {
+                        Storage::disk(config('upload.storage_disk', 'public'))->delete($oldImagePath);
+                    } catch (\Exception $e) {
+                        \Log::warning('Failed to delete old image file during update: ' . $e->getMessage());
+                    }
+                }
+            }
+
+            $imagePaths = [];
+            $imageNames = [];
+
+            foreach ($request->file('images') as $image) {
+                $imageName = time() . '_' . uniqid() . '_' . $image->getClientOriginalName();
+                $imagePath = $image->storeAs(config('upload.image_storage_path', 'forums/images'), $imageName, config('upload.storage_disk', 'public'));
+
+                $imagePaths[] = $imagePath;
+                $imageNames[] = $image->getClientOriginalName();
+            }
+
+            // Store as JSON for multiple images
+            $forum->image_path = json_encode($imagePaths);
+            $forum->image_original_name = json_encode($imageNames);
+        } else {
+            // If no new images are uploaded, preserve the existing image data
+            if ($request->has('existing_image_path') && $request->has('existing_image_name')) {
+                $forum->image_path = $request->existing_image_path;
+                $forum->image_original_name = $request->existing_image_name;
+            }
+        }
 
         // Handle video upload
         if ($request->hasFile('video')) {
@@ -209,6 +289,14 @@ class ForumsController extends Controller
         // Delete video file if exists
         if ($forum->video_path && Storage::disk(config('upload.storage_disk', 'public'))->exists($forum->video_path)) {
             Storage::disk(config('upload.storage_disk', 'public'))->delete($forum->video_path);
+        }
+
+        // Delete image files if they exist
+        $imagePaths = $forum->getImagePaths();
+        foreach ($imagePaths as $imagePath) {
+            if ($imagePath && Storage::disk(config('upload.storage_disk', 'public'))->exists($imagePath)) {
+                Storage::disk(config('upload.storage_disk', 'public'))->delete($imagePath);
+            }
         }
 
         $forum->delete();

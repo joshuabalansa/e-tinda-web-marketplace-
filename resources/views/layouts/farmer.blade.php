@@ -6,8 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="E-Tinda Marketplace - Farm to Table" />
     <meta name="author" content="" />
+    <meta name="theme-color" content="#28a745">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="E-Tinda">
 
     <title>E-Tinda</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('template-assets/js/jquery-ui/css/no-theme/jquery-ui-1.10.3.custom.min.css') }}">
@@ -936,6 +947,14 @@ $(document).ready(function() {
     @endif
 });
 </script>
+
+<!-- PWA Scripts -->
+@if(file_exists(public_path('build/manifest.json')))
+  @vite(['resources/js/app.js'])
+@else
+  <!-- Fallback PWA registration when Vite is not built -->
+  <script src="{{ asset('pwa-register.js') }}"></script>
+@endif
 
 @stack('scripts')
 </body>

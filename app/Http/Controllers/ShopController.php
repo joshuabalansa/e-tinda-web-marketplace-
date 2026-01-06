@@ -7,6 +7,8 @@ use App\Models\Product;
 use App\Models\Review;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ShopController extends Controller
 {
@@ -16,7 +18,7 @@ class ShopController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Product::with('user')
+            $query = Product::with(['user', 'user.association'])
                 ->where('status', 'available')
                 ->whereHas('user'); // Only show products with valid users
 
@@ -35,6 +37,14 @@ class ShopController extends Controller
             // Category filter
             if ($request->filled('category') && $request->category !== 'all') {
                 $query->where('category', $request->category);
+            }
+
+            // Cooperative filter
+            if ($request->filled('cooperative') && $request->cooperative !== 'all') {
+                $query->whereHas('user', function($q) use ($request) {
+                    $q->where('association_id', $request->cooperative)
+                      ->where('role', 'farmer');
+                });
             }
 
             // Price range filter
@@ -78,10 +88,19 @@ class ShopController extends Controller
 
             // Paginate the results
             $products = $query->paginate(9);
-            
+
             // Transform the items without losing pagination
             $products->getCollection()->transform(function ($product) {
                 try {
+                    $cooperative = null;
+                    if ($product->user && $product->user->association) {
+                        $cooperative = [
+                            'id' => $product->user->association->association_id,
+                            'name' => $product->user->association->name,
+                            'slug' => $product->user->association->slug,
+                        ];
+                    }
+
                     return (object)[
                         'id' => $product->id,
                         'name' => $product->name ?? 'Unnamed Product',
@@ -94,7 +113,8 @@ class ShopController extends Controller
                         'category' => $product->category ?? 'Other',
                         'stock' => $product->stock_quantity ?? 0,
                         'harvest_date' => $product->harvest_date ? $product->harvest_date->format('Y-m-d') : 'N/A',
-                        'storage' => 'Store in a cool, dry place'
+                        'storage' => 'Store in a cool, dry place',
+                        'cooperative' => $cooperative
                     ];
                 } catch (\Exception $e) {
                     \Log::error('Error processing product in shop index', [
@@ -104,7 +124,7 @@ class ShopController extends Controller
                     return null;
                 }
             });
-            
+
             // Filter out null entries from the collection
             $products->setCollection($products->getCollection()->filter());
 
@@ -118,9 +138,40 @@ class ShopController extends Controller
                 ->sort()
                 ->values();
 
+            // Get active cooperatives for filter (safe query - handles missing columns)
+            try {
+                // Check if association_id column exists in users table
+                $hasAssociationIdColumn = Schema::hasColumn('users', 'association_id');
+
+                if ($hasAssociationIdColumn) {
+                    // Check if is_active column exists before using it
+                    $hasIsActiveColumn = Schema::hasColumn('associations', 'is_active');
+                    if ($hasIsActiveColumn) {
+                        $cooperatives = \App\Models\Association::where('is_active', true)
+                            ->whereHas('farmers')
+                            ->orderBy('name', 'asc')
+                            ->get();
+                    } else {
+                        // Fallback: get all associations if is_active column doesn't exist yet
+                        $cooperatives = \App\Models\Association::whereHas('farmers')
+                            ->orderBy('name', 'asc')
+                            ->get();
+                    }
+                } else {
+                    // If association_id doesn't exist, return empty collection
+                    $cooperatives = collect([]);
+                }
+            } catch (\Exception $e) {
+                // If query fails for any reason, return empty collection
+                \Log::warning('Error loading cooperatives in ShopController', [
+                    'error' => $e->getMessage()
+                ]);
+                $cooperatives = collect([]);
+            }
+
             // If AJAX request, return JSON
             if ($request->ajax()) {
-                $hasFilters = request()->hasAny(['category', 'min_price', 'max_price', 'query', 'in_stock']);
+                $hasFilters = request()->hasAny(['category', 'min_price', 'max_price', 'query', 'in_stock', 'cooperative']);
                 $activeFiltersHtml = '';
 
                 if ($hasFilters) {
@@ -140,7 +191,7 @@ class ShopController extends Controller
                 ]);
             }
 
-            return view('shop.index', compact('products', 'categories'));
+            return view('shop.index', compact('products', 'categories', 'cooperatives'));
         } catch (\Exception $e) {
             \Log::error('Error in ShopController@index', [
                 'error' => $e->getMessage(),
@@ -148,10 +199,18 @@ class ShopController extends Controller
             ]);
 
             // Return empty results instead of crashing
-            $products = collect([])->paginate(9);
+            $emptyCollection = collect([]);
+            $products = new LengthAwarePaginator(
+                $emptyCollection,
+                0,
+                9,
+                1,
+                ['path' => request()->url(), 'query' => request()->query()]
+            );
             $categories = collect([]);
+            $cooperatives = collect([]);
 
-            return view('shop.index', compact('products', 'categories'))
+            return view('shop.index', compact('products', 'categories', 'cooperatives'))
                 ->with('error', 'Unable to load products. Please try again later.');
         }
     }
@@ -189,6 +248,13 @@ class ShopController extends Controller
             $isInWishlist = auth()->user()->wishlist()->where('product_id', $product->id)->exists();
         }
 
+        // Get farmer coordinates if available
+        $farmerCoordinates = null;
+        $farmer = $product->user;
+        if ($farmer && $farmer->hasValidCoordinates()) {
+            $farmerCoordinates = $farmer->getCoordinatesArray();
+        }
+
         $productData = [
             'id' => $product->id,
             'name' => $product->name,
@@ -223,7 +289,7 @@ class ShopController extends Controller
                 ];
             });
 
-        return view('shop.product', compact('productData', 'relatedProducts', 'isInWishlist'));
+        return view('shop.product', compact('productData', 'relatedProducts', 'isInWishlist', 'farmerCoordinates', 'farmer'));
     }
 
     /**
@@ -266,7 +332,7 @@ class ShopController extends Controller
             })
             ->latest()
             ->paginate(9);
-            
+
         // Transform the items without losing pagination
         $products->getCollection()->transform(function ($product) {
             return (object)[
@@ -298,7 +364,7 @@ class ShopController extends Controller
             ->where('category', $category)
             ->latest()
             ->paginate(9);
-            
+
         // Transform the items without losing pagination
         $products->getCollection()->transform(function ($product) {
             return (object)[

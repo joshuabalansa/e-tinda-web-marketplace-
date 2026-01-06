@@ -378,6 +378,88 @@
                             </div>
                         </div>
 
+                        <!-- Price Negotiation Section -->
+                        <div class="card mb-4" style="border: 1px solid #dee2e6;">
+                            <div class="card-body">
+                                <div class="form-check form-switch mb-3">
+                                    <input type="hidden" name="is_negotiation" value="0">
+                                    <input class="form-check-input" type="checkbox" id="enable_negotiation" name="is_negotiation" value="1">
+                                    <label class="form-check-label" for="enable_negotiation">
+                                        <strong><i class="fas fa-handshake me-2"></i>Request Price Negotiation</strong>
+                                        <br><small class="text-muted">Propose your price and let the farmer review your offer</small>
+                                    </label>
+                                </div>
+
+                                <div id="negotiation_section" style="display: none;">
+                                    <div class="alert alert-info mb-3">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>How it works:</strong> Enter your proposed price for each item. The farmer will review your offer and can accept or reject it. Your order will only be confirmed after the farmer accepts.
+                                    </div>
+
+                                    @foreach($groupedItems as $farmerId => $farmerItems)
+                                        @php
+                                            $firstItem = $farmerItems->first();
+                                        @endphp
+                                        <div class="farmer-section mb-3 p-3 bg-light rounded">
+                                            <h6 class="fw-bold text-success mb-3">
+                                                <i class="fas fa-store me-2"></i>
+                                                {{ $firstItem['farmer_name'] ?? 'Local Farmer' }}
+                                            </h6>
+                                            @foreach($farmerItems as $item)
+                                            <div class="row mb-3 align-items-center border-bottom pb-3">
+                                                <div class="col-md-4">
+                                                    <strong>{{ $item['name'] }}</strong>
+                                                    <br><small class="text-muted">{{ $item['quantity'] }} {{ $item['unit'] }}</small>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label small">Original Price:</label>
+                                                    <div class="text-muted">₱{{ number_format($item['price'], 2) }}/{{ $item['unit'] }}</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="negotiated_price_{{ $item['id'] }}" class="form-label small">Your Offer:</label>
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">₱</span>
+                                                        <input type="number"
+                                                               class="form-control negotiated-price-input"
+                                                               id="negotiated_price_{{ $item['id'] }}"
+                                                               name="negotiated_prices[{{ $item['id'] }}]"
+                                                               step="0.01"
+                                                               min="0"
+                                                               max="{{ $item['price'] }}"
+                                                               placeholder="{{ number_format($item['price'] * 0.9, 2) }}"
+                                                               data-original-price="{{ $item['price'] }}"
+                                                               data-quantity="{{ $item['quantity'] }}">
+                                                    </div>
+                                                    <small class="text-muted">Max: ₱{{ number_format($item['price'], 2) }}</small>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label small">Savings:</label>
+                                                    <div class="text-success fw-bold" id="savings_{{ $item['id'] }}">₱0.00</div>
+                                                </div>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                    @endforeach
+
+                                    <div class="mb-3">
+                                        <label for="negotiation_notes" class="form-label">
+                                            <i class="fas fa-comment me-2"></i>Message to Farmer (Optional)
+                                        </label>
+                                        <textarea class="form-control"
+                                                  id="negotiation_notes"
+                                                  name="negotiation_notes"
+                                                  rows="3"
+                                                  placeholder="Add a message explaining your price offer...">{{ old('negotiation_notes') }}</textarea>
+                                    </div>
+
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Note:</strong> Stock will not be reserved until the farmer accepts your offer. The order will be created after acceptance.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Payment Method -->
                         <div class="mb-4">
                             <h6><i class="fas fa-credit-card"></i> Payment Method</h6>
@@ -642,8 +724,79 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateTotal() {
         const shipping = parseFloat(shippingInput.value) || 0;
-        const total = subtotal + shipping;
+        let calculatedSubtotal = subtotal;
+
+        // If negotiation is enabled, calculate from negotiated prices
+        const negotiationEnabled = document.getElementById('enable_negotiation')?.checked;
+        if (negotiationEnabled) {
+            calculatedSubtotal = 0;
+            document.querySelectorAll('.negotiated-price-input').forEach(input => {
+                const negotiatedPrice = parseFloat(input.value) || 0;
+                const quantity = parseFloat(input.dataset.quantity) || 1;
+                if (negotiatedPrice > 0) {
+                    calculatedSubtotal += negotiatedPrice * quantity;
+                } else {
+                    // Use original price if no negotiation entered
+                    const originalPrice = parseFloat(input.dataset.originalPrice) || 0;
+                    calculatedSubtotal += originalPrice * quantity;
+                }
+            });
+        }
+
+        const total = calculatedSubtotal + shipping;
         totalDisplay.textContent = '₱' + total.toFixed(2);
+    }
+
+    // Price Negotiation Functionality
+    const enableNegotiation = document.getElementById('enable_negotiation');
+    const negotiationSection = document.getElementById('negotiation_section');
+
+    if (enableNegotiation && negotiationSection) {
+        // Toggle negotiation section
+        enableNegotiation.addEventListener('change', function() {
+            if (this.checked) {
+                negotiationSection.style.display = 'block';
+            } else {
+                negotiationSection.style.display = 'none';
+                // Clear all negotiated prices
+                document.querySelectorAll('.negotiated-price-input').forEach(input => {
+                    input.value = '';
+                    const itemId = input.id.replace('negotiated_price_', '');
+                    document.getElementById('savings_' + itemId).textContent = '₱0.00';
+                });
+            }
+            updateTotal();
+        });
+
+        // Calculate savings for each item
+        document.querySelectorAll('.negotiated-price-input').forEach(input => {
+            input.addEventListener('input', function() {
+                const originalPrice = parseFloat(this.dataset.originalPrice) || 0;
+                const quantity = parseFloat(this.dataset.quantity) || 1;
+                const negotiatedPrice = parseFloat(this.value) || 0;
+
+                // Validate max price
+                if (negotiatedPrice > originalPrice) {
+                    this.value = originalPrice.toFixed(2);
+                    alert('Negotiated price cannot be higher than original price.');
+                    return;
+                }
+
+                // Calculate savings
+                const originalTotal = originalPrice * quantity;
+                const negotiatedTotal = negotiatedPrice > 0 ? negotiatedPrice * quantity : originalTotal;
+                const savings = originalTotal - negotiatedTotal;
+
+                const itemId = this.id.replace('negotiated_price_', '');
+                const savingsElement = document.getElementById('savings_' + itemId);
+                if (savingsElement) {
+                    savingsElement.textContent = '₱' + savings.toFixed(2);
+                    savingsElement.className = savings > 0 ? 'text-success fw-bold' : 'text-muted';
+                }
+
+                updateTotal();
+            });
+        });
     }
 
     // Update delivery option input when radio changes
@@ -677,11 +830,35 @@ document.addEventListener('DOMContentLoaded', function() {
         const shipping = parseFloat(shippingInput.value) || 0;
         document.getElementById('shipping_input').value = shipping;
 
+        // Validate negotiation prices if negotiation is enabled
+        const negotiationEnabled = document.getElementById('enable_negotiation')?.checked;
+        if (negotiationEnabled) {
+            let hasInvalidPrice = false;
+            document.querySelectorAll('.negotiated-price-input').forEach(input => {
+                const negotiatedPrice = parseFloat(input.value) || 0;
+                const originalPrice = parseFloat(input.dataset.originalPrice) || 0;
+
+                if (negotiatedPrice > originalPrice) {
+                    hasInvalidPrice = true;
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+
+            if (hasInvalidPrice) {
+                e.preventDefault();
+                alert('Please ensure all negotiated prices are not higher than original prices.');
+                return false;
+            }
+        }
+
         // Show loading state
         const submitButton = document.querySelector('button[type="submit"][form="checkoutForm"]');
         if (submitButton) {
             submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing...';
+            const buttonText = negotiationEnabled ? 'Submitting Negotiation...' : 'Processing...';
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> ' + buttonText;
         }
     });
 });

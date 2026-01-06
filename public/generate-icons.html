@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Icon Generator - E-Tinda</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #28a745;
+        }
+        .upload-area {
+            border: 2px dashed #28a745;
+            padding: 40px;
+            text-align: center;
+            border-radius: 10px;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            background: #f0f8f0;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #218838;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .preview {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .preview img {
+            max-width: 200px;
+            border: 1px solid #ddd;
+            margin: 10px;
+        }
+        .download-links {
+            margin-top: 20px;
+        }
+        .download-links a {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌱 E-Tinda PWA Icon Generator</h1>
+        <div class="info">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Upload your logo/image (PNG, JPG, or ICO)</li>
+                <li>Click "Generate Icons"</li>
+                <li>Download all generated icons</li>
+                <li>Extract the ZIP file to <code>/var/www/e-tinda/public/icons/</code></li>
+            </ol>
+        </div>
+
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <p>📁 Click to upload your logo/image</p>
+            <p style="font-size: 12px; color: #666;">PNG, JPG, or ICO format</p>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+
+        <div style="text-align: center;">
+            <button id="generateBtn" onclick="generateIcons()" disabled>Generate Icons</button>
+            <button id="downloadBtn" onclick="downloadAll()" disabled>Download All Icons (ZIP)</button>
+        </div>
+
+        <div class="preview" id="preview"></div>
+        <div class="download-links" id="downloadLinks"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        const iconSizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        let sourceImage = null;
+        let generatedIcons = {};
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        sourceImage = img;
+                        document.getElementById('preview').innerHTML =
+                            '<h3>Preview:</h3><img src="' + event.target.result + '" alt="Source">';
+                        document.getElementById('generateBtn').disabled = false;
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function generateIcons() {
+            if (!sourceImage) {
+                alert('Please upload an image first!');
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const preview = document.getElementById('preview');
+            const downloadLinks = document.getElementById('downloadLinks');
+
+            preview.innerHTML = '<h3>Generated Icons:</h3>';
+            downloadLinks.innerHTML = '';
+            generatedIcons = {};
+
+            iconSizes.forEach(size => {
+                canvas.width = size;
+                canvas.height = size;
+
+                // Clear canvas
+                ctx.clearRect(0, 0, size, size);
+
+                // Draw image
+                ctx.drawImage(sourceImage, 0, 0, size, size);
+
+                // Convert to blob
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.style.width = '100px';
+                    img.style.height = '100px';
+                    preview.appendChild(img);
+
+                    // Store blob for download
+                    generatedIcons[`icon-${size}x${size}.png`] = blob;
+
+                    // Create download link
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `icon-${size}x${size}.png`;
+                    link.textContent = `Download ${size}x${size}`;
+                    downloadLinks.appendChild(link);
+                }, 'image/png');
+            });
+
+            document.getElementById('downloadBtn').disabled = false;
+        }
+
+        async function downloadAll() {
+            if (Object.keys(generatedIcons).length === 0) {
+                alert('Please generate icons first!');
+                return;
+            }
+
+            const zip = new JSZip();
+
+            // Add all icons to zip
+            for (const [filename, blob] of Object.entries(generatedIcons)) {
+                zip.file(filename, blob);
+            }
+
+            // Generate and download zip
+            const content = await zip.generateAsync({type: 'blob'});
+            const url = URL.createObjectURL(content);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'e-tinda-pwa-icons.zip';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
+

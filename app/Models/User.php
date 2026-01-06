@@ -53,6 +53,7 @@ class User extends Authenticatable
         'order_notifications',
         'marketing_notifications',
         'is_active',
+        'association_id',
     ];
 
     /**
@@ -145,6 +146,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the association (cooperative) this farmer belongs to.
+     */
+    public function association()
+    {
+        return $this->belongsTo(Association::class, 'association_id', 'association_id');
+    }
+
+    /**
      * Get formatted location string for display.
      * Uses farm_address, city, state, country fields.
      */
@@ -179,5 +188,52 @@ class User extends Authenticatable
         }
 
         return 'Location not specified';
+    }
+
+    /**
+     * Parse coordinates string into latitude and longitude array.
+     * Expected format: "lat, lng" or "lat,lng"
+     *
+     * @return array|null Returns ['lat' => float, 'lng' => float] or null if invalid
+     */
+    public function getCoordinatesArray()
+    {
+        if (!$this->coordinates) {
+            return null;
+        }
+
+        // Remove whitespace and split by comma
+        $coords = array_map('trim', explode(',', $this->coordinates));
+
+        if (count($coords) !== 2) {
+            return null;
+        }
+
+        $lat = filter_var($coords[0], FILTER_VALIDATE_FLOAT);
+        $lng = filter_var($coords[1], FILTER_VALIDATE_FLOAT);
+
+        // Validate latitude (-90 to 90) and longitude (-180 to 180)
+        if ($lat === false || $lng === false) {
+            return null;
+        }
+
+        if ($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180) {
+            return null;
+        }
+
+        return [
+            'lat' => (float) $lat,
+            'lng' => (float) $lng
+        ];
+    }
+
+    /**
+     * Check if user has valid GPS coordinates.
+     *
+     * @return bool
+     */
+    public function hasValidCoordinates()
+    {
+        return $this->getCoordinatesArray() !== null;
     }
 }

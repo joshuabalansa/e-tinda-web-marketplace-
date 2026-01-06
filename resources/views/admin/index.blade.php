@@ -99,32 +99,42 @@
     <div class="col-sm-8">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <div class="panel-title">Recent Users</div>
+                <div class="panel-title">Recent Orders</div>
             </div>
             <div class="panel-body">
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>Name</th>
-                                <th>Role</th>
-                                <th>Email</th>
-                                <th>Joined</th>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Type</th>
+                                <th>Date</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($recent_users as $index => $user)
+                            @foreach($recent_orders as $order)
                             <tr>
-                                <td>{{ $index + 1 }}</td>
-                                <td>{{ $user->name }}</td>
+                                <td>#{{ $order->id }}</td>
+                                <td>{{ $order->user->name ?? 'Guest' }}</td>
+                                <td>${{ number_format($order->total, 2) }}</td>
                                 <td>
-                                    <span class="label label-{{ $user->role->value === 'admin' ? 'danger' : ($user->role->value === 'farmer' ? 'success' : 'info') }}">
-                                        {{ ucfirst($user->role->value) }}
+                                    <span class="label label-{{ $order->status === 'completed' ? 'success' : ($order->status === 'pending' ? 'warning' : ($order->status === 'cancelled' ? 'danger' : 'info')) }}">
+                                        {{ ucfirst($order->status) }}
                                     </span>
                                 </td>
-                                <td>{{ $user->email }}</td>
-                                <td>{{ $user->created_at->format('M d, Y') }}</td>
+                                <td>
+                                    @if($order->is_negotiation)
+                                        <span class="label label-warning">
+                                            <i class="entypo-hand"></i> Negotiation
+                                        </span>
+                                    @else
+                                        <span class="label label-default">Regular</span>
+                                    @endif
+                                </td>
+                                <td>{{ $order->created_at->format('M d, Y') }}</td>
                             </tr>
                             @endforeach
                         </tbody>

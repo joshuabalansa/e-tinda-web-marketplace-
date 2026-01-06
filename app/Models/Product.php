@@ -44,6 +44,15 @@ class Product extends Model
     }
 
     /**
+     * Get the association (cooperative) this product belongs to via the farmer.
+     * This is a helper method to access association through user.
+     */
+    public function getAssociationAttribute()
+    {
+        return $this->user ? $this->user->association : null;
+    }
+
+    /**
      * Calculate the average rating for this product
      */
     public function averageRating()
@@ -100,12 +109,12 @@ class Product extends Model
         // Use Storage::url() for proper URL generation
         try {
             $disk = Storage::disk('public');
-            
+
             // Check if file exists
             if ($disk->exists($cleanPath)) {
                 return $disk->url($cleanPath);
             }
-            
+
             // Fallback to direct URL construction
             return url('storage/' . $cleanPath);
         } catch (\Exception $e) {

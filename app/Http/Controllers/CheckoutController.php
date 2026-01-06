@@ -130,7 +130,11 @@ class CheckoutController extends Controller
             'shipping' => 'required|numeric|min:0',
             'delivery_option' => 'required|in:pickup,delivery',
             'payment_method' => 'required|in:cash',
-            'special_instructions' => 'nullable|string|max:2000'
+            'special_instructions' => 'nullable|string|max:2000',
+            'is_negotiation' => 'nullable|boolean',
+            'negotiated_prices' => 'nullable|array',
+            'negotiated_prices.*' => 'nullable|numeric|min:0',
+            'negotiation_notes' => 'nullable|string|max:1000'
         ]);
 
         // Additional validation for delivery option
@@ -149,18 +153,81 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
+        // Check if this is a negotiation request
+        $negotiatedPrices = $request->negotiated_prices ?? [];
+
+        // Filter out empty values from negotiated prices (including empty strings, null, 0, etc.)
+        $filteredNegotiatedPrices = array_filter($negotiatedPrices, function($price) {
+            return $price !== null
+                && $price !== ''
+                && trim($price) !== ''
+                && floatval($price) > 0;
+        });
+
+        $hasNegotiatedPrices = !empty($filteredNegotiatedPrices);
+
+        // Set is_negotiation if explicitly set OR if negotiated prices are provided
+        $isNegotiation = $request->input('is_negotiation') == '1'
+            || $request->input('is_negotiation') === 1
+            || $request->input('is_negotiation') === true
+            || $hasNegotiatedPrices;
+
+        // Debug logging with all request data
+        \Log::info('Checkout Negotiation Debug', [
+            'is_negotiation_input' => $request->input('is_negotiation'),
+            'is_negotiation_parsed' => $isNegotiation,
+            'negotiated_prices_raw' => $negotiatedPrices,
+            'negotiated_prices_filtered' => $filteredNegotiatedPrices,
+            'has_negotiated_prices' => $hasNegotiatedPrices,
+            'cart_items' => array_map(function($item) {
+                return ['id' => $item['id'], 'name' => $item['name'] ?? 'unknown'];
+            }, $items)
+        ]);
+
         try {
             DB::beginTransaction();
 
-            // Calculate subtotal from cart items
+            // Calculate subtotal - use negotiated prices if provided
             $subtotal = 0;
             foreach ($items as $item) {
-                $subtotal += $item['subtotal'];
+                $productId = $item['id'];
+                $negotiatedPriceForSubtotal = null;
+
+                // Check for negotiated price using multiple key formats
+                $productIdKeys = [
+                    $productId,
+                    (string)$productId,
+                    (int)$productId
+                ];
+
+                foreach ($productIdKeys as $key) {
+                    if (isset($negotiatedPrices[$key])
+                        && $negotiatedPrices[$key] !== null
+                        && $negotiatedPrices[$key] !== ''
+                        && floatval($negotiatedPrices[$key]) > 0) {
+                        $negotiatedPriceForSubtotal = floatval($negotiatedPrices[$key]);
+                        break;
+                    }
+                }
+
+                if ($negotiatedPriceForSubtotal !== null) {
+                    // Use negotiated price
+                    $subtotal += $negotiatedPriceForSubtotal * $item['quantity'];
+                } else {
+                    // Use original price
+                    $subtotal += $item['subtotal'];
+                }
             }
 
             // Calculate total with shipping
             $shipping = $request->shipping;
             $total = $subtotal + $shipping;
+
+            // Ensure is_negotiation is set if we have negotiated prices
+            // This handles cases where negotiated prices are provided but the flag wasn't explicitly set
+            if ($hasNegotiatedPrices && !$isNegotiation) {
+                $isNegotiation = true;
+            }
 
             // Create order with all user inputs
             $order = Order::create([
@@ -189,15 +256,82 @@ class CheckoutController extends Controller
                 'payment_method' => $request->payment_method,
                 'special_instructions' => $request->filled('special_instructions')
                     ? trim($request->special_instructions)
+                    : null,
+                'is_negotiation' => $isNegotiation,
+                'negotiation_notes' => $isNegotiation && $request->filled('negotiation_notes')
+                    ? trim($request->negotiation_notes)
                     : null
             ]);
+
+            // Track if we found any negotiated prices during item creation
+            $foundNegotiatedPrices = false;
 
             // Add order items
             foreach ($items as $item) {
                 $product = Product::findOrFail($item['id']);
 
-                if ($product->stock_quantity < $item['quantity']) {
-                    throw new \Exception("Not enough stock available for {$product->name}");
+                // Only check stock if NOT a negotiation (stock will be deducted when farmer accepts)
+                if (!$isNegotiation) {
+                    if ($product->stock_quantity < $item['quantity']) {
+                        throw new \Exception("Not enough stock available for {$product->name}");
+                    }
+                } else {
+                    // For negotiations, just check if product exists and has stock
+                    if ($product->stock_quantity < $item['quantity']) {
+                        throw new \Exception("Not enough stock available for {$product->name}. Please adjust your order.");
+                    }
+                }
+
+                // Get negotiated price - check for it regardless of is_negotiation flag
+                // This ensures prices are saved even if checkbox wasn't checked but prices were entered
+                $negotiatedPrice = null;
+                $productIdKeys = [
+                    $product->id,
+                    (string)$product->id,
+                    (int)$product->id,
+                    $item['id'],
+                    (string)$item['id'],
+                    (int)$item['id']
+                ];
+
+                foreach ($productIdKeys as $key) {
+                    if (isset($negotiatedPrices[$key])
+                        && $negotiatedPrices[$key] !== null
+                        && $negotiatedPrices[$key] !== ''
+                        && trim($negotiatedPrices[$key]) !== '') {
+                        $priceValue = floatval($negotiatedPrices[$key]);
+                        // Allow price to be > 0 and <= original price (or allow equal for flexibility)
+                        if ($priceValue > 0 && $priceValue <= $product->price_per_unit) {
+                            $negotiatedPrice = $priceValue;
+                            $foundNegotiatedPrices = true;
+                            // If we found a negotiated price, ensure is_negotiation is set
+                            if (!$isNegotiation) {
+                                $isNegotiation = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                // Log if we're in negotiation mode but didn't find a price for this item
+                if ($isNegotiation && $negotiatedPrice === null && !empty($filteredNegotiatedPrices)) {
+                    \Log::debug('Negotiation mode but no price found for item', [
+                        'product_id' => $product->id,
+                        'item_id' => $item['id'],
+                        'available_keys' => array_keys($negotiatedPrices),
+                        'tried_keys' => $productIdKeys
+                    ]);
+                }
+
+                // Additional check: if is_negotiation is true but we didn't find a price, log it
+                if ($isNegotiation && $negotiatedPrice === null) {
+                    \Log::warning('Negotiation flag set but no negotiated price found', [
+                        'order_id' => $order->id ?? 'not_created',
+                        'product_id' => $product->id,
+                        'item_id' => $item['id'] ?? null,
+                        'negotiated_prices_keys' => array_keys($negotiatedPrices),
+                        'negotiated_prices' => $negotiatedPrices
+                    ]);
                 }
 
                 // Create order item
@@ -205,12 +339,34 @@ class CheckoutController extends Controller
                     'order_id' => $order->id,
                     'product_id' => $product->id,
                     'quantity' => $item['quantity'],
-                    'price' => $product->price_per_unit
+                    'price' => $product->price_per_unit,
+                    'negotiated_price' => $negotiatedPrice
                 ]);
 
-                // Update product stock
-                $product->stock_quantity -= $item['quantity'];
-                $product->save();
+                // Only update product stock if NOT a negotiation
+                if (!$isNegotiation) {
+                    $product->stock_quantity -= $item['quantity'];
+                    $product->save();
+                }
+            }
+
+            // Update order's is_negotiation flag if we found any negotiated prices
+            // This ensures the flag is set even if it wasn't set during order creation
+            if ($foundNegotiatedPrices) {
+                if (!$order->is_negotiation) {
+                    $order->update(['is_negotiation' => true]);
+                    \Log::info('Updated order is_negotiation flag', [
+                        'order_id' => $order->id,
+                        'found_negotiated_prices' => $foundNegotiatedPrices
+                    ]);
+                }
+            } else if ($isNegotiation && !$foundNegotiatedPrices) {
+                // Log warning if negotiation was expected but no prices were found
+                \Log::warning('Negotiation flag set but no negotiated prices found in items', [
+                    'order_id' => $order->id,
+                    'negotiated_prices_input' => $negotiatedPrices,
+                    'filtered_prices' => $filteredNegotiatedPrices
+                ]);
             }
 
             // Clear cart
@@ -223,6 +379,11 @@ class CheckoutController extends Controller
             }
 
             DB::commit();
+
+            if ($isNegotiation) {
+                return redirect()->route('checkout.success', $order->id)
+                               ->with('success', 'Price negotiation request submitted! The farmer will review your offer.');
+            }
 
             return redirect()->route('checkout.success', $order->id)
                            ->with('success', 'Order placed successfully!');

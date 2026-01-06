@@ -68,7 +68,18 @@
                                         <span class="badge bg-{{ $order->status === 'completed' ? 'success' : ($order->status === 'pending' ? 'warning' : ($order->status === 'cancelled' ? 'danger' : 'info')) }} rounded-pill">
                                             {{ ucfirst($order->status) }}
                                         </span>
+                                        @if($order->is_negotiation)
+                                            <span class="badge bg-warning rounded-pill ms-2">
+                                                <i class="fas fa-handshake me-1"></i> Negotiation
+                                            </span>
+                                        @endif
                                     </p>
+                                    @if($order->is_negotiation && $order->status === 'pending')
+                                        <div class="alert alert-info mt-3 mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <strong>Price Negotiation Pending:</strong> Your price offer is being reviewed by the farmer. You will be notified once they respond.
+                                        </div>
+                                    @endif
                                     @if($order->status === 'pending')
                                         <div class="mt-3">
                                             <form action="{{ route('buyer.orders.cancel', $order->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order? The stock will be restored to inventory.');">
@@ -189,7 +200,17 @@
                                     <span class="badge bg-success rounded-pill" style="font-size: 0.8rem;">{{ $item->quantity }}x</span>
                                 </div>
                                 <div class="col-md-2 text-end">
-                                    <strong class="text-success" style="font-size: 0.9rem;">₱{{ number_format($item->price, 2) }}</strong>
+                                    @if($item->negotiated_price !== null)
+                                        <div>
+                                            <small class="text-muted text-decoration-line-through">₱{{ number_format($item->price, 2) }}</small>
+                                            <br>
+                                            <strong class="text-success" style="font-size: 0.9rem;">₱{{ number_format($item->negotiated_price, 2) }}</strong>
+                                            <br>
+                                            <small class="text-info">Negotiated</small>
+                                        </div>
+                                    @else
+                                        <strong class="text-success" style="font-size: 0.9rem;">₱{{ number_format($item->price, 2) }}</strong>
+                                    @endif
                                 </div>
                             </div>
                             @endforeach
@@ -200,7 +221,23 @@
                                     <small class="text-muted">Subtotal from this farmer:</small>
                                 </div>
                                 <div class="col-md-2 text-end">
-                                    <strong class="text-success">₱{{ number_format($items->sum(function($item) { return $item->price * $item->quantity; }), 2) }}</strong>
+                                    @php
+                                        $farmerSubtotal = $items->sum(function($item) {
+                                            return ($item->negotiated_price ?? $item->price) * $item->quantity;
+                                        });
+                                        $originalSubtotal = $items->sum(function($item) {
+                                            return $item->price * $item->quantity;
+                                        });
+                                    @endphp
+                                    @if($farmerSubtotal < $originalSubtotal)
+                                        <div>
+                                            <small class="text-muted text-decoration-line-through">₱{{ number_format($originalSubtotal, 2) }}</small>
+                                            <br>
+                                            <strong class="text-success">₱{{ number_format($farmerSubtotal, 2) }}</strong>
+                                        </div>
+                                    @else
+                                        <strong class="text-success">₱{{ number_format($farmerSubtotal, 2) }}</strong>
+                                    @endif
                                 </div>
                             </div>
                         </div>

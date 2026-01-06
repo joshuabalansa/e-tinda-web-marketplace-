@@ -25,38 +25,113 @@ class FarmerAccountController extends Controller
     {
         $user = Auth::user();
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:500',
-            'business_name' => 'nullable|string|max:255',
-            'business_type' => 'nullable|string|max:100',
-            'business_description' => 'nullable|string|max:1000',
-            'farm_address' => 'nullable|string|max:500',
-            'city' => 'nullable|string|max:100',
-            'state' => 'nullable|string|max:100',
-            'zip_code' => 'nullable|string|max:20',
-            'country' => 'nullable|string|max:100',
-            'delivery_radius' => 'nullable|integer|min:0',
-            'coordinates' => 'nullable|string|max:255',
-            'password' => 'nullable|string|min:8|confirmed',
-        ]);
+        // Build validation rules based on what fields are present
+        $rules = [];
 
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->phone = $request->phone;
-        $user->address = $request->address;
-        $user->business_name = $request->business_name;
-        $user->business_type = $request->business_type;
-        $user->business_description = $request->business_description;
-        $user->farm_address = $request->farm_address;
-        $user->city = $request->city;
-        $user->state = $request->state;
-        $user->zip_code = $request->zip_code;
-        $user->country = $request->country;
-        $user->delivery_radius = $request->delivery_radius;
-        $user->coordinates = $request->coordinates;
+        // Only validate fields that are actually in the request
+        if ($request->has('name')) {
+            $rules['name'] = 'required|string|max:255';
+        }
+        if ($request->has('email')) {
+            $rules['email'] = 'required|email|unique:users,email,' . $user->id;
+        }
+        if ($request->has('phone')) {
+            $rules['phone'] = 'nullable|string|max:20';
+        }
+        if ($request->has('address')) {
+            $rules['address'] = 'nullable|string|max:500';
+        }
+        if ($request->has('business_name')) {
+            $rules['business_name'] = 'nullable|string|max:255';
+        }
+        if ($request->has('business_type')) {
+            $rules['business_type'] = 'nullable|string|max:100';
+        }
+        if ($request->has('business_description')) {
+            $rules['business_description'] = 'nullable|string|max:1000';
+        }
+        if ($request->has('business_license')) {
+            $rules['business_license'] = 'nullable|string|max:255';
+        }
+        if ($request->has('tax_id')) {
+            $rules['tax_id'] = 'nullable|string|max:255';
+        }
+        if ($request->has('farm_address')) {
+            $rules['farm_address'] = 'nullable|string|max:500';
+        }
+        if ($request->has('city')) {
+            $rules['city'] = 'nullable|string|max:100';
+        }
+        if ($request->has('state')) {
+            $rules['state'] = 'nullable|string|max:100';
+        }
+        if ($request->has('zip_code')) {
+            $rules['zip_code'] = 'nullable|string|max:20';
+        }
+        if ($request->has('country')) {
+            $rules['country'] = 'nullable|string|max:100';
+        }
+        if ($request->has('delivery_radius')) {
+            $rules['delivery_radius'] = 'nullable|integer|min:0|max:100';
+        }
+        if ($request->has('coordinates')) {
+            $rules['coordinates'] = 'nullable|string|max:255';
+        }
+        if ($request->has('password')) {
+            $rules['password'] = 'nullable|string|min:8|confirmed';
+        }
+
+        $request->validate($rules);
+
+        // Update only the fields that are present in the request
+        if ($request->has('name')) {
+            $user->name = $request->name;
+        }
+        if ($request->has('email')) {
+            $user->email = $request->email;
+        }
+        if ($request->has('phone')) {
+            $user->phone = $request->phone;
+        }
+        if ($request->has('address')) {
+            $user->address = $request->address;
+        }
+        if ($request->has('business_name')) {
+            $user->business_name = $request->business_name;
+        }
+        if ($request->has('business_type')) {
+            $user->business_type = $request->business_type;
+        }
+        if ($request->has('business_description')) {
+            $user->business_description = $request->business_description;
+        }
+        if ($request->has('business_license')) {
+            $user->business_license = $request->business_license;
+        }
+        if ($request->has('tax_id')) {
+            $user->tax_id = $request->tax_id;
+        }
+        if ($request->has('farm_address')) {
+            $user->farm_address = $request->farm_address;
+        }
+        if ($request->has('city')) {
+            $user->city = $request->city;
+        }
+        if ($request->has('state')) {
+            $user->state = $request->state;
+        }
+        if ($request->has('zip_code')) {
+            $user->zip_code = $request->zip_code;
+        }
+        if ($request->has('country')) {
+            $user->country = $request->country;
+        }
+        if ($request->has('delivery_radius')) {
+            $user->delivery_radius = $request->delivery_radius;
+        }
+        if ($request->has('coordinates')) {
+            $user->coordinates = $request->coordinates;
+        }
 
         // Update password if provided
         if ($request->filled('password')) {

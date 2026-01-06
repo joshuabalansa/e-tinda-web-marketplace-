@@ -30,6 +30,14 @@
             <!-- Price -->
             <h2 class="text-success mb-2">₱{{ number_format($productData['price'], 2) }}/{{ $productData['unit'] }}</h2>
 
+            <!-- Price Watchlist Link -->
+            <div class="mb-3">
+                <a href="https://www.investnegrosoccidental.com/price" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                    <i class="fas fa-chart-line me-2 text-info"></i>
+                    <span class="text-info">View Price Watchlist</span>
+                </a>
+            </div>
+
             <!-- Rating Summary -->
             @if($productData['total_reviews'] > 0)
                 <div class="mb-4">
@@ -62,6 +70,42 @@
                     <p class="mb-1"><strong>{{ __('shop.location') }}:</strong> {{ $productData['location'] }}</p>
                 </div>
             </div>
+
+            <!-- Farmer Location Map -->
+            @if($farmerCoordinates)
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-map-marker-alt me-2"></i>Farm Location
+                    </h5>
+                    <div id="farmer-location-map" style="height: 300px; width: 100%; border-radius: 8px; overflow: hidden; position: relative; background-color: #f0f0f0;"></div>
+                    @if($farmer && $farmer->farm_address)
+                        <p class="text-muted small mt-2 mb-0">
+                            <i class="fas fa-info-circle me-1"></i>
+                            {{ $farmer->farm_address }}
+                        </p>
+                    @endif
+                </div>
+            </div>
+            @elseif($farmer && $farmer->farm_address)
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-map-marker-alt me-2"></i>Farm Location
+                    </h5>
+                    <p class="mb-0">
+                        <i class="fas fa-map-pin me-2 text-success"></i>
+                        {{ $farmer->farm_address }}
+                        @if($farmer->city || $farmer->state)
+                            <br>
+                            <small class="text-muted">
+                                {{ $farmer->city }}{{ $farmer->city && $farmer->state ? ', ' : '' }}{{ $farmer->state }}
+                            </small>
+                        @endif
+                    </p>
+                </div>
+            </div>
+            @endif
 
             <!-- Add to Cart -->
             <form action="{{ route('cart.add') }}" method="POST" class="mb-4">
@@ -388,9 +432,132 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
+// Initialize Leaflet map for farmer location (OpenStreetMap - Free, No API Key Required)
+@if($farmerCoordinates)
+(function() {
+    const farmerCoords = [{{ $farmerCoordinates['lat'] }}, {{ $farmerCoordinates['lng'] }}];
+
+    function initMap() {
+        const mapElement = document.getElementById('farmer-location-map');
+        if (!mapElement) {
+            console.error('Map element not found');
+            return;
+        }
+
+        // Check if Leaflet is loaded
+        if (typeof L === 'undefined') {
+            console.error('Leaflet library not loaded');
+            mapElement.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Loading map...</div>';
+            return;
+        }
+
+        try {
+            // Initialize map centered on farmer location
+            const map = L.map('farmer-location-map', {
+                center: farmerCoords,
+                zoom: 15,
+                zoomControl: true
+            });
+
+            // Add OpenStreetMap tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Use default marker icon (more reliable than external icon)
+            const marker = L.marker(farmerCoords).addTo(map);
+
+            // Create popup content
+            let popupContent = '<div style="padding: 8px; min-width: 200px;">';
+            popupContent += '<h6 style="margin: 0 0 8px 0; font-weight: bold; color: #28a745; font-size: 14px;">{{ addslashes($productData["vendor"]) }}</h6>';
+            popupContent += '<p style="margin: 0; font-size: 12px; color: #666;">';
+            @if($farmer && $farmer->farm_address)
+                popupContent += '{{ addslashes($farmer->farm_address) }}<br>';
+            @endif
+            @if($farmer && ($farmer->city || $farmer->state))
+                popupContent += '{{ addslashes($farmer->city) }}{{ $farmer->city && $farmer->state ? ", " : "" }}{{ addslashes($farmer->state) }}';
+            @endif
+            popupContent += '</p></div>';
+
+            marker.bindPopup(popupContent).openPopup();
+        } catch (error) {
+            console.error('Error initializing map:', error);
+            mapElement.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">Error loading map. Please refresh the page.</div>';
+        }
+    }
+
+    // Load Leaflet JS
+    function loadLeafletJS() {
+        // Check if already loaded
+        if (typeof L !== 'undefined') {
+            // Wait a moment for CSS to be fully applied
+            setTimeout(initMap, 50);
+            return;
+        }
+
+        // Check if JS script is already in the page
+        if (!document.querySelector('script[src*="leaflet.js"]')) {
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+            script.crossOrigin = '';
+            script.onload = function() {
+                // Small delay to ensure everything is ready
+                setTimeout(initMap, 100);
+            };
+            script.onerror = function() {
+                const mapElement = document.getElementById('farmer-location-map');
+                if (mapElement) {
+                    mapElement.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">Failed to load map library. Please check your internet connection.</div>';
+                }
+            };
+            document.body.appendChild(script);
+        } else {
+            // Script exists, wait for it to load
+            const checkInterval = setInterval(function() {
+                if (typeof L !== 'undefined') {
+                    clearInterval(checkInterval);
+                    setTimeout(initMap, 100);
+                }
+            }, 100);
+
+            // Timeout after 5 seconds
+            setTimeout(function() {
+                clearInterval(checkInterval);
+                if (typeof L === 'undefined') {
+                    const mapElement = document.getElementById('farmer-location-map');
+                    if (mapElement) {
+                        mapElement.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">Map library failed to load. Please refresh the page.</div>';
+                    }
+                }
+            }, 5000);
+        }
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadLeafletJS);
+    } else {
+        loadLeafletJS();
+    }
+})();
+@endif
 </script>
 
 <style>
+#farmer-location-map {
+    height: 300px !important;
+    width: 100% !important;
+    z-index: 1;
+}
+.leaflet-container {
+    height: 100% !important;
+    width: 100% !important;
+    border-radius: 8px;
+}
+
 .wishlist-btn {
     transition: all 0.3s ease !important;
     border-radius: 50% !important;

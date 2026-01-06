@@ -106,6 +106,21 @@
               </div>
               <input type="hidden" name="category" id="categoryInput" value="{{ request('category', 'all') }}">
 
+              <!-- Cooperatives Filter -->
+              @if(isset($cooperatives) && $cooperatives->count() > 0)
+                <h6 class="mb-3 mt-4">Cooperatives</h6>
+                <div class="mb-4">
+                  <select name="cooperative" id="cooperativeInput" class="form-select form-select-sm" onchange="applyFilters()">
+                    <option value="all" {{ !request('cooperative') || request('cooperative') == 'all' ? 'selected' : '' }}>All Cooperatives</option>
+                    @foreach($cooperatives as $cooperative)
+                      <option value="{{ $cooperative->association_id }}" {{ request('cooperative') == $cooperative->association_id ? 'selected' : '' }}>
+                        {{ $cooperative->name }}
+                      </option>
+                    @endforeach
+                  </select>
+                </div>
+              @endif
+
               <!-- Price Range -->
               <h6 class="mb-3">{{ __('shop.price_range') }}</h6>
               <div class="row g-2 mb-4">

@@ -30,15 +30,18 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Default role to buyer if not provided
+        $role = $request->input('role', 'buyer');
+
         $validationRules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['required', 'string', 'in:farmer,buyer'],
+            'role' => ['nullable', 'string', 'in:farmer,buyer'],
         ];
 
         // Add location validation for farmers
-        if ($request->role === 'farmer') {
+        if ($role === 'farmer') {
             $validationRules['farm_address'] = ['required', 'string', 'max:500'];
             $validationRules['city'] = ['required', 'string', 'max:100'];
             $validationRules['state'] = ['required', 'string', 'max:100'];
@@ -52,11 +55,11 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
+            'role' => $role,
         ];
 
         // Add location fields for farmers
-        if ($request->role === 'farmer') {
+        if ($role === 'farmer') {
             $userData['farm_address'] = $request->farm_address;
             $userData['city'] = $request->city;
             $userData['state'] = $request->state;

@@ -36,8 +36,26 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <i class="fas fa-check-circle fa-5x mb-4"></i>
-                <h1 class="display-4 fw-bold mb-3">Order Placed Successfully!</h1>
-                <p class="lead mb-4">Thank you for supporting local farmers. Your order has been confirmed.</p>
+                <h1 class="display-4 fw-bold mb-3">
+                    @if($order->is_negotiation)
+                        Price Negotiation Request Submitted!
+                    @else
+                        Order Placed Successfully!
+                    @endif
+                </h1>
+                <p class="lead mb-4">
+                    @if($order->is_negotiation)
+                        Thank you for supporting local farmers. Your price negotiation request has been submitted. The farmer will review your offer and notify you once they respond.
+                    @else
+                        Thank you for supporting local farmers. Your order has been confirmed.
+                    @endif
+                </p>
+                @if($order->is_negotiation)
+                    <div class="alert alert-warning mt-3" style="background-color: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                        <i class="fas fa-handshake me-2"></i>
+                        <strong>Negotiation Status:</strong> Pending farmer review
+                    </div>
+                @endif
                 <div class="row text-center">
                     <div class="col-md-4">
                         <h5><i class="fas fa-receipt me-2"></i>Order #{{ $order->id }}</h5>
@@ -70,6 +88,9 @@
                         $firstItem = $farmerItems->first();
                         $farmer = $firstItem->product->user;
                         $farmerSubtotal = $farmerItems->sum(function($item) {
+                            return ($item->negotiated_price ?? $item->price) * $item->quantity;
+                        });
+                        $farmerOriginalSubtotal = $farmerItems->sum(function($item) {
                             return $item->price * $item->quantity;
                         });
                     @endphp
@@ -106,7 +127,19 @@
                                     <span class="badge bg-success rounded-pill">{{ $item->quantity }}x</span>
                                 </div>
                                 <div class="col-md-2 text-end">
-                                    <strong class="text-success">₱{{ number_format($item->price * $item->quantity, 2) }}</strong>
+                                    @if($item->negotiated_price !== null)
+                                        <div>
+                                            <small class="text-muted text-decoration-line-through">₱{{ number_format($item->price * $item->quantity, 2) }}</small>
+                                            <br>
+                                            <strong class="text-success">₱{{ number_format($item->negotiated_price * $item->quantity, 2) }}</strong>
+                                            <br>
+                                            <small class="text-info">
+                                                <i class="fas fa-handshake"></i> Negotiated
+                                            </small>
+                                        </div>
+                                    @else
+                                        <strong class="text-success">₱{{ number_format($item->price * $item->quantity, 2) }}</strong>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -117,7 +150,17 @@
                             <small class="text-muted">Subtotal from {{ $farmer->business_name ?? $farmer->name }}:</small>
                         </div>
                         <div class="col-md-2 text-end">
-                            <strong class="text-success">₱{{ number_format($farmerSubtotal, 2) }}</strong>
+                            @if($farmerSubtotal < $farmerOriginalSubtotal)
+                                <div>
+                                    <small class="text-muted text-decoration-line-through">₱{{ number_format($farmerOriginalSubtotal, 2) }}</small>
+                                    <br>
+                                    <strong class="text-success">₱{{ number_format($farmerSubtotal, 2) }}</strong>
+                                    <br>
+                                    <small class="text-danger">Saved: ₱{{ number_format($farmerOriginalSubtotal - $farmerSubtotal, 2) }}</small>
+                                </div>
+                            @else
+                                <strong class="text-success">₱{{ number_format($farmerSubtotal, 2) }}</strong>
+                            @endif
                         </div>
                     </div>
                 @endforeach
@@ -182,15 +225,28 @@
                     <strong class="text-success">₱{{ number_format($order->total, 2) }}</strong>
                 </div>
 
-                <div class="alert alert-info">
-                    <h6><i class="fas fa-info-circle me-2"></i>What's Next?</h6>
-                    <ul class="mb-0 small">
-                        <li>You'll receive a confirmation email shortly</li>
-                        <li>The farmer(s) will prepare your order</li>
-                        <li>You'll be contacted for pickup/delivery details</li>
-                        <li>Track your order in your dashboard</li>
-                    </ul>
-                </div>
+                @if($order->is_negotiation)
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-handshake me-2"></i>Price Negotiation Status</h6>
+                        <ul class="mb-0 small">
+                            <li>Your price negotiation request has been submitted</li>
+                            <li>The farmer will review your offer</li>
+                            <li>You'll be notified when they accept or reject</li>
+                            <li>If accepted, the order will be confirmed with negotiated prices</li>
+                            <li>Track the status in your orders dashboard</li>
+                        </ul>
+                    </div>
+                @else
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle me-2"></i>What's Next?</h6>
+                        <ul class="mb-0 small">
+                            <li>You'll receive a confirmation email shortly</li>
+                            <li>The farmer(s) will prepare your order</li>
+                            <li>You'll be contacted for pickup/delivery details</li>
+                            <li>Track your order in your dashboard</li>
+                        </ul>
+                    </div>
+                @endif
 
                 <div class="mt-4">
                     <a href="{{ route('buyer.orders') }}" class="btn btn-success btn-lg w-100 mb-2">

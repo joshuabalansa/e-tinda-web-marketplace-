@@ -109,6 +109,79 @@
                         </div>
                     </div>
 
+                    <!-- Location Information Section -->
+                    <hr>
+                    <h5 class="mb-3"><i class="entypo-location"></i> Location Information</h5>
+
+                    <div class="form-group">
+                        <label for="farm_address">Farm Address</label>
+                        <textarea class="form-control" id="farm_address" name="farm_address" rows="3">{{ old('farm_address', $user->farm_address) }}</textarea>
+                        @error('farm_address')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="city">City</label>
+                                <input type="text" class="form-control" id="city" name="city" value="{{ old('city', $user->city) }}">
+                                @error('city')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="state">State/Province</label>
+                                <input type="text" class="form-control" id="state" name="state" value="{{ old('state', $user->state) }}">
+                                @error('state')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="zip_code">ZIP Code</label>
+                                <input type="text" class="form-control" id="zip_code" name="zip_code" value="{{ old('zip_code', $user->zip_code) }}">
+                                @error('zip_code')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="country">Country</label>
+                                <input type="text" class="form-control" id="country" name="country" value="{{ old('country', $user->country) }}">
+                                @error('country')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="delivery_radius">Delivery Radius (km)</label>
+                                <input type="number" class="form-control" id="delivery_radius" name="delivery_radius" value="{{ old('delivery_radius', $user->delivery_radius) }}" min="1" max="100">
+                                @error('delivery_radius')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="coordinates">GPS Coordinates (Optional)</label>
+                                <input type="text" class="form-control" id="coordinates" name="coordinates" value="{{ old('coordinates', $user->coordinates) }}" placeholder="e.g., 14.5995, 120.9842">
+                                <small class="text-muted">Format: latitude, longitude (e.g., 14.5995, 120.9842)</small>
+                                @error('coordinates')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <div class="checkbox">
                             <label>

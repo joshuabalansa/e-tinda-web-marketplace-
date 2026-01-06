@@ -7,8 +7,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="E-Tinda Marketplace - Farm to Table" />
     <meta name="author" content="" />
+    <meta name="theme-color" content="#28a745">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="E-Tinda">
 
     <title>E-Tinda</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -542,6 +553,14 @@
     <!-- Toastr for notifications -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+    <!-- PWA Scripts -->
+    @if(file_exists(public_path('build/manifest.json')))
+      @vite(['resources/js/app.js'])
+    @else
+      <!-- Fallback PWA registration when Vite is not built -->
+      <script src="{{ asset('pwa-register.js') }}"></script>
+    @endif
 
     <!-- Custom JavaScript -->
     <script>

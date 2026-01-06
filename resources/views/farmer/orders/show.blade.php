@@ -12,6 +12,11 @@
                     <span class="badge badge-{{ getStatusBadgeClass($order->status) }}">
                         {{ ucfirst($order->status) }}
                     </span>
+                    @if($order->is_negotiation)
+                        <span class="badge badge-warning">
+                            <i class="entypo-hand"></i> Price Negotiation
+                        </span>
+                    @endif
                     <a href="{{ route('farmer.orders') }}">
                         <i class="entypo-left-open"></i> Back to Orders
                     </a>
@@ -27,6 +32,29 @@
                 @if(session('error'))
                     <div class="alert alert-danger">
                         {{ session('error') }}
+                    </div>
+                @endif
+
+                @if($order->is_negotiation)
+                    <div class="alert alert-{{ $order->status === 'pending' ? 'warning' : 'info' }}">
+                        <h5><i class="entypo-hand"></i> Price Negotiation Request</h5>
+                        @if($order->status === 'pending')
+                            <p><strong>Action Required:</strong> The buyer has requested a price negotiation for this order. Please review the proposed prices below and accept or reject the offer.</p>
+                        @else
+                            <p><strong>Negotiation Status:</strong> This order was created with a price negotiation request.
+                            @if($order->status === 'cancelled')
+                                The negotiation was rejected and the order was cancelled.
+                            @else
+                                The negotiation has been processed and the order is now {{ $order->status }}.
+                            @endif
+                            </p>
+                        @endif
+                        @if($order->negotiation_notes)
+                            <div class="well well-sm mt-2" style="background-color: #fff3cd;">
+                                <strong>Buyer's Message:</strong>
+                                <p class="mb-0">{{ $order->negotiation_notes }}</p>
+                            </div>
+                        @endif
                     </div>
                 @endif
 
@@ -61,10 +89,25 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-2 text-right">
-                                                <strong>₱{{ number_format($item->price, 2) }}</strong>
-                                                <div class="text-muted">
-                                                    <small>Total: ₱{{ number_format($item->price * $item->quantity, 2) }}</small>
-                                                </div>
+                                                @if($item->negotiated_price !== null)
+                                                    <div>
+                                                        <small class="text-muted text-decoration-line-through">₱{{ number_format($item->price, 2) }}</small>
+                                                        <br>
+                                                        <strong class="text-success">₱{{ number_format($item->negotiated_price, 2) }}</strong>
+                                                        <br>
+                                                        <small class="text-info">Negotiated</small>
+                                                    </div>
+                                                    <div class="text-muted mt-1">
+                                                        <small>Total: ₱{{ number_format($item->negotiated_price * $item->quantity, 2) }}</small>
+                                                        <br>
+                                                        <small class="text-danger">Savings: ₱{{ number_format(($item->price - $item->negotiated_price) * $item->quantity, 2) }}</small>
+                                                    </div>
+                                                @else
+                                                    <strong>₱{{ number_format($item->price, 2) }}</strong>
+                                                    <div class="text-muted">
+                                                        <small>Total: ₱{{ number_format($item->price * $item->quantity, 2) }}</small>
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -77,7 +120,20 @@
                                         <table class="table table-condensed">
                                             <tr>
                                                 <td>Your Products Subtotal:</td>
-                                                <td class="text-right">₱{{ number_format($farmerOrderItems->sum(function($item) { return $item->price * $item->quantity; }), 2) }}</td>
+                                                <td class="text-right">
+                                                    @php
+                                                        $originalSubtotal = $farmerOrderItems->sum(function($item) { return $item->price * $item->quantity; });
+                                                        $negotiatedSubtotal = $farmerOrderItems->sum(function($item) {
+                                                            return ($item->negotiated_price ?? $item->price) * $item->quantity;
+                                                        });
+                                                    @endphp
+                                                    @if($negotiatedSubtotal < $originalSubtotal)
+                                                        <small class="text-muted text-decoration-line-through">₱{{ number_format($originalSubtotal, 2) }}</small><br>
+                                                        <strong class="text-success">₱{{ number_format($negotiatedSubtotal, 2) }}</strong>
+                                                    @else
+                                                        ₱{{ number_format($originalSubtotal, 2) }}
+                                                    @endif
+                                                </td>
                                             </tr>
                                             <tr>
                                                 <td>Shipping:</td>
@@ -91,7 +147,12 @@
                                             </tr>
                                             <tr class="active">
                                                 <td><strong>Your Revenue:</strong></td>
-                                                <td class="text-right"><strong>₱{{ number_format($farmerOrderItems->sum(function($item) { return $item->price * $item->quantity; }), 2) }}</strong></td>
+                                                <td class="text-right">
+                                                    <strong>₱{{ number_format($negotiatedSubtotal, 2) }}</strong>
+                                                    @if($negotiatedSubtotal < $originalSubtotal)
+                                                        <br><small class="text-danger">Reduced by ₱{{ number_format($originalSubtotal - $negotiatedSubtotal, 2) }}</small>
+                                                    @endif
+                                                </td>
                                             </tr>
                                         </table>
 
@@ -168,18 +229,129 @@
                                 </div>
                             </div>
                             <div class="panel-body">
+                                @php
+                                    // Check if any farmer order items have negotiated prices
+                                    // Be more permissive - just check if negotiated_price exists and is > 0
+                                    $hasNegotiatedPrices = false;
+                                    foreach ($farmerOrderItems as $item) {
+                                        // Check if negotiated_price exists and is greater than 0
+                                        // Don't require it to be different from price, just that it exists
+                                        if ($item->negotiated_price !== null
+                                            && $item->negotiated_price !== ''
+                                            && floatval($item->negotiated_price) > 0) {
+                                            $hasNegotiatedPrices = true;
+                                            break;
+                                        }
+                                    }
+
+                                    // Also check all order items (in case negotiation flag is set but prices aren't on farmer items yet)
+                                    $orderHasAnyNegotiation = false;
+                                    if ($order->items && $order->items->count() > 0) {
+                                        foreach ($order->items as $item) {
+                                            // Check if negotiated_price exists and is greater than 0
+                                            if ($item->negotiated_price !== null
+                                                && $item->negotiated_price !== ''
+                                                && floatval($item->negotiated_price) > 0) {
+                                                $orderHasAnyNegotiation = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    // Check is_negotiation flag - handle both boolean and integer (0/1) values
+                                    $orderIsNegotiation = false;
+                                    if ($order->is_negotiation === true
+                                        || $order->is_negotiation === 1
+                                        || $order->is_negotiation === '1'
+                                        || (is_bool($order->is_negotiation) && $order->is_negotiation)) {
+                                        $orderIsNegotiation = true;
+                                    }
+
+                                    // Show buttons if order is pending and (has negotiation flag OR farmer items have negotiated prices OR any items have negotiated prices)
+                                    // Also check if any items show negotiated prices in the display (as a fallback)
+                                    $hasDisplayNegotiation = false;
+                                    foreach ($farmerOrderItems as $item) {
+                                        // Check the actual database value
+                                        $np = $item->getOriginal('negotiated_price') ?? $item->negotiated_price;
+                                        if ($np !== null && $np !== '' && floatval($np) > 0) {
+                                            $hasDisplayNegotiation = true;
+                                            break;
+                                        }
+                                    }
+
+                                    $showNegotiationButtons = $order->status === 'pending' && (
+                                        $orderIsNegotiation
+                                        || $hasNegotiatedPrices
+                                        || $orderHasAnyNegotiation
+                                        || $hasDisplayNegotiation
+                                    );
+
+                                    // Debug output (remove in production)
+                                    if (config('app.debug')) {
+                                        \Log::info('View Negotiation Check', [
+                                            'order_id' => $order->id,
+                                            'order_status' => $order->status,
+                                            'is_negotiation_raw' => $order->is_negotiation,
+                                            'is_negotiation_type' => gettype($order->is_negotiation),
+                                            'orderIsNegotiation' => $orderIsNegotiation,
+                                            'hasNegotiatedPrices' => $hasNegotiatedPrices,
+                                            'orderHasAnyNegotiation' => $orderHasAnyNegotiation,
+                                            'showNegotiationButtons' => $showNegotiationButtons,
+                                            'farmer_items_count' => $farmerOrderItems->count(),
+                                            'item_details' => $farmerOrderItems->map(function($item) {
+                                                return [
+                                                    'id' => $item->id,
+                                                    'price' => $item->price,
+                                                    'negotiated_price' => $item->negotiated_price,
+                                                    'negotiated_price_type' => gettype($item->negotiated_price)
+                                                ];
+                                            })->toArray()
+                                        ]);
+                                    }
+                                @endphp
+
+                                {{-- Show negotiation buttons if order is pending and has negotiation indicators --}}
+                                @if($showNegotiationButtons)
+                                    <!-- Negotiation Actions -->
+                                    <div class="form-group" style="background-color: #fff3cd; padding: 15px; border-radius: 5px; border: 2px solid #ffc107; margin-bottom: 20px;">
+                                        <h5 class="text-warning" style="margin-top: 0;">
+                                            <i class="entypo-hand"></i> <strong>Price Negotiation - Action Required</strong>
+                                        </h5>
+                                        <p class="text-muted">The buyer has proposed negotiated prices. Review the prices above and decide:</p>
+
+                                        <form action="{{ route('farmer.orders.negotiation.accept', $order) }}" method="POST" class="mb-2" style="display: block;">
+                                            @csrf
+                                            <button type="submit" class="btn btn-success btn-lg btn-block" style="display: block; width: 100%;" onclick="return confirm('Accept this price negotiation? Stock will be reserved and order will be confirmed.')">
+                                                <i class="entypo-check"></i> Accept Negotiation
+                                            </button>
+                                        </form>
+
+                                        <button type="button" class="btn btn-danger btn-lg btn-block" style="display: block; width: 100%; margin-top: 10px;" data-toggle="modal" data-target="#rejectNegotiationModal">
+                                            <i class="entypo-cancel"></i> Reject Negotiation
+                                        </button>
+
+                                        <div class="alert alert-info mt-3 mb-0" style="font-size: 0.9em;">
+                                            <i class="entypo-info"></i> <strong>Note:</strong> Once you accept, the order will be confirmed with the negotiated prices and stock will be deducted.
+                                        </div>
+                                    </div>
+                                    <hr>
+                                @endif
+
                                 <form action="{{ route('farmer.orders.update-status', $order) }}" method="POST">
                                     @csrf
                                     @method('PUT')
                                     <div class="form-group">
                                         <label for="status" class="control-label"><strong>Update Status:</strong></label>
-                                        <select name="status" id="status" class="form-control" onchange="this.form.submit()">
+                                        <select name="status" id="status" class="form-control" onchange="this.form.submit()" {{ $showNegotiationButtons ? 'disabled' : '' }}>
                                             <option value="pending" {{ $order->status === 'pending' ? 'selected' : '' }}>Pending</option>
                                             <option value="processing" {{ $order->status === 'processing' ? 'selected' : '' }}>Processing</option>
                                             <option value="shipped" {{ $order->status === 'shipped' ? 'selected' : '' }}>Shipped</option>
                                             <option value="delivered" {{ $order->status === 'delivered' ? 'selected' : '' }}>Delivered</option>
                                             <option value="cancelled" {{ $order->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                                         </select>
+                                        @if($showNegotiationButtons)
+                                            <small class="text-muted">Please accept or reject the negotiation first.</small>
+                                        @endif
                                     </div>
                                 </form>
 
@@ -187,32 +359,64 @@
 
                                 <!-- Quick Action Buttons -->
                                 <div class="form-group">
-                                    @if($order->status === 'pending')
-                                        <button type="button" class="btn btn-warning btn-block"
-                                                onclick="updateOrderStatus('processing')">
-                                            <i class="entypo-cog"></i> Start Processing
-                                        </button>
-                                    @elseif($order->status === 'processing')
-                                        <button type="button" class="btn btn-primary btn-block"
-                                                onclick="updateOrderStatus('shipped')">
-                                            <i class="entypo-paper-plane"></i> Mark as Shipped
-                                        </button>
-                                    @elseif($order->status === 'shipped')
-                                        <button type="button" class="btn btn-success btn-block"
-                                                onclick="updateOrderStatus('delivered')">
-                                            <i class="entypo-check"></i> Mark as Delivered
-                                        </button>
-                                    @endif
+                                    @if(!$showNegotiationButtons)
+                                        @if($order->status === 'pending')
+                                            <button type="button" class="btn btn-warning btn-block"
+                                                    onclick="updateOrderStatus('processing')">
+                                                <i class="entypo-cog"></i> Start Processing
+                                            </button>
+                                        @elseif($order->status === 'processing')
+                                            <button type="button" class="btn btn-primary btn-block"
+                                                    onclick="updateOrderStatus('shipped')">
+                                                <i class="entypo-paper-plane"></i> Mark as Shipped
+                                            </button>
+                                        @elseif($order->status === 'shipped')
+                                            <button type="button" class="btn btn-success btn-block"
+                                                    onclick="updateOrderStatus('delivered')">
+                                                <i class="entypo-check"></i> Mark as Delivered
+                                            </button>
+                                        @endif
 
-                                    @if($order->status === 'pending')
-                                        <button type="button" class="btn btn-danger btn-block"
-                                                onclick="updateOrderStatus('cancelled')">
-                                            <i class="entypo-cancel"></i> Cancel Order
-                                        </button>
+                                        @if($order->status === 'pending' && !$showNegotiationButtons)
+                                            <button type="button" class="btn btn-danger btn-block"
+                                                    onclick="updateOrderStatus('cancelled')">
+                                                <i class="entypo-cancel"></i> Cancel Order
+                                            </button>
+                                        @endif
                                     @endif
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Reject Negotiation Modal -->
+                        @if($showNegotiationButtons)
+                        <div class="modal fade" id="rejectNegotiationModal" tabindex="-1" role="dialog">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Reject Price Negotiation</h5>
+                                        <button type="button" class="close" data-dismiss="modal">
+                                            <span>&times;</span>
+                                        </button>
+                                    </div>
+                                    <form action="{{ route('farmer.orders.negotiation.reject', $order) }}" method="POST">
+                                        @csrf
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to reject this price negotiation? The order will be cancelled.</p>
+                                            <div class="form-group">
+                                                <label for="rejection_reason">Reason (Optional):</label>
+                                                <textarea class="form-control" id="rejection_reason" name="rejection_reason" rows="3" placeholder="Explain why you're rejecting this offer..."></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-danger">Reject Negotiation</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
 
                         <!-- Order Timeline -->
                         <div class="panel panel-default" data-collapsed="0">

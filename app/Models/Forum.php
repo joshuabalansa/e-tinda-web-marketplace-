@@ -18,6 +18,8 @@ class Forum extends Model
         'category',
         'video_path',
         'video_original_name',
+        'image_path',
+        'image_original_name',
         'views',
         'status',
         'is_flagged',
@@ -44,10 +46,13 @@ class Forum extends Model
     {
         parent::boot();
 
-        // Delete video file when forum is deleted
+        // Delete video and image files when forum is deleted
         static::deleting(function ($forum) {
             if ($forum->video_path && Storage::disk('public')->exists($forum->video_path)) {
                 Storage::disk('public')->delete($forum->video_path);
+            }
+            if ($forum->image_path && Storage::disk('public')->exists($forum->image_path)) {
+                Storage::disk('public')->delete($forum->image_path);
             }
         });
     }
@@ -310,5 +315,104 @@ class Forum extends Model
         // If neither new video nor existing video, leave as null (will be cleaned up)
 
         return true;
+    }
+
+    /**
+     * Check if the forum has an image attachment.
+     */
+    public function hasImage()
+    {
+        if (empty($this->image_path)) {
+            return false;
+        }
+
+        $imagePaths = $this->getImagePaths();
+        return !empty($imagePaths) && count($imagePaths) > 0;
+    }
+
+    /**
+     * Get image paths as array (handles JSON encoding)
+     */
+    public function getImagePaths()
+    {
+        if (empty($this->image_path)) {
+            return [];
+        }
+
+        $paths = json_decode($this->image_path, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($paths)) {
+            return $paths;
+        }
+
+        // Fallback: treat as single path string
+        return [$this->image_path];
+    }
+
+    /**
+     * Get image original names as array
+     */
+    public function getImageOriginalNames()
+    {
+        if (empty($this->image_original_name)) {
+            return [];
+        }
+
+        $names = json_decode($this->image_original_name, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($names)) {
+            return $names;
+        }
+
+        // Fallback: treat as single name string
+        return [$this->image_original_name];
+    }
+
+    /**
+     * Get all image URLs for display.
+     */
+    public function getImageUrlsAttribute()
+    {
+        $urls = [];
+        $imagePaths = $this->getImagePaths();
+
+        foreach ($imagePaths as $imagePath) {
+            try {
+                if (Storage::disk('public')->exists($imagePath)) {
+                    $urls[] = Storage::disk('public')->url($imagePath);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error generating image URL', [
+                    'forum_id' => $this->id,
+                    'image_path' => $imagePath,
+                    'error' => $e->getMessage()
+                ]);
+                // Fallback to storage route
+                $urls[] = url('storage/' . $imagePath);
+            }
+        }
+
+        return $urls;
+    }
+
+    /**
+     * Check if the image file actually exists in storage.
+     */
+    public function imageFileExists()
+    {
+        if (empty($this->image_path)) {
+            return false;
+        }
+
+        $imagePaths = $this->getImagePaths();
+        foreach ($imagePaths as $imagePath) {
+            try {
+                if (Storage::disk('public')->exists($imagePath)) {
+                    return true;
+                }
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        return false;
     }
 }

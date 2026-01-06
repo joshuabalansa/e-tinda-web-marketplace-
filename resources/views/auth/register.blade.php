@@ -59,18 +59,8 @@
                                 </div>
                             </div>
 
-                            <!-- Role -->
-                            <div class="mb-3">
-                                <label for="role" class="form-label">Account Type</label>
-                                <select id="role"
-                                        name="role"
-                                        class="form-select"
-                                        required>
-                                    <option value="">Select your account type</option>
-                                    <option value="farmer" {{ old('role') == 'farmer' ? 'selected' : '' }}>I am a farmer (vendor)</option>
-                                    <option value="buyer" {{ old('role') == 'buyer' ? 'selected' : '' }}>I am a buyer</option>
-                                </select>
-                            </div>
+                            <!-- Role (Hidden - Default to Buyer) -->
+                            <input type="hidden" name="role" value="buyer">
 
                             <!-- Farmer Location Fields (shown when farmer is selected) -->
                             <div id="farmer-location-fields" style="display: none;">
@@ -287,34 +277,11 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Show/hide farmer location fields based on role selection
-                const roleSelect = document.getElementById('role');
+                // Hide farmer location fields since we're defaulting to buyer
                 const farmerLocationFields = document.getElementById('farmer-location-fields');
-                const farmAddressField = document.getElementById('farm_address');
-                const cityField = document.getElementById('city');
-                const stateField = document.getElementById('state');
-
-                function toggleFarmerFields() {
-                    if (roleSelect.value === 'farmer') {
-                        farmerLocationFields.style.display = 'block';
-                        // Make location fields required when farmer is selected
-                        farmAddressField.setAttribute('required', 'required');
-                        cityField.setAttribute('required', 'required');
-                        stateField.setAttribute('required', 'required');
-                    } else {
-                        farmerLocationFields.style.display = 'none';
-                        // Remove required attribute when not farmer
-                        farmAddressField.removeAttribute('required');
-                        cityField.removeAttribute('required');
-                        stateField.removeAttribute('required');
-                    }
+                if (farmerLocationFields) {
+                    farmerLocationFields.style.display = 'none';
                 }
-
-                // Initial check
-                toggleFarmerFields();
-
-                // Listen for changes
-                roleSelect.addEventListener('change', toggleFarmerFields);
 
                 // Password match validation
                 const password = document.getElementById('password');

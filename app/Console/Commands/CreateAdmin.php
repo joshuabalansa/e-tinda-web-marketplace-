@@ -28,7 +28,7 @@ class CreateAdmin extends Command
      */
     public function handle()
     {
-        $email = 'admin@example.com';
+        $email = 'admin2@example.com';
         $password = 'admin123';
         $name = 'Administrator';
 

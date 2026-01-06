@@ -137,4 +137,131 @@ class FarmerOrderController extends Controller
         return $stats;
     }
 
+    /**
+     * Accept price negotiation for an order
+     */
+    public function acceptNegotiation(Request $request, Order $order)
+    {
+        $farmerId = Auth::id();
+
+        // Check if this order contains products from the authenticated farmer
+        $farmerOrderItems = $order->items()->whereHas('product', function($query) use ($farmerId) {
+            $query->where('user_id', $farmerId);
+        })->with('product')->get();
+
+        if ($farmerOrderItems->isEmpty()) {
+            abort(403, 'You can only accept negotiations for orders that contain your products.');
+        }
+
+        // Check if this is a negotiation order
+        if (!$order->is_negotiation) {
+            return redirect()->back()->with('error', 'This order is not a negotiation request.');
+        }
+
+        // Check if order is still pending
+        if ($order->status !== 'pending') {
+            return redirect()->back()->with('error', 'This negotiation has already been processed.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Update order items to use negotiated prices and deduct stock
+            $newSubtotal = 0;
+            foreach ($farmerOrderItems as $item) {
+                if ($item->negotiated_price !== null) {
+                    // Use negotiated price
+                    $itemPrice = $item->negotiated_price;
+                } else {
+                    // Use original price if no negotiation was provided for this item
+                    $itemPrice = $item->price;
+                }
+
+                // Check stock availability
+                $product = $item->product;
+                if ($product->stock_quantity < $item->quantity) {
+                    throw new \Exception("Not enough stock available for {$product->name}");
+                }
+
+                // Deduct stock
+                $product->stock_quantity -= $item->quantity;
+                $product->save();
+
+                // Calculate subtotal for this farmer's items
+                $newSubtotal += $itemPrice * $item->quantity;
+            }
+
+            // Update order: remove negotiation flag and recalculate totals
+            // For multi-vendor orders, we need to recalculate the entire order subtotal
+            $allItemsSubtotal = 0;
+            foreach ($order->items as $item) {
+                $itemPrice = $item->negotiated_price ?? $item->price;
+                $allItemsSubtotal += $itemPrice * $item->quantity;
+            }
+
+            $order->update([
+                'is_negotiation' => false,
+                'subtotal' => $allItemsSubtotal,
+                'total' => $allItemsSubtotal + $order->shipping,
+                'status' => 'pending' // Keep as pending, ready for processing
+            ]);
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Price negotiation accepted! Order is now confirmed.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Reject price negotiation for an order
+     */
+    public function rejectNegotiation(Request $request, Order $order)
+    {
+        $request->validate([
+            'rejection_reason' => 'nullable|string|max:500'
+        ]);
+
+        $farmerId = Auth::id();
+
+        // Check if this order contains products from the authenticated farmer
+        $hasFarmerProducts = $order->items()->whereHas('product', function($query) use ($farmerId) {
+            $query->where('user_id', $farmerId);
+        })->exists();
+
+        if (!$hasFarmerProducts) {
+            abort(403, 'You can only reject negotiations for orders that contain your products.');
+        }
+
+        // Check if this is a negotiation order
+        if (!$order->is_negotiation) {
+            return redirect()->back()->with('error', 'This order is not a negotiation request.');
+        }
+
+        // Check if order is still pending
+        if ($order->status !== 'pending') {
+            return redirect()->back()->with('error', 'This negotiation has already been processed.');
+        }
+
+        try {
+            // Update order status to cancelled
+            $rejectionNote = $request->filled('rejection_reason')
+                ? 'Rejected: ' . trim($request->rejection_reason)
+                : 'Price negotiation rejected by farmer';
+
+            $order->update([
+                'status' => 'cancelled',
+                'negotiation_notes' => ($order->negotiation_notes ? $order->negotiation_notes . "\n\n" : '') . $rejectionNote
+            ]);
+
+            return redirect()->back()->with('success', 'Price negotiation rejected. Order has been cancelled.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to reject negotiation: ' . $e->getMessage());
+        }
+    }
+
 }

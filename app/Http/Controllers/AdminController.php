@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Order;
@@ -115,6 +116,67 @@ class AdminController extends Controller
     }
 
     /**
+     * Show the form for creating a new user.
+     */
+    public function createUser()
+    {
+        return view('admin.users.create');
+    }
+
+    /**
+     * Store a newly created user.
+     */
+    public function storeUser(Request $request)
+    {
+        $validationRules = [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'password' => ['required', 'confirmed', 'min:8'],
+            'role' => ['required', 'string', 'in:farmer,buyer'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'business_name' => ['nullable', 'string', 'max:255'],
+            'is_active' => ['boolean'],
+        ];
+
+        // Add location validation for farmers
+        if ($request->role === 'farmer') {
+            $validationRules['farm_address'] = ['required', 'string', 'max:500'];
+            $validationRules['city'] = ['required', 'string', 'max:100'];
+            $validationRules['state'] = ['required', 'string', 'max:100'];
+            $validationRules['zip_code'] = ['nullable', 'string', 'max:20'];
+            $validationRules['country'] = ['nullable', 'string', 'max:100'];
+        }
+
+        $request->validate($validationRules);
+
+        $userData = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => UserRole::from($request->role),
+            'phone' => $request->phone,
+            'address' => $request->address,
+            'business_name' => $request->business_name,
+            'is_active' => $request->has('is_active') ? true : true, // Default to active
+        ];
+
+        // Add location fields for farmers
+        if ($request->role === 'farmer') {
+            $userData['farm_address'] = $request->farm_address;
+            $userData['city'] = $request->city;
+            $userData['state'] = $request->state;
+            $userData['zip_code'] = $request->zip_code;
+            $userData['country'] = $request->country ?? 'Philippines';
+        }
+
+        $user = User::create($userData);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User created successfully!');
+    }
+
+    /**
      * Show the form for editing a user.
      */
     public function editUser(User $user)
@@ -135,6 +197,13 @@ class AdminController extends Controller
             'address' => 'nullable|string|max:500',
             'business_name' => 'nullable|string|max:255',
             'business_type' => 'nullable|string|max:100',
+            'farm_address' => 'nullable|string|max:500',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'zip_code' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:100',
+            'delivery_radius' => 'nullable|integer|min:0|max:100',
+            'coordinates' => 'nullable|string|max:255',
             'is_active' => 'boolean',
         ]);
 
@@ -146,6 +215,13 @@ class AdminController extends Controller
             'address' => $request->address,
             'business_name' => $request->business_name,
             'business_type' => $request->business_type,
+            'farm_address' => $request->farm_address,
+            'city' => $request->city,
+            'state' => $request->state,
+            'zip_code' => $request->zip_code,
+            'country' => $request->country,
+            'delivery_radius' => $request->delivery_radius,
+            'coordinates' => $request->coordinates,
             'is_active' => $request->has('is_active'),
         ]);
 

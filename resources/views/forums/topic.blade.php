@@ -60,6 +60,24 @@
                         {!! nl2br(e($forum->content)) !!}
                     </div>
 
+                    <!-- Topic Images Display -->
+                    @if($forum->hasImage())
+                    <div class="topic-images mb-3">
+                        <h6 class="text-muted mb-2">{{ __('forums.image_attachment') }}:</h6>
+                        <div class="row g-2">
+                            @foreach($forum->image_urls as $imageUrl)
+                            <div class="col-md-4 col-sm-6">
+                                <div class="card">
+                                    <a href="{{ $imageUrl }}" target="_blank" class="d-block">
+                                        <img src="{{ $imageUrl }}" class="card-img-top" alt="Forum Image" style="max-height: 250px; object-fit: cover; cursor: pointer;">
+                                    </a>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
                     <!-- Topic Video Display -->
                     @if($forum->hasVideo())
                     <div class="topic-video mb-3">

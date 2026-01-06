@@ -29,11 +29,14 @@ class Order extends Model
         'pickup_date',
         'delivery_date',
         'farmer_notes',
-        'received_at'
+        'received_at',
+        'is_negotiation',
+        'negotiation_notes'
     ];
 
     protected $casts = [
         'received_at' => 'datetime',
+        'is_negotiation' => 'boolean',
     ];
 
     public function items()
@@ -72,5 +75,21 @@ class Order extends Model
     public function getTotalAmountAttribute()
     {
         return $this->total;
+    }
+
+    /**
+     * Check if order is a negotiation order
+     */
+    public function isNegotiation()
+    {
+        return $this->is_negotiation === true;
+    }
+
+    /**
+     * Check if order is pending negotiation
+     */
+    public function isPendingNegotiation()
+    {
+        return $this->is_negotiation && $this->status === 'pending';
     }
 }

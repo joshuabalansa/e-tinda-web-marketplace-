@@ -16,6 +16,30 @@
                             <h3>Account Settings</h3>
                             <p class="text-muted">Manage your account preferences and configurations.</p>
 
+                            @if(session('success'))
+                                <div class="alert alert-success alert-dismissible fade in" role="alert" style="margin-top: 20px;">
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+                                </div>
+                            @endif
+
+                            @if($errors->any())
+                                <div class="alert alert-danger alert-dismissible fade in" role="alert" style="margin-top: 20px;">
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    <strong>Please fix the following errors:</strong>
+                                    <ul class="mb-0" style="margin-top: 10px;">
+                                        @foreach($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
                             <!-- Business Information Form -->
                             <div class="row mt-4">
                                 <div class="col-md-12">
@@ -144,7 +168,9 @@
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label for="coordinates">GPS Coordinates (Optional)</label>
-                                                            <input type="text" class="form-control" id="coordinates" name="coordinates" value="{{ old('coordinates', $user->coordinates) }}" placeholder="e.g., 14.5995, 120.9842">
+                                                            <input type="hidden" id="coordinates" name="coordinates" value="{{ old('coordinates', $user->coordinates) }}">
+                                                            <div id="coordinates-map" style="height: 300px; width: 100%; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px;"></div>
+                                                            <small class="text-muted" style="display: block; margin-top: 5px;">Click on the map to select your location. Selected coordinates: <span id="coordinates-display">{{ old('coordinates', $user->coordinates) ?: 'Not selected' }}</span></small>
                                                             @error('coordinates') <span class="text-danger">{{ $message }}</span> @enderror
                                                         </div>
                                                     </div>
@@ -314,4 +340,137 @@
         </div>
     </div>
 </div>
+
+@push('styles')
+<!-- Leaflet CSS for map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""/>
+<style>
+    #coordinates-map {
+        z-index: 1;
+    }
+    .leaflet-container {
+        font-family: inherit;
+    }
+</style>
+@endpush
+
+@push('scripts')
+<!-- Leaflet JS for map -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+<script>
+$(document).ready(function() {
+    // Parse existing coordinates or use default (Philippines center)
+    var defaultLat = 14.5995;
+    var defaultLng = 120.9842;
+    var initialZoom = 6;
+
+    var coordinatesInput = $('#coordinates');
+    var coordinatesDisplay = $('#coordinates-display');
+    var existingCoords = coordinatesInput.val();
+
+    // Parse existing coordinates if available
+    if (existingCoords) {
+        var coords = existingCoords.split(',').map(function(c) { return parseFloat(c.trim()); });
+        if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+            defaultLat = coords[0];
+            defaultLng = coords[1];
+            initialZoom = 15;
+        }
+    }
+
+    // Initialize map
+    var map = L.map('coordinates-map', {
+        center: [defaultLat, defaultLng],
+        zoom: initialZoom,
+        zoomControl: true
+    });
+
+    // Add OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    // Create marker (will be updated on click)
+    var marker = null;
+
+    // If we have existing coordinates, add marker
+    if (existingCoords && defaultLat !== 14.5995 && defaultLng !== 120.9842) {
+        marker = L.marker([defaultLat, defaultLng]).addTo(map);
+        marker.bindPopup('Current location').openPopup();
+    }
+
+    // Handle map click to set coordinates
+    map.on('click', function(e) {
+        var lat = e.latlng.lat;
+        var lng = e.latlng.lng;
+        var coordsString = lat + ', ' + lng;
+
+        // Update hidden input
+        coordinatesInput.val(coordsString);
+
+        // Update display
+        coordinatesDisplay.text(coordsString);
+
+        // Remove existing marker if any
+        if (marker) {
+            map.removeLayer(marker);
+        }
+
+        // Add new marker at clicked location
+        marker = L.marker([lat, lng]).addTo(map);
+        marker.bindPopup('Selected location: ' + coordsString).openPopup();
+    });
+
+    // Optional: Add geolocation button
+    var geolocateControl = L.Control.extend({
+        onAdd: function(map) {
+            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+            container.innerHTML = '<a href="#" title="Use my current location" style="line-height: 30px; padding: 0 8px;"><i class="entypo-location" style="font-size: 18px;"></i></a>';
+            container.style.backgroundColor = 'white';
+            container.style.cursor = 'pointer';
+
+            L.DomEvent.on(container, 'click', function(e) {
+                L.DomEvent.stopPropagation(e);
+                L.DomEvent.preventDefault(e);
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        var lat = position.coords.latitude;
+                        var lng = position.coords.longitude;
+                        var coordsString = lat + ', ' + lng;
+
+                        // Update input
+                        coordinatesInput.val(coordsString);
+                        coordinatesDisplay.text(coordsString);
+
+                        // Remove existing marker
+                        if (marker) {
+                            map.removeLayer(marker);
+                        }
+
+                        // Add marker and center map
+                        marker = L.marker([lat, lng]).addTo(map);
+                        marker.bindPopup('Your current location: ' + coordsString).openPopup();
+                        map.setView([lat, lng], 15);
+                    }, function(error) {
+                        alert('Unable to get your location. Please click on the map to select your location.');
+                    });
+                } else {
+                    alert('Geolocation is not supported by your browser. Please click on the map to select your location.');
+                }
+            });
+
+            return container;
+        }
+    });
+
+    map.addControl(new geolocateControl({ position: 'topleft' }));
+});
+</script>
+@endpush
 @endsection

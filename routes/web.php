@@ -26,6 +26,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CooperativeController;
 
 // Storage route for serving uploaded files (Laravel Cloud compatible)
 // This route MUST be placed early to catch /storage/* requests before other routes
@@ -233,6 +234,10 @@ Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 
+// Cooperative/Storefront routes
+Route::get('/cooperatives', [CooperativeController::class, 'index'])->name('cooperatives.index');
+Route::get('/cooperatives/{id}', [CooperativeController::class, 'show'])->name('cooperatives.show');
+
 // Buyer routes
 Route::middleware(['auth', 'role:buyer'])->group(function () {
     Route::get('/buyer', [BuyerDashboardController::class, 'index'])->name('buyer.dashboard');
@@ -281,6 +286,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     // User management routes
     Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users.index');
+    Route::get('/admin/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
+    Route::post('/admin/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
     Route::get('/admin/users/{user}', [AdminController::class, 'showUser'])->name('admin.users.show');
     Route::get('/admin/users/{user}/edit', [AdminController::class, 'editUser'])->name('admin.users.edit');
     Route::put('/admin/users/{user}', [AdminController::class, 'updateUser'])->name('admin.users.update');
@@ -324,6 +331,8 @@ Route::middleware(['auth', 'role:farmer'])->group(function () {
     Route::get('/farmer/orders', [FarmerOrdersController::class, 'index'])->name('farmer.orders');
     Route::get('/farmer/orders/{order}', [FarmerOrdersController::class, 'show'])->name('farmer.orders.show');
     Route::put('/farmer/orders/{order}/status', [FarmerOrdersController::class, 'updateStatus'])->name('farmer.orders.update-status');
+    Route::post('/farmer/orders/{order}/negotiation/accept', [FarmerOrdersController::class, 'acceptNegotiation'])->name('farmer.orders.negotiation.accept');
+    Route::post('/farmer/orders/{order}/negotiation/reject', [FarmerOrdersController::class, 'rejectNegotiation'])->name('farmer.orders.negotiation.reject');
     Route::get('/farmer/analytics', [FarmerAnalyticsController::class, 'index'])->name('farmer.analytics');
     Route::get('/farmer/reports', [FarmerReportsController::class, 'index'])->name('farmer.reports.index');
     Route::get('/farmer/reports/export', [FarmerReportsController::class, 'export'])->name('farmer.reports.export');
